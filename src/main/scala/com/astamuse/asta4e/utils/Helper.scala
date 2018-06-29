@@ -19,8 +19,11 @@ object Helper {
                           tmr: ToMap[L]
                          ): Map[String, Any] = {
       val m: Map[tmr.Key, tmr.Value] = tmr(gen.to(a))
-      m.map { case (k: Symbol, v) =>
-        k.name -> v
+      m.map {
+        case (k: Symbol, v) =>
+          k.name -> v
+        case _ =>
+          throw new IllegalArgumentException
       }
     }
 

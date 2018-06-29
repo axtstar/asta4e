@@ -2,6 +2,8 @@ name := "asta4e"
 version := "0.0.1"
 scalaVersion := "2.12.4"
 
+assemblyJarName in assembly := { s"${name.value}-${version.value}.jar" }
+
 libraryDependencies ++= Seq(
   // https://mvnrepository.com/artifact/org.apache.poi/poi
   "org.apache.poi" % "poi" % "3.17",
