@@ -1,6 +1,6 @@
-package com.astamuse.asta4e.utils
+package com.axtstar.asta4e.utils
 
-import com.astamuse.asta4e.ExcelMapper
+import com.axtstar.asta4e.ExcelMapper
 import shapeless._
 import labelled.{FieldType, field}
 

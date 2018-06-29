@@ -1,12 +1,11 @@
-package com.astamuse.asta4e
+package com.axtstar.asta4e
 
 import java.io.File
 
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
-import com.astamuse.asta4e.converter.E._
-import shapeless.{Generic, HList, LabelledGeneric}
+import com.axtstar.asta4e.converter.E._
 
 case class Data(name:String, address:String)
 
