@@ -2,8 +2,11 @@ package com.astamuse.asta4e
 
 import java.io.{File, FileInputStream, FileOutputStream}
 
+import com.astamuse.asta4e.utils.Helper
 import org.apache.poi.ss.usermodel.{Cell, WorkbookFactory}
 import org.apache.poi.ss.util.{CellAddress, CellReference}
+import shapeless._
+import shapeless.labelled.{FieldType, field}
 
 object ExcelMapper {
 
@@ -66,7 +69,7 @@ object ExcelMapper {
                          dataTemplateXls:String,
                          outTemplate:String,
                          outXlsPath:String,
-                         locationDataArray:List[(String,Any)] *
+                         locationDataArray:Map[String,Any] *
                        )={
     val locations = getExcelLocation(dataTemplateXls)
 
@@ -123,7 +126,8 @@ object ExcelMapper {
     workbook.close()
   }
 
-  /**
+
+    /**
     * Excelからデータバインドを取得
     * @param dataTemplateXls ${}のあるひな形ファイルテンプレート
     * @param inputXlsPath ひな形ファイル（出力用フォーマット）
@@ -145,7 +149,7 @@ object ExcelMapper {
         null
       } else {
 
-        var results = scala.collection.mutable.Map[String,String]()
+        var results = scala.collection.immutable.Map[String,Any]()
 
 
         locations.map {
@@ -169,17 +173,15 @@ object ExcelMapper {
             if (all.size>0) {
               (for (i <- 0 until all.get.groupCount) yield {
                 results += (x._4(i).replaceAll("^\\$\\{", "").replaceAll("\\}$", "") -> all.get.group(i + 1))
-                x._4(i).replaceAll("^\\$\\{", "").replaceAll("\\}$", "") -> all.get.group(i + 1)
-              }).toList
+              })
             }
             else {
               (x._4.map {
                 xx =>
                   results += (xx.replaceAll("^\\$\\{", "").replaceAll("\\}$", "") -> "")
-                  xx.replaceAll("^\\$\\{", "").replaceAll("\\}$", "") -> ""
-              }).toList
+              })
             }
-        }.flatten
+        }
         results
       }
     }).filter(_!=null).toList

@@ -5,8 +5,10 @@ import java.io.File
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
-
 import com.astamuse.asta4e.converter.E._
+import shapeless.{Generic, HList, LabelledGeneric}
+
+case class Data(name:String, address:String)
 
 @RunWith(classOf[JUnitRunner])
 class ExcelMapperTest extends Specification {
@@ -41,20 +43,32 @@ class ExcelMapperTest extends Specification {
         s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample1.xlsx",
       s"${currentDir}/target/output1.xlsx",
-       "A1" -> "test1" &
-        "A2" -> "test2" &
-        "A3" -> "test3"
+       "A1" ->
+         """t
+           |e
+           |s
+           |t
+           |1""".stripMargin &
+        "A2" -> null &
+        "A3" -> "test3" &
+        "A4" -> 1
       )
 
       val result = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
         s"${currentDir}/target/output1.xlsx")
 
-      result(0)("A1") must be_==("test1")
-      result(0)("A2") must be_==("test2")
+      result(0)("A1") must be_==(
+          """t
+            |e
+            |s
+            |t
+            |1""".stripMargin
+      )
+      result(0)("A2") must be_==("")
       result(0)("A3") must be_==("test3")
+      result(0)("A4") must be_==("1")
 
     }
-
   }
 }
