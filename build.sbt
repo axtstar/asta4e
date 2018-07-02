@@ -29,3 +29,11 @@ libraryDependencies ++= Seq(
   "org.specs2" % s"specs2-core_2.11" % "4.2.0" % Test,
   "org.specs2" % s"specs2-junit_2.11" % "4.2.0" % Test
 )
+
+publishTo := {
+  if (isSnapshot.value)
+    Some("snapshots" at "https://oss.sonatype.org/content/repositories/snapshots")
+  else
+    Some("releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2")
+}
+
