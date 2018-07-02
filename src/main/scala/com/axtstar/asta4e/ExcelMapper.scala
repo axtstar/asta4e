@@ -2,7 +2,7 @@ package com.axtstar.asta4e
 
 import java.io.{File, FileInputStream, FileOutputStream}
 
-import org.apache.poi.ss.usermodel.{Cell, WorkbookFactory}
+import org.apache.poi.ss.usermodel.{Cell, CellType, WorkbookFactory}
 import org.apache.poi.ss.util.CellReference
 
 object ExcelMapper {
@@ -152,10 +152,17 @@ object ExcelMapper {
         locations.map {
           x =>
             //${}のList取得
-            val ref = new CellReference(x._2.toString)
-            val row = sheet.getRow(ref.getRow)
-            val target = row.getCell(ref.getCol)
+            val target = {
+              val ref = new CellReference(x._2.toString)
+              val row = sheet.getRow(ref.getRow)
 
+              if (ref==null || row==null || ref.getCol==null){
+                null
+              }
+              else {
+                row.getCell(ref.getCol)
+              }
+            }
             val regEx = ("(?s)" + x._4.foldLeft(if (x._3==null){""}else{x._3.toString}) {
               (acc, xx) =>
                 val xxx = xx.replace("$", "\\$")
@@ -165,7 +172,26 @@ object ExcelMapper {
             })
               .r
 
-            val all = regEx.findFirstMatchIn(target.getStringCellValue)
+            val matchValue = if(target==null)
+            {
+              ""
+            }
+            else {
+              target.getCellTypeEnum match {
+                case CellType.STRING =>
+                  target.getStringCellValue
+                case CellType.NUMERIC =>
+                  target.getNumericCellValue.toString
+                case CellType.BLANK =>
+                  ""
+                case CellType.FORMULA =>
+                  target.getStringCellValue
+                case _ =>
+                  target.getStringCellValue
+              }
+            }
+
+            val all = regEx.findFirstMatchIn(matchValue)
 
             if (all.size>0) {
               (for (i <- 0 until all.get.groupCount) yield {
