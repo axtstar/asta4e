@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/axtstar/asta4e.svg?branch=master)](https://travis-ci.org/axtstar/asta4e)
+
 # asta4e
 
 This library provide a template engine functionality for Excel as sama as asta4d
