@@ -3,21 +3,30 @@ package com.axtstar.asta4e
 import java.io.{File, FileInputStream, FileOutputStream}
 
 import org.apache.poi.ss.usermodel.{Cell, CellType, WorkbookFactory}
-import org.apache.poi.ss.util.CellReference
+import org.apache.poi.ss.util.{CellAddress, CellReference}
 
 object ExcelMapper {
 
   val allReplaceBrace = "\\$\\{([^\\}]*)\\}".r
 
   /**
-    * xlsファイルから${}の文字列を探し出してそのロケーションと文字列のペアを返す
+    * search ${@} from Excel file and returen to tuple 4
     * @param xlsPath
+    * @return
+    */
+  def getExcelLocation(xlsPath:String):List[(String, CellAddress, Cell, List[String])] = {
+    val stream = new FileInputStream(xlsPath)
+    getExcelLocation(stream)
+  }
+
+  /**
+    * xlsファイルから${}の文字列を探し出してそのロケーションと文字列のペアを返す
+    * @param stream
     *
     */
-  def getExcelLocation(xlsPath:String) = {
+  def getExcelLocation(stream:FileInputStream) = {
 
-    val f = new FileInputStream(xlsPath)
-    val workbook = WorkbookFactory.create(f)
+    val workbook = WorkbookFactory.create(stream)
 
     val results = (for (i <- 0 to workbook.getNumberOfSheets - 1) yield {
       val sheet = workbook.getSheetAt(i)
@@ -27,7 +36,7 @@ object ExcelMapper {
           val cell = row.getCell(columnID)
           cell match {
             case null =>
-              (null, "", "", Nil)
+              (null, null, null, Nil)
             case x:Cell =>
               val all = allReplaceBrace.findAllIn(x.toString)
               var result:List[String] = Nil
@@ -36,14 +45,14 @@ object ExcelMapper {
                 result = d :: result
               }
               if (result==Nil){
-                (null, "", "", Nil)
+                (null, null, null, Nil)
               }else {
-                //シート名 -> セルアドレス -> バインダの値 -> List(バインダ)
+                // sheet name -> cell address -> cell(value) -> List(binder)
                 (sheet.getSheetName, cell.getAddress, cell, result.reverse)
               }
           }
         })
-          .filter(_._1!=null) //nullを省く
+          .filter(_._1!=null) //ignore null
           .toList
       })
         .filter(_.size > 0)
@@ -55,23 +64,39 @@ object ExcelMapper {
     results
   }
 
-  /**
-    * データバインドをExcelに出力
-    * @param dataTemplateXls ${}のあるひな形ファイルテンプレート
-    * @param outTemplate ひな形ファイル（出力用フォーマット）
-    * @param outXlsPath 出力先のExcel
-    * @param locationDataArray
-    */
   def setDataAsTemplate(
                          dataTemplateXls:String,
                          outTemplate:String,
                          outXlsPath:String,
                          locationDataArray:Map[String,Any] *
-                       )={
-    val locations = getExcelLocation(dataTemplateXls)
+                       ):Unit = {
+    val dataTemplateXlsStream = new FileInputStream(dataTemplateXls)
+    val outTemplateStream = new FileInputStream(outTemplate)
 
-    val f = new FileInputStream(outTemplate)
-    val workbook = WorkbookFactory.create(f)
+    setDataAsTemplate(
+      dataTemplateXlsStream,
+      outTemplateStream,
+      outXlsPath,
+      locationDataArray:_*
+    )
+  }
+
+  /**
+    * データバインドをExcelに出力
+    * @param dataTemplateXlsStream ${}のあるひな形ファイルテンプレート
+    * @param outTemplateStream ひな形ファイル（出力用フォーマット）
+    * @param outXlsPath 出力先のExcel
+    * @param locationDataArray
+    */
+  def setDataAsTemplate(
+                         dataTemplateXlsStream:FileInputStream,
+                         outTemplateStream:FileInputStream,
+                         outXlsPath:String,
+                         locationDataArray:Map[String,Any] *
+                       ):Unit={
+    val locations = getExcelLocation(dataTemplateXlsStream)
+
+    val workbook = WorkbookFactory.create(outTemplateStream)
 
     var sheetIndex = 0
     locationDataArray.map {
@@ -123,20 +148,35 @@ object ExcelMapper {
     workbook.close()
   }
 
-
-    /**
-    * Excelからデータバインドを取得
-    * @param dataTemplateXls ${}のあるひな形ファイルテンプレート
-    * @param inputXlsPath ひな形ファイル（出力用フォーマット）
-    */
   def getDataAsTemplate(
                          dataTemplateXls:String,
                          inputXlsPath:String,
                          ignoreSheet:List[String]=List("設定")
+                       ):List[Map[String, Any]] = {
+    val stream = new FileInputStream(inputXlsPath)
+
+    getDataAsTemplate(
+      dataTemplateXls,
+      stream,
+      ignoreSheet
+    )
+  }
+
+
+
+    /**
+    * Excelからデータバインドを取得
+    * @param dataTemplateXls ${}のあるひな形ファイルテンプレート
+    * @param istream ひな形ファイル（出力用フォーマット）
+    */
+  def getDataAsTemplate(
+                         dataTemplateXls:String,
+                         istream:FileInputStream,
+                         ignoreSheet:List[String]
                        )={
     val locations = getExcelLocation(dataTemplateXls)
 
-    val f = new FileInputStream(inputXlsPath)
+    val f = istream
     val workbook = WorkbookFactory.create(f)
 
     val result = (for (index <- 0 until workbook.getNumberOfSheets)  yield {
@@ -151,12 +191,12 @@ object ExcelMapper {
 
         locations.map {
           x =>
-            //${}のList取得
+            //retrieve ${}'s list
             val target = {
               val ref = new CellReference(x._2.toString)
               val row = sheet.getRow(ref.getRow)
 
-              if (ref==null || row==null || ref.getCol==null){
+              if (ref==null || row==null){
                 null
               }
               else {
