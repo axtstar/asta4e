@@ -13,7 +13,9 @@ publishMavenStyle := true
 name := "asta4e"
 version := "0.0.1-SNAPSHOT"
 
-scalaVersion := "2.11.7"
+//scalaVersion := "2.11.7"
+crossScalaVersions := Seq("2.11.7", "2.12.4")
+
 
 assemblyJarName in assembly := { s"${name.value}-${version.value}.jar" }
 
@@ -23,11 +25,11 @@ libraryDependencies ++= Seq(
   // https://mvnrepository.com/artifact/org.apache.poi/poi
   "org.apache.poi" % "poi" % "3.17",
   "org.apache.poi" % "poi-ooxml" % "3.17",
-  "com.chuusai" % s"shapeless_2.11" % "2.3.3",
+  "com.chuusai" % s"shapeless_${scalaMajorVersion}" % "2.3.3",
 
   "junit" % "junit" % "4.12" % Test,
-  "org.specs2" % s"specs2-core_2.11" % "4.2.0" % Test,
-  "org.specs2" % s"specs2-junit_2.11" % "4.2.0" % Test
+  "org.specs2" % s"specs2-core_${scalaMajorVersion}" % "4.2.0" % Test,
+  "org.specs2" % s"specs2-junit_${scalaMajorVersion}" % "4.2.0" % Test
 )
 
 publishTo := {
