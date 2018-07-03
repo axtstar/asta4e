@@ -11,7 +11,7 @@ licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 publishMavenStyle := true
 
 name := "asta4e"
-version := "0.0.1-SNAPSHOT"
+version := "0.0.1"
 
 //scalaVersion := "2.11.7"
 crossScalaVersions := Seq("2.11.7", "2.12.4")
@@ -27,9 +27,9 @@ libraryDependencies ++= Seq(
   "org.apache.poi" % "poi-ooxml" % "3.17",
   "com.chuusai" % s"shapeless_${scalaMajorVersion}" % "2.3.3",
 
-  "junit" % "junit" % "4.12" % Test,
-  "org.specs2" % s"specs2-core_${scalaMajorVersion}" % "4.2.0" % Test,
-  "org.specs2" % s"specs2-junit_${scalaMajorVersion}" % "4.2.0" % Test
+  "org.junit.jupiter" % "junit-jupiter-api" % "5.2.0" % Test,
+  "org.specs2" % s"specs2-core_${scalaMajorVersion}" % "4.3.0" % Test,
+  "org.specs2" % s"specs2-junit_${scalaMajorVersion}" % "4.3.0" % Test
 )
 
 publishTo := {
