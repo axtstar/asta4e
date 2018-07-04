@@ -69,5 +69,18 @@ class HelperTest extends Specification {
 
     }
 
+    "from[get]" in {
+      val target = ExcelMapper.getDataAsTemplate(
+        s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
+
+      val result = Helper.to[DataAtoO16].from(target(0))
+
+      result.get.name must be_==("axtstar")
+      result.get.address must be_==("Tokyo, Japan")
+
+    }
+
+
   }
 }
