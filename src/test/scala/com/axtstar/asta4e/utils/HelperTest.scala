@@ -2,6 +2,7 @@ package com.axtstar.asta4e.utils
 
 import java.io.File
 
+import com.axtstar.asta4e.ExcelMapper
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -31,10 +32,12 @@ class HelperTest extends Specification {
         s"${currentDir}/target/output2.xlsx"
       )
 
-      val result = Helper.to[Data].from(
+      val target = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template2.xlsx",
         s"${currentDir}/target/output2.xlsx"
       )
+
+      val result = Helper.to[Data].from(target(0))
 
       result.get.name must be_==("axtstar")
       result.get.address must be_==("Tokyo, Japan")
@@ -47,9 +50,7 @@ class HelperTest extends Specification {
         "name" -> "axtstar",
         "address" -> "Tokyo, Japan"
       )
-      val result:Option[Data] = Helper.to[Data].from(/*
-        s"${currentDir}/src/test/resources/excel/bind_template2.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_sample2.xlsx",List(),*/map)
+      val result:Option[Data] = Helper.to[Data].from(map)
 
       result.get.name must be_==("axtstar")
       result.get.address must be_==("Tokyo, Japan")
@@ -61,9 +62,11 @@ class HelperTest extends Specification {
         "name" -> "axtstar",
         "address" -> "Tokyo, Japan"
       )
-      val result:Option[Data] = Helper.to[Data].from(
+      val target = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template2.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample2.xlsx")
+
+      val result = Helper.to[Data].from(target(0))
 
       result.get.name must be_==("axtstar")
       result.get.address must be_==("Tokyo, Japan")

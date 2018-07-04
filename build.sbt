@@ -11,10 +11,10 @@ licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 publishMavenStyle := true
 
 name := "asta4e"
-version := "0.0.1"
+version := "0.0.2-SNAPSHOT"
 
 //scalaVersion := "2.11.7"
-crossScalaVersions := Seq("2.11.7", "2.12.4")
+crossScalaVersions := Seq("2.11.12", "2.12.4")
 
 
 assemblyJarName in assembly := { s"${name.value}-${version.value}.jar" }
