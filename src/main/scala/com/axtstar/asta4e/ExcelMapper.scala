@@ -11,8 +11,8 @@ object ExcelMapper {
 
   /**
     * search ${} from Excel file and returen to tuple 4
-    * @param xlsPath
-    * @return
+    * @param xlsPath template excel path
+    * @return tuple 4
     */
   def getExcelLocation(xlsPath:String):List[(String, CellAddress, Cell, List[String])] = {
     val stream = new FileInputStream(xlsPath)
@@ -20,8 +20,8 @@ object ExcelMapper {
   }
 
   /**
-    * xlsファイルから${}の文字列を探し出してそのロケーションと文字列のペアを返す
-    * @param stream
+    * search ${} from Excel file and returen to tuple 4
+    * @param stream template Excel file stream
     *
     */
   def getExcelLocation(stream:FileInputStream) = {
@@ -82,11 +82,11 @@ object ExcelMapper {
   }
 
   /**
-    * データバインドをExcelに出力
-    * @param dataTemplateXlsStream ${}のあるひな形ファイルテンプレート
-    * @param outTemplateStream ひな形ファイル（出力用フォーマット）
-    * @param outXlsPath 出力先のExcel
-    * @param locationDataArray
+    * output Excel
+    * @param dataTemplateXlsStream Excel template File stream which has ${} binderes
+    * @param outTemplateStream Output templae Excel File stream
+    * @param outXlsPath Output Excel path
+    * @param locationDataArray DataBinder which consists Map of name of ${} and value  
     */
   def setDataAsTemplate(
                          dataTemplateXlsStream:FileInputStream,
@@ -102,19 +102,19 @@ object ExcelMapper {
     locationDataArray.map {
       locationData =>
 
-        //sheetの決定
+        //determine sheet
         val sheet = if (sheetIndex==0) {
           workbook.getSheet(locations.head._1)
         }
         else{
-          //シートをコピー
+          //copy sheet
           val sheet = workbook.cloneSheet(0)
           sheet
         }
 
         locations.foreach {
           x =>
-            //${}のList取得
+            //iterate ${}
             x._4.foreach {
               xx => {
                 val ref = new CellReference(x._2.toString)
@@ -165,9 +165,9 @@ object ExcelMapper {
 
 
     /**
-    * Excelからデータバインドを取得
-    * @param dataTemplateXls ${}のあるひな形ファイルテンプレート
-    * @param istream ひな形ファイル（出力用フォーマット）
+    * get databind
+    * @param dataTemplateXls template
+    * @param istream input Excel
     */
   def getDataAsTemplate(
                          dataTemplateXls:String,
