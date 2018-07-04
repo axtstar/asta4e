@@ -58,10 +58,6 @@ class HelperTest extends Specification {
     }
 
     "from[get]" in {
-      val map = Map(
-        "name" -> "axtstar",
-        "address" -> "Tokyo, Japan"
-      )
       val target = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template2.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample2.xlsx")
