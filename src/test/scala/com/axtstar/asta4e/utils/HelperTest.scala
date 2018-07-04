@@ -8,8 +8,6 @@ import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 
 
-case class Data(name:String, address:String)
-
 @RunWith(classOf[JUnitRunner])
 class HelperTest extends Specification {
 
@@ -69,18 +67,53 @@ class HelperTest extends Specification {
 
     }
 
-    "from[get]" in {
+    "Data23" in {
       val target = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
 
-      val result = Helper.to[DataAtoO16].from(target(0))
+      val result = Helper.to[Data23].from(target(0))
 
       result.get.A1 must be_==("A1")
       result.get.A2 must be_==("A2")
 
     }
 
+    "Data28" in {
+      val target = ExcelMapper.getDataAsTemplate(
+        s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
+
+      val result = Helper.to[Data28].from(target(0))
+
+      result.get.A1 must be_==("A1")
+      result.get.A2 must be_==("A2")
+
+    }
+
+    "Data29" in {
+      val target = ExcelMapper.getDataAsTemplate(
+        s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
+
+      val result = Helper.to[Data29].from(target(0))
+
+      result.get.A1 must be_==("A1")
+      result.get.A2 must be_==("A2")
+
+    }
+
+    "Data64" in {
+      val target = ExcelMapper.getDataAsTemplate(
+        s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
+
+      val result = Helper.to[Data64].from(target(0))
+
+      result.get.A1 must be_==("A1")
+      result.get.A2 must be_==("A2")
+
+    }
 
   }
 }

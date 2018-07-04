@@ -16,6 +16,11 @@ version := "0.0.2-SNAPSHOT"
 //scalaVersion := "2.11.7"
 crossScalaVersions := Seq("2.11.12", "2.12.4")
 
+scalacOptions ++= Seq(
+  "-encoding", "utf8", // Option and arguments on same line
+  "-Xfatal-warnings",  // New lines for each options
+  "-unchecked"
+)
 
 assemblyJarName in assembly := { s"${name.value}-${version.value}.jar" }
 
