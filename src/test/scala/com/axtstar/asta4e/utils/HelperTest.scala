@@ -76,8 +76,8 @@ class HelperTest extends Specification {
 
       val result = Helper.to[DataAtoO16].from(target(0))
 
-      result.get.name must be_==("axtstar")
-      result.get.address must be_==("Tokyo, Japan")
+      result.get.A1 must be_==("A1")
+      result.get.A2 must be_==("A2")
 
     }
 
