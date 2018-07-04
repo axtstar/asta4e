@@ -10,7 +10,7 @@ object ExcelMapper {
   val allReplaceBrace = "\\$\\{([^\\}]*)\\}".r
 
   /**
-    * search ${@} from Excel file and returen to tuple 4
+    * search ${} from Excel file and returen to tuple 4
     * @param xlsPath
     * @return
     */
