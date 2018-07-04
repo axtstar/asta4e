@@ -26,6 +26,8 @@ assemblyJarName in assembly := { s"${name.value}-${version.value}.jar" }
 
 val scalaMajorVersion = if (scalaVersion.toString().startsWith("2.11")){"2.11"}else{"2.12"}
 
+println(s"scalaMajorVersion: ${scalaMajorVersion}")
+
 libraryDependencies ++= Seq(
   // https://mvnrepository.com/artifact/org.apache.poi/poi
   "org.apache.poi" % "poi" % "3.17",
