@@ -55,7 +55,7 @@ ExcelMapper.setDataAsTemplate(
 ```
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  output Excel. 
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  `com.axtstar.asta4e.converter.E._` is commpanion utilites for implicit conversion and gethering separeted Map to List Map.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  `com.axtstar.asta4e.converter.E._` is commpanion utilites for implicit conversion and gethering separeted tuple to Map.
 
 # LICENSE
 
