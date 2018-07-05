@@ -54,11 +54,16 @@ object Helper {
                                                            typeable: Typeable[V],
                                                            fromMapT: Lazy[FromMap[T]]
                                                           ): FromMap[FieldType[K, V] :: T] = new FromMap[FieldType[K, V] :: T] {
-      def apply(m: Map[String, Any]): Option[FieldType[K, V] :: T] = for {
-        v <- m.get(witness.value.name)
-        h <- typeable.cast(v)
-        t <- fromMapT.value(m)
-      } yield field[K](h) :: t
+
+      def apply(m: Map[String, Any]): Option[FieldType[K, V] :: T] = {
+        val result = for {
+          v <- m.get(witness.value.name)
+          h <- typeable.cast(v)
+          t <- fromMapT.value(m)
+        } yield field[K](h) :: t
+        result
+
+      }
     }
   }
 
@@ -97,7 +102,12 @@ object Helper {
                                               fromMap: FromMap[R]
     ): Option[A] = {
       val m = ExcelMapper.getDataAsTemplate(dataTemplateXls,inputXlsPath,ignoreSheet)
-      fromMap(m(0)).map(gen.from(_))
+      fromMap(
+        m(0)
+      ).map{
+        x =>
+          gen.from(x)
+      }
     }
 
 
@@ -105,10 +115,17 @@ object Helper {
                                               gen: LabelledGeneric.Aux[A, R],
                                               fromMap: FromMap[R]
     ): Option[A] = {
-      fromMap(m).map(gen.from(_))
+      val target = fromMap(m).map {
+        x =>
+        gen.from(x)
+      }
+      target
     }
   }
 
-  def to[A]: ConvertHelper[A] = new ConvertHelper[A]
+  def to[A]: ConvertHelper[A] = {
+    val target = new ConvertHelper[A]
+    target
+  }
 
 }

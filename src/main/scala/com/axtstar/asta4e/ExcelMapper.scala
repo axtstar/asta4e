@@ -64,6 +64,13 @@ object ExcelMapper {
     results
   }
 
+  /**
+    * output Excel from Map
+    * @param dataTemplateXls
+    * @param outTemplate
+    * @param outXlsPath
+    * @param locationDataArray
+    */
   def setDataAsTemplate(
                          dataTemplateXls:String,
                          outTemplate:String,
@@ -82,7 +89,7 @@ object ExcelMapper {
   }
 
   /**
-    * output Excel
+    * output Excel from Map
     * @param dataTemplateXlsStream Excel template File stream which has ${} binderes
     * @param outTemplateStream Output templae Excel File stream
     * @param outXlsPath Output Excel path
@@ -148,10 +155,17 @@ object ExcelMapper {
     workbook.close()
   }
 
+  /**
+    * get databind Map from Excel
+    * @param dataTemplateXls
+    * @param inputXlsPath
+    * @param ignoreSheet
+    * @return
+    */
   def getDataAsTemplate(
                          dataTemplateXls:String,
                          inputXlsPath:String,
-                         ignoreSheet:List[String]=List("設定")
+                         ignoreSheet:List[String]=List()
                        ):List[Map[String, Any]] = {
     val stream = new FileInputStream(inputXlsPath)
 
@@ -163,11 +177,11 @@ object ExcelMapper {
   }
 
 
-
     /**
-    * get databind
-    * @param dataTemplateXls template
+    * get databind Map from Excel
+    * @param dataTemplateXls template Excel file path
     * @param istream input Excel
+    * @param ignoreSheet ignore Sheet names
     */
   def getDataAsTemplate(
                          dataTemplateXls:String,
@@ -252,35 +266,4 @@ object ExcelMapper {
     workbook.close()
     result
   }
-
-
-  def setData(dataTempleteXls:String, outXlsPath:String, locationData:List[(String,String,Any)])={
-
-    val f = new File(dataTempleteXls)
-    val workbook = WorkbookFactory.create(f)
-
-    locationData.foreach{
-      x =>
-        val sheet = workbook.getSheet(x._1)
-        val ref = new CellReference(x._2)
-        val row = sheet.getRow(ref.getRow)
-        val target = row.getCell(ref.getCol)
-        x._3 match {
-          case xx:String =>
-            target.setCellValue(xx)
-          case xx:Int =>
-            target.setCellValue(xx)
-          case _ =>
-            target.setCellValue(x._3.toString)
-        }
-    }
-
-    val w = new File(outXlsPath)
-    val out = new FileOutputStream(w)
-
-    workbook.write(out)
-    workbook.close()
-
-  }
-
 }

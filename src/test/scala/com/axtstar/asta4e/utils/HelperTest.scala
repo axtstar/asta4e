@@ -13,7 +13,12 @@ class HelperTest extends Specification {
 
   val currentDir = new File(".").getAbsoluteFile().getParent()
 
-  "ToMapOps" should {
+  val map = Map(
+    "name" -> "axtstar",
+    "address" -> "Tokyo, Japan"
+  )
+
+  "ToMap" should {
     "toMap" in {
       val d = Data("axtstar","Tokyo, Japan")
       val target = Helper.ToMapOps(d).toMap
@@ -42,12 +47,22 @@ class HelperTest extends Specification {
     }
   }
 
+  "Different" should {
+    "toCase" in {
+      val target = Helper.to[Data]
+      val result = target.from(
+        s"${currentDir}/src/test/resources/excel/bind_template2.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample2.xlsx"
+      )
+
+      result.get.name must be_==("axtstar")
+      result.get.address must be_==("Tokyo, Japan")
+    }
+  }
+
+
   "Helper" should {
     "from[Map]" in {
-      val map = Map(
-        "name" -> "axtstar",
-        "address" -> "Tokyo, Japan"
-      )
       val result:Option[Data] = Helper.to[Data].from(map)
 
       result.get.name must be_==("axtstar")
@@ -114,6 +129,19 @@ class HelperTest extends Specification {
       result.get.A2 must be_==("A2")
 
     }
+
+    "Last10" in {
+      val target = ExcelMapper.getDataAsTemplate(
+        s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
+
+      val result = Helper.to[Last10].from(target(0))
+
+      result.get.B16 must be_==("B16")
+      result.get.D16 must be_==("D16")
+
+    }
+
 
   }
 }
