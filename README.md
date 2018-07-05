@@ -25,7 +25,7 @@ libraryDependencies ++= Seq(
 )
 ```
 
-- get bind date from Excel
+- get bind data from Excel
  
   The function needs 2 Excel files, first template Excel contains ${}. Second is data Excel file which contains data as exact same location as template Excel file.
 
@@ -54,7 +54,8 @@ ExcelMapper.setDataAsTemplate(
 )
 ```
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  output Excel. 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`com.axtstar.asta4e.converter.E._` is commpanion utilites for implicit conversion & separeted Map to List Map.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  `com.axtstar.asta4e.converter.E._` is commpanion utilites for implicit conversion and gethering separeted Map to List Map.
 
 # LICENSE
 
