@@ -4,8 +4,27 @@ import java.io.{File, FileInputStream, FileOutputStream}
 
 import org.apache.poi.ss.usermodel.{Cell, CellType, WorkbookFactory}
 import org.apache.poi.ss.util.{CellAddress, CellReference}
+import shapeless.{HList, LabelledGeneric, ops}
 
 object ExcelMapper {
+
+  implicit class ToMapOps[A](val a: A) extends AnyVal {
+    import ops.record._
+
+    def toMap[L <: HList](implicit
+                          gen: LabelledGeneric.Aux[A, L],
+                          tmr: ToMap[L]
+                         ): Map[String, Any] = {
+      val m: Map[tmr.Key, tmr.Value] = tmr(gen.to(a))
+      m.map {
+        case (k: Symbol, v) =>
+          k.name -> v
+        case _ =>
+          throw new IllegalArgumentException
+      }
+    }
+  }
+
 
   val allReplaceBrace = "\\$\\{([^\\}]*)\\}".r
 
@@ -62,6 +81,27 @@ object ExcelMapper {
     workbook.close()
 
     results
+  }
+
+  def setDataAsCase[T](
+                        dataTemplateXls:String,
+                        outTemplate:String,
+                        outXlsPath:String,
+                        bindData:T
+                      ):Unit = {
+
+    val cls = ToMapOps[T](bindData)
+/*
+    val map = cls.toMap[T]
+
+    setDataAsTemplate(
+      dataTemplateXls,
+      outTemplate,
+      outXlsPath,
+      map
+    )
+    */
+    val x = ""
   }
 
   /**
