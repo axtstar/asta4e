@@ -70,22 +70,37 @@ class ExcelMapperTest extends Specification {
 
     }
 
-    "setDataAsCase to getDataAsCase" in {
-      val d = Data("test1","test1")
+    "setData to getDataAsTemplate" in {
 
-      val target = ExcelMapper.setDataAsCase[Data](
+      val target = ExcelMapper.setData(
         s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample1.xlsx",
-        s"${currentDir}/target/output2.xlsx",
-        d
+        s"${currentDir}/target/output3.xlsx",
+        "Sheet1" -> ("A1" ->
+          """t
+            |e
+            |s
+            |t
+            |1""".stripMargin &
+          "A2" -> null &
+          "A3" -> "test3" &
+          "A4" -> 1)
       )
 
       val result = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
-        s"${currentDir}/target/output2.xlsx")
+        s"${currentDir}/target/output3.xlsx")
 
-      result(0)("name") must be_==("test1")
-      result(0)("address") must be_==("test1")
+      result(0)("A1") must be_==(
+        """t
+          |e
+          |s
+          |t
+          |1""".stripMargin
+      )
+      result(0)("A2") must be_==("")
+      result(0)("A3") must be_==("test3")
+      result(0)("A4") must be_==("1")
 
     }
 

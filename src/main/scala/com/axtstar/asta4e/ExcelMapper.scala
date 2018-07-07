@@ -4,27 +4,8 @@ import java.io.{File, FileInputStream, FileOutputStream}
 
 import org.apache.poi.ss.usermodel.{Cell, CellType, WorkbookFactory}
 import org.apache.poi.ss.util.{CellAddress, CellReference}
-import shapeless.{HList, LabelledGeneric, ops}
 
 object ExcelMapper {
-
-  implicit class ToMapOps[A](val a: A) extends AnyVal {
-    import ops.record._
-
-    def toMap[L <: HList](implicit
-                          gen: LabelledGeneric.Aux[A, L],
-                          tmr: ToMap[L]
-                         ): Map[String, Any] = {
-      val m: Map[tmr.Key, tmr.Value] = tmr(gen.to(a))
-      m.map {
-        case (k: Symbol, v) =>
-          k.name -> v
-        case _ =>
-          throw new IllegalArgumentException
-      }
-    }
-  }
-
 
   val allReplaceBrace = "\\$\\{([^\\}]*)\\}".r
 
@@ -83,27 +64,6 @@ object ExcelMapper {
     results
   }
 
-  def setDataAsCase[T](
-                        dataTemplateXls:String,
-                        outTemplate:String,
-                        outXlsPath:String,
-                        bindData:T
-                      ):Unit = {
-
-    val cls = ToMapOps[T](bindData)
-/*
-    val map = cls.toMap[T]
-
-    setDataAsTemplate(
-      dataTemplateXls,
-      outTemplate,
-      outXlsPath,
-      map
-    )
-    */
-    val x = ""
-  }
-
   /**
     * output Excel from Map
     * @param dataTemplateXls
@@ -111,6 +71,7 @@ object ExcelMapper {
     * @param outXlsPath
     * @param locationDataArray
     */
+//  @deprecated("use setData instead","0.0.3")
   def setDataAsTemplate(
                          dataTemplateXls:String,
                          outTemplate:String,
@@ -128,6 +89,7 @@ object ExcelMapper {
     )
   }
 
+
   /**
     * output Excel from Map
     * @param dataTemplateXlsStream Excel template File stream which has ${} binderes
@@ -135,6 +97,7 @@ object ExcelMapper {
     * @param outXlsPath Output Excel path
     * @param locationDataArray DataBinder which consists Map of name of ${} and value  
     */
+//  @deprecated("use setData instead","0.0.3")
   def setDataAsTemplate(
                          dataTemplateXlsStream:FileInputStream,
                          outTemplateStream:FileInputStream,
@@ -147,7 +110,7 @@ object ExcelMapper {
 
     var sheetIndex = 0
     locationDataArray.map {
-      locationData =>
+      locationData:Map[String,Any] =>
 
         //determine sheet
         val sheet = if (sheetIndex==0) {
@@ -163,7 +126,7 @@ object ExcelMapper {
           x =>
             //iterate ${}
             x._4.foreach {
-              xx => {
+              _ => {
                 val ref = new CellReference(x._2.toString)
                 val row = sheet.getRow(ref.getRow)
                 val target = row.getCell(ref.getCol)
@@ -194,6 +157,106 @@ object ExcelMapper {
     workbook.write(out)
     workbook.close()
   }
+
+  /**
+    * output Excel from Map
+    * @param dataTemplateXls
+    * @param outTemplate
+    * @param outXlsPath
+    * @param bindData
+    */
+  def setData(
+               dataTemplateXls:String,
+               outTemplate:String,
+               outXlsPath:String,
+               bindData:(String, Map[String,Any]) *
+             ):Unit = {
+    val dataTemplateXlsStream = new FileInputStream(dataTemplateXls)
+    val outTemplateStream = new FileInputStream(outTemplate)
+
+    setData(
+      dataTemplateXlsStream,
+      outTemplateStream,
+      outXlsPath,
+      bindData:_*
+    )
+  }
+
+  /**
+    * output Excel from Map
+    * @param dataTemplateXlsStream Excel template File stream which has ${} binderes
+    * @param outTemplateStream Output templae Excel File stream
+    * @param outXlsPath Output Excel path
+    * @param bindData DataBinder which consists Map of name of ${} and value
+    */
+  def setData(
+               dataTemplateXlsStream:FileInputStream,
+               outTemplateStream:FileInputStream,
+               outXlsPath:String,
+               bindData:(String, Map[String,Any]) *
+             ):Unit={
+    val locationMap = getExcelLocation(dataTemplateXlsStream)
+
+    val workbook = WorkbookFactory.create(outTemplateStream)
+
+    //check sheet names
+    val sheetNames = for (i <- 0 until workbook.getNumberOfSheets) yield {
+      (i,workbook.getSheetAt(i).getSheetName)
+    }
+
+    //Clone Sheet if not exists
+    bindData.foreach{
+      sheetMap =>
+        if(sheetNames.filter(_._2==sheetMap._1).size ==0){
+          val sheet = workbook.cloneSheet(0)
+          workbook.setSheetName(workbook.getNumberOfSheets - 1 , sheetMap._1)
+        }
+    }
+
+    bindData.foreach {
+      sheetMap:(String, Map[String, Any]) =>
+        //determine sheet
+        val sheet = workbook.getSheet(sheetMap._1)
+
+        sheetMap._2.foreach {
+          locationData =>
+
+            locationMap.foreach {
+              x =>
+                //iterate ${}
+                x._4.foreach {
+                  xx => {
+                    val ref = new CellReference(x._2.toString)
+                    val row = sheet.getRow(ref.getRow)
+                    val target = row.getCell(ref.getCol)
+
+                    target.setCellValue(
+                      sheetMap._2
+                        .foldLeft(x._3.toString) {
+                          (acc, xxx) =>
+                            val alt = if (xxx._2 == null) {
+                              ""
+                            } else {
+                              xxx._2.toString
+                            }
+
+                            acc.replaceAll("\\$\\{" + s"${xxx._1}" + "\\}", alt)
+
+                        }
+                    )
+                  }
+                }
+            }
+        }
+    }
+
+    val w = new File(outXlsPath)
+    val out = new FileOutputStream(w)
+
+    workbook.write(out)
+    workbook.close()
+  }
+
 
   /**
     * get databind Map from Excel
