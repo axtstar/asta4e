@@ -104,5 +104,105 @@ class ExcelMapperTest extends Specification {
 
     }
 
+    "setData 2Sheets to getDataAsTemplate" in {
+
+      val target = ExcelMapper.setData(
+        s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample1.xlsx",
+        s"${currentDir}/target/output4.xlsx",
+        "Sheet1" -> ("A1" ->
+          """t
+            |e
+            |s
+            |t
+            |1""".stripMargin &
+          "A2" -> null &
+          "A3" -> "test3" &
+          "A4" -> 1) &
+          "Sheet2" -> ("A1" ->
+            """t
+              |e
+              |s
+              |t
+              |1""".stripMargin &
+            "A2" -> null &
+            "A3" -> "test3" &
+            "A4" -> 1) :_*
+      )
+
+      val result = ExcelMapper.getDataAsTemplate(
+        s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
+        s"${currentDir}/target/output4.xlsx")
+
+      result.size must be_==(2)
+
+      result(0)("A1") must be_==(
+        """t
+          |e
+          |s
+          |t
+          |1""".stripMargin
+      )
+      result(0)("A2") must be_==("")
+      result(0)("A3") must be_==("test3")
+      result(0)("A4") must be_==("1")
+
+    }
+
+    "setData 3Sheets to getDataAsTemplate" in {
+
+      val target = ExcelMapper.setData(
+        s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample1.xlsx",
+        s"${currentDir}/target/output5.xlsx",
+        "Sheet1" -> ("A1" ->
+          """t
+            |e
+            |s
+            |t
+            |1""".stripMargin &
+          "A2" -> null &
+          "A3" -> "test3" &
+          "A4" -> 1) &
+          "Sheet2" -> ("A1" ->
+            """t
+              |e
+              |s
+              |t
+              |1""".stripMargin &
+            "A2" -> null &
+            "A3" -> "test3" &
+            "A4" -> 1)  &
+          "Sheet3" -> ("A1" ->
+            """t
+              |e
+              |s
+              |t
+              |1""".stripMargin &
+            "A2" -> null &
+            "A3" -> "test3" &
+            "A4" -> 1) :_*
+      )
+
+      val result = ExcelMapper.getDataAsTemplate(
+        s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
+        s"${currentDir}/target/output5.xlsx")
+
+      result.size must be_==(3)
+
+      result(0)("A1") must be_==(
+        """t
+          |e
+          |s
+          |t
+          |1""".stripMargin
+      )
+      result(0)("A2") must be_==("")
+      result(0)("A3") must be_==("test3")
+      result(0)("A4") must be_==("1")
+
+    }
+
+
   }
 }
