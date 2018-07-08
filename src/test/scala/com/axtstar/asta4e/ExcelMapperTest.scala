@@ -35,7 +35,18 @@ class ExcelMapperTest extends Specification {
       target(0)("B3") must be_==("B3")
       target(0)("C5") must be_==("C5")
     }
+/*
+    "getData with format" in {
+      val target = ExcelMapper.getDataAsTemplate(
+        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample4.xlsx")
 
+      target(0)("numeric") must be_==(30)
+      target(0)("string") must be_==("30")
+      target(0)("date") must be_==("B3")
+      target(0)("formula") must be_==("C5")
+    }
+*/
     "setDataAsTemplate to getDataAsTemplate" in {
 
       val target = ExcelMapper.setDataAsTemplate(
@@ -64,7 +75,7 @@ class ExcelMapperTest extends Specification {
             |t
             |1""".stripMargin
       )
-      result(0)("A2") must be_==("")
+      result(0)("A2") must be_==(null)
       result(0)("A3") must be_==("test3")
       result(0)("A4") must be_==("1")
 
@@ -98,7 +109,7 @@ class ExcelMapperTest extends Specification {
           |t
           |1""".stripMargin
       )
-      result(0)("A2") must be_==("")
+      result(0)("A2") must be_==(null)
       result(0)("A3") must be_==("test3")
       result(0)("A4") must be_==("1")
 
@@ -143,7 +154,7 @@ class ExcelMapperTest extends Specification {
           |t
           |1""".stripMargin
       )
-      result(0)("A2") must be_==("")
+      result(0)("A2") must be_==(null)
       result(0)("A3") must be_==("test3")
       result(0)("A4") must be_==("1")
 
@@ -197,7 +208,7 @@ class ExcelMapperTest extends Specification {
           |t
           |1""".stripMargin
       )
-      result(0)("A2") must be_==("")
+      result(0)("A2") must be_==(null)
       result(0)("A3") must be_==("test3")
       result(0)("A4") must be_==("1")
 

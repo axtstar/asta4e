@@ -9,6 +9,10 @@ object ExcelMapper {
 
   val allReplaceBrace = "\\$\\{([^\\}]*)\\}".r
 
+  def getBindName(bindName:String)={
+    bindName.replaceAll("^\\$\\{", "").replaceAll("\\}$", "")
+  }
+
   /**
     * search ${} from Excel file and returen to tuple 4
     * @param xlsPath template excel path
@@ -104,58 +108,17 @@ object ExcelMapper {
                          outXlsPath:String,
                          locationDataArray:Map[String,Any] *
                        ):Unit={
-    val locations = getExcelLocation(dataTemplateXlsStream)
-
-    val workbook = WorkbookFactory.create(outTemplateStream)
-
-    var sheetIndex = 0
-    locationDataArray.map {
-      locationData:Map[String,Any] =>
-
-        //determine sheet
-        val sheet = if (sheetIndex==0) {
-          workbook.getSheet(locations.head._1)
-        }
-        else{
-          //copy sheet
-          val sheet = workbook.cloneSheet(0)
-          sheet
-        }
-
-        locations.foreach {
-          x =>
-            //iterate ${}
-            x._4.foreach {
-              _ => {
-                val ref = new CellReference(x._2.toString)
-                val row = sheet.getRow(ref.getRow)
-                val target = row.getCell(ref.getCol)
-
-                target.setCellValue(
-                  locationData
-                    .foldLeft(x._3.toString) {
-                      (acc, xxx) =>
-                        val alt = if (xxx._2==null){
-                          ""
-                        } else {
-                          xxx._2.toString
-                        }
-
-                        acc.replaceAll("\\$\\{" + s"${xxx._1}" + "\\}", alt)
-
-                    }
-                )
-              }
-            }
-        }
-        sheetIndex = sheetIndex + 1
-    }
-
-    val w = new File(outXlsPath)
-    val out = new FileOutputStream(w)
-
-    workbook.write(out)
-    workbook.close()
+    var index = 0
+    setData(
+      dataTemplateXlsStream,
+      outTemplateStream,
+      outXlsPath,
+      locationDataArray.map {
+        x =>
+          index = index + 1
+          s"Sheet${index}" -> x
+      } :_*
+    )
   }
 
   /**
@@ -279,21 +242,38 @@ object ExcelMapper {
     )
   }
 
+  def getDataAsTemplate(
+               dataTemplateXls:String,
+               iStream:FileInputStream,
+               ignoreSheet:List[String]
+
+             )={
+    val target = getData(
+      dataTemplateXls,
+      iStream,
+      ignoreSheet
+    )
+    target.map {
+      x =>
+        x._2
+    }.toList
+  }
+
 
     /**
     * get databind Map from Excel
     * @param dataTemplateXls template Excel file path
-    * @param istream input Excel
+    * @param iStream input Excel
     * @param ignoreSheet ignore Sheet names
     */
-  def getDataAsTemplate(
+  def getData(
                          dataTemplateXls:String,
-                         istream:FileInputStream,
+                         iStream:FileInputStream,
                          ignoreSheet:List[String]
                        )={
     val locations = getExcelLocation(dataTemplateXls)
 
-    val f = istream
+    val f = iStream
     val workbook = WorkbookFactory.create(f)
 
     val result = (for (index <- 0 until workbook.getNumberOfSheets)  yield {
@@ -308,7 +288,7 @@ object ExcelMapper {
 
         locations.map {
           x =>
-            //retrieve ${}'s list
+            //target cell
             val target = {
               val ref = new CellReference(x._2.toString)
               val row = sheet.getRow(ref.getRow)
@@ -320,14 +300,16 @@ object ExcelMapper {
                 row.getCell(ref.getCol)
               }
             }
+
+            //construct regular expression from a template cell
+            //consider multiple binder like `${id1}-${id2}`
             val regEx = ("(?s)" + x._4.foldLeft(if (x._3==null){""}else{x._3.toString}) {
               (acc, xx) =>
                 val xxx = xx.replace("$", "\\$")
                   .replace("{", "\\{")
                   .replace("}", "\\}")
                 acc.replaceFirst(xxx, "(.+)")
-            })
-              .r
+            }).r
 
             val matchValue = if(target==null)
             {
@@ -352,19 +334,19 @@ object ExcelMapper {
 
             if (all.size>0) {
               (for (i <- 0 until all.get.groupCount) yield {
-                results += (x._4(i).replaceAll("^\\$\\{", "").replaceAll("\\}$", "") -> all.get.group(i + 1))
+                results += (getBindName(x._4(i)) -> all.get.group(i + 1))
               })
             }
             else {
               (x._4.map {
                 xx =>
-                  results += (xx.replaceAll("^\\$\\{", "").replaceAll("\\}$", "") -> "")
+                  results += (getBindName(xx) -> null)
               })
             }
         }
-        results
+       sheet.getSheetName -> results
       }
-    }).filter(_!=null).toList
+    }).filter(_!=null)
 
     workbook.close()
     result
