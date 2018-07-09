@@ -1,6 +1,7 @@
 package com.axtstar.asta4e.utils
 
 import java.io.File
+import java.text.SimpleDateFormat
 
 import com.axtstar.asta4e.ExcelMapper
 import org.junit.runner.RunWith
@@ -139,6 +140,31 @@ class HelperTest extends Specification {
 
       result.get.B16 must be_==("B16")
       result.get.D16 must be_==("D16")
+
+    }
+
+    "Etc" in {
+      val target = ExcelMapper.getData(
+        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample4.xlsx",
+        List("設定")
+      )
+
+      val result = Helper.to[Etc7].from(target.head._2)
+
+      val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
+      val timeFormat = new SimpleDateFormat("HH:mm:ss")
+
+      val dateFormatFull = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
+
+      result.get.numeric must be_==(111)
+      result.get.string must be_==("111")
+
+      result.get.date must be_==(dateFormat.parse("1970/01/01"))
+      result.get.formula must be_==("111")
+      result.get.bool must be_==(true)
+      result.get.time must be_==(dateFormatFull.parse("1899/12/31 17:25:47"))
+      result.get.userDate must be_==(dateFormatFull.parse("2018/7/2 22:35:54"))
 
     }
 
