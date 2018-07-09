@@ -2,15 +2,16 @@ package com.axtstar.asta4e
 
 import java.io.{File, FileInputStream, FileOutputStream}
 
-import org.apache.poi.hssf.usermodel.HSSFDateUtil
 import org.apache.poi.ss.usermodel._
 import org.apache.poi.ss.util.{CellAddress, CellReference}
 
+import scala.util.matching.Regex
+
 object ExcelMapper {
 
-  val allReplaceBrace = "\\$\\{([^\\}]*)\\}".r
+  val allReplaceBrace:Regex = "\\$\\{([^\\}]*)\\}".r
 
-  def getBindName(bindName:String)={
+  def getBindName(bindName:String):String={
     bindName.replaceAll("^\\$\\{", "").replaceAll("\\}$", "")
   }
 
@@ -29,11 +30,11 @@ object ExcelMapper {
     * @param stream template Excel file stream
     *
     */
-  def getExcelLocation(stream:FileInputStream) = {
+  def getExcelLocation(stream:FileInputStream):List[(String, CellAddress, Cell, List[String])] = {
 
     val workbook = WorkbookFactory.create(stream)
 
-    val results = (for (i <- 0 to workbook.getNumberOfSheets - 1) yield {
+    val results = (for (i <- 0 until workbook.getNumberOfSheets) yield {
       val sheet = workbook.getSheetAt(i)
       (for (rowID <- 0 to sheet.getLastRowNum) yield {
         val row = sheet.getRow(rowID)
@@ -60,7 +61,7 @@ object ExcelMapper {
           .filter(_._1!=null) //ignore null
           .toList
       })
-        .filter(_.size > 0)
+        .filter(_.nonEmpty)
         .toList
     }).flatten.flatten.toList
 
@@ -71,10 +72,10 @@ object ExcelMapper {
 
   /**
     * output Excel from Map
-    * @param dataTemplateXls
-    * @param outTemplate
-    * @param outXlsPath
-    * @param locationDataArray
+    * @param dataTemplateXls Excel template File path which has ${} binder
+    * @param outTemplate Output template Excel File path
+    * @param outXlsPath Output Excel path
+    * @param locationDataArray DataBinder which consists Map of name of ${} and value
     */
 //  @deprecated("use setData instead","0.0.3")
   def setDataAsTemplate(
@@ -97,8 +98,8 @@ object ExcelMapper {
 
   /**
     * output Excel from Map
-    * @param dataTemplateXlsStream Excel template File stream which has ${} binderes
-    * @param outTemplateStream Output templae Excel File stream
+    * @param dataTemplateXlsStream Excel template File stream which has ${} binder
+    * @param outTemplateStream Output template Excel File stream
     * @param outXlsPath Output Excel path
     * @param locationDataArray DataBinder which consists Map of name of ${} and value  
     */
@@ -117,17 +118,17 @@ object ExcelMapper {
       locationDataArray.map {
         x =>
           index = index + 1
-          s"Sheet${index}" -> x
+          s"Sheet$index" -> x
       } :_*
     )
   }
 
   /**
     * output Excel from Map
-    * @param dataTemplateXls
-    * @param outTemplate
-    * @param outXlsPath
-    * @param bindData
+    * @param dataTemplateXls Excel template File path which has ${} binder
+    * @param outTemplate Output template Excel File path
+    * @param outXlsPath Output Excel path
+    * @param bindData DataBinder which consists Map of name of ${} and value
     */
   def setData(
                dataTemplateXls:String,
@@ -171,8 +172,8 @@ object ExcelMapper {
     //Clone Sheet if not exists
     bindData.foreach{
       sheetMap =>
-        if(sheetNames.filter(_._2==sheetMap._1).size ==0){
-          val sheet = workbook.cloneSheet(0)
+        if(!sheetNames.exists(_._2==sheetMap._1)){
+          workbook.cloneSheet(0)
           workbook.setSheetName(workbook.getNumberOfSheets - 1 , sheetMap._1)
         }
     }
@@ -183,13 +184,13 @@ object ExcelMapper {
         val sheet = workbook.getSheet(sheetMap._1)
 
         sheetMap._2.foreach {
-          locationData =>
+          _ =>
 
             locationMap.foreach {
               x =>
                 //iterate ${}
                 x._4.foreach {
-                  xx => {
+                  _ => {
                     val ref = new CellReference(x._2.toString)
                     val row = sheet.getRow(ref.getRow)
                     val target = row.getCell(ref.getCol)
@@ -223,11 +224,11 @@ object ExcelMapper {
 
 
   /**
-    * get databind Map from Excel
-    * @param dataTemplateXls
-    * @param inputXlsPath
-    * @param ignoreSheet
-    * @return
+    * get data bind Map from Excel
+    * @param dataTemplateXls template Excel file path
+    * @param inputXlsPath input Excel file path
+    * @param ignoreSheet ignore sheet names
+    * @return Map
     */
   def getDataAsTemplate(
                          dataTemplateXls:String,
@@ -248,7 +249,7 @@ object ExcelMapper {
                iStream:FileInputStream,
                ignoreSheet:List[String]
 
-             )={
+             ): List[Map[String, Any]]={
     val target = getData(
       dataTemplateXls,
       iStream,
@@ -271,7 +272,7 @@ object ExcelMapper {
                          dataTemplateXls:String,
                          iStream:FileInputStream,
                          ignoreSheet:List[String]
-                       )={
+                       ): IndexedSeq[(String, Map[String, Any])]={
     val locations = getExcelLocation(dataTemplateXls)
 
     val f = iStream
@@ -287,7 +288,7 @@ object ExcelMapper {
         var results = scala.collection.immutable.Map[String,Any]()
 
 
-        locations.map {
+        locations.foreach {
           x =>
             //target cell
             val target = {
@@ -305,7 +306,7 @@ object ExcelMapper {
 
             target match {
               case null =>
-                x._4.map {
+                x._4.foreach {
                   xx =>
                     results += (getBindName(xx) -> null)
                 }
@@ -314,18 +315,18 @@ object ExcelMapper {
                   case CellType.NUMERIC =>
                     val format = ExcelNumberFormat.from(xx.getCellStyle)
                     if(DateUtil.isADateFormat(format)){
-                      x._4.map {
+                      x._4.foreach {
                         xxx =>
                           results += (getBindName(xxx) -> xx.getDateCellValue)
                       }
                     } else {
-                      x._4.map {
+                      x._4.foreach {
                         xxx =>
                           results += (getBindName(xxx) -> xx.getNumericCellValue)
                       }
                     }
 
-                  case (CellType.STRING | CellType.FORMULA) =>
+                  case CellType.STRING | CellType.FORMULA =>
                     //construct regular expression from a template cell
                     //consider multiple binder like `${id1}-${id2}`
                     val regEx = ("(?s)" + x._4.foldLeft(if (x._3==null){""}else{x._3.toString}) {
@@ -338,16 +339,16 @@ object ExcelMapper {
 
                     val all = regEx.findFirstMatchIn(xx.getStringCellValue)
 
-                    if (all.size>0) {
-                      (for (i <- 0 until all.get.groupCount) yield {
-                        results += (getBindName(x._4(i)) -> all.get.group(i + 1))
-                      })
+                    if (all.isDefined) {
+                      for (i <- 0 until all.get.groupCount) {
+                        results += getBindName(x._4(i)) -> all.get.group(i + 1)
+                      }
                     }
                     else {
-                      (x._4.map {
+                      x._4.foreach {
                         xx =>
-                          results += (getBindName(xx) -> null)
-                      })
+                          results += getBindName(xx) -> null
+                      }
                     }
 
                   case _ =>
