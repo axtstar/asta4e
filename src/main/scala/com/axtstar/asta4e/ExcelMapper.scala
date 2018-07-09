@@ -326,6 +326,24 @@ object ExcelMapper {
                       }
                     }
 
+                  case CellType.BOOLEAN =>
+                    x._4.foreach {
+                      xxx =>
+                        results += (getBindName(xxx) -> xx.getBooleanCellValue)
+                    }
+
+                  case CellType.BLANK =>
+                    x._4.foreach {
+                      xxx =>
+                        results += (getBindName(xxx) -> null)
+                    }
+
+                  case CellType._NONE =>
+                    x._4.foreach {
+                      xxx =>
+                        results += (getBindName(xxx) -> null)
+                    }
+
                   case CellType.STRING | CellType.FORMULA =>
                     //construct regular expression from a template cell
                     //consider multiple binder like `${id1}-${id2}`
