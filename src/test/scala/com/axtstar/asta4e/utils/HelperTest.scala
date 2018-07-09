@@ -48,20 +48,6 @@ class HelperTest extends Specification {
     }
   }
 
-  "Different" should {
-    "toCase" in {
-      val target = Helper.to[Data]
-      val result = target.from(
-        s"${currentDir}/src/test/resources/excel/bind_template2.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_sample2.xlsx"
-      )
-
-      result.get.name must be_==("axtstar")
-      result.get.address must be_==("Tokyo, Japan")
-    }
-  }
-
-
   "Helper" should {
     "from[Map]" in {
       val result:Option[Data] = Helper.to[Data].from(map)

@@ -93,24 +93,6 @@ object Helper {
     */
   class ConvertHelper[A] {
 
-    def from[R <: HList](
-                          dataTemplateXls:String,
-                          inputXlsPath:String,
-                          ignoreSheet:List[String]=List("設定")
-                        )(implicit
-                                              gen: LabelledGeneric.Aux[A, R],
-                                              fromMap: FromMap[R]
-    ): Option[A] = {
-      val m = ExcelMapper.getDataAsTemplate(dataTemplateXls,inputXlsPath,ignoreSheet)
-      fromMap(
-        m(0)
-      ).map{
-        x =>
-          gen.from(x)
-      }
-    }
-
-
     def from[R <: HList](m: Map[String, Any])(implicit
                                               gen: LabelledGeneric.Aux[A, R],
                                               fromMap: FromMap[R]

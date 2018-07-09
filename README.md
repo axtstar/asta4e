@@ -1,27 +1,27 @@
 [![Build Status](https://travis-ci.org/axtstar/asta4e.svg?branch=master)](https://travis-ci.org/axtstar/asta4e)
 
-# asta4e
+# Asta4e
 
 This library provide a template engine functionality for Excel for scala.
 
-# feature
+# Feature
 
 - retrieve data from Excel and convert them to Map[String, Any] or a case class
 
 - create Excel from Map[String, Any] or a case class
 
-# required
+# Required
 
 - scala 2.11
 - scala 2.12
 
-# usage
+# Usage
 
 add dependency like the below
 
 ```sbt
 libraryDependencies ++= Seq(
-      "com.axtstar" %% "asta4e" % "0.0.2"
+      "com.axtstar" %% "asta4e" % "0.0.3"
 )
 ```
 
