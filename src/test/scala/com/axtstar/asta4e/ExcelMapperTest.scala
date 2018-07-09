@@ -48,7 +48,14 @@ class ExcelMapperTest extends Specification {
       val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
       target(0)("date") must be_==(dateFormat.parse("1970/1/1"))
       target(0)("formula") must be_==("111")
-    }
+      target(0)("bool") must be_==(true)
+
+      val timeFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
+      //TODO : Excel return 1899
+      target(0)("time") must be_==(timeFormat.parse("1899/12/31 17:25:47"))
+
+      target(0)("userDate") must be_==(timeFormat.parse("2018/07/02 22:35:54"))
+  }
 
     "setDataAsTemplate to getDataAsTemplate" in {
 

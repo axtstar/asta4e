@@ -190,25 +190,28 @@ object ExcelMapper {
               x =>
                 //iterate ${}
                 x._4.foreach {
-                  _ => {
-                    val ref = new CellReference(x._2.toString)
-                    val row = sheet.getRow(ref.getRow)
-                    val target = row.getCell(ref.getCol)
+                  xx => {
+                    if ( sheetMap._2.exists(
+                      p =>
+                        "${" + s"${p._1}" + "}"==xx)
+                    ) {
+                      val ref = new CellReference(x._2.toString)
+                      val row = sheet.getRow(ref.getRow)
+                      val target = row.getCell(ref.getCol)
 
-                    target.setCellValue(
-                      sheetMap._2
-                        .foldLeft(x._3.toString) {
+                      val alt =
+                        sheetMap._2.foldLeft(x._3.toString) {
                           (acc, xxx) =>
                             val alt = if (xxx._2 == null) {
                               ""
                             } else {
                               xxx._2.toString
                             }
-
                             acc.replaceAll("\\$\\{" + s"${xxx._1}" + "\\}", alt)
-
                         }
-                    )
+
+                      target.setCellValue(alt)
+                    }
                   }
                 }
             }
