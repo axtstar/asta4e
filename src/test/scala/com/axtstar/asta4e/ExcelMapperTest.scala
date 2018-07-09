@@ -61,7 +61,7 @@ class ExcelMapperTest extends Specification {
 
       val target = ExcelMapper.setDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_sample1.xlsx",
+        s"${currentDir}/src/test/resources/excel/output_template1.xlsx",
       s"${currentDir}/target/output1.xlsx",
        "A1" ->
          """t
@@ -95,7 +95,7 @@ class ExcelMapperTest extends Specification {
 
       val target = ExcelMapper.setData(
         s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_sample1.xlsx",
+        s"${currentDir}/src/test/resources/excel/output_template1.xlsx",
         s"${currentDir}/target/output3.xlsx",
         "Sheet1" -> ("A1" ->
           """t
@@ -129,7 +129,7 @@ class ExcelMapperTest extends Specification {
 
       val target = ExcelMapper.setData(
         s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_sample1.xlsx",
+        s"${currentDir}/src/test/resources/excel/output_template1.xlsx",
         s"${currentDir}/target/output4.xlsx",
         "Sheet1" -> ("A1" ->
           """t
@@ -174,7 +174,7 @@ class ExcelMapperTest extends Specification {
 
       val target = ExcelMapper.setData(
         s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_sample1.xlsx",
+        s"${currentDir}/src/test/resources/excel/output_template1.xlsx",
         s"${currentDir}/target/output5.xlsx",
         "Sheet1" -> ("A1" ->
           """t
