@@ -2,7 +2,8 @@ package com.axtstar.asta4e
 
 import java.io.{File, FileInputStream, FileOutputStream}
 
-import org.apache.poi.ss.usermodel.{Cell, CellType, WorkbookFactory}
+import org.apache.poi.hssf.usermodel.HSSFDateUtil
+import org.apache.poi.ss.usermodel._
 import org.apache.poi.ss.util.{CellAddress, CellReference}
 
 object ExcelMapper {
@@ -301,47 +302,59 @@ object ExcelMapper {
               }
             }
 
-            //construct regular expression from a template cell
-            //consider multiple binder like `${id1}-${id2}`
-            val regEx = ("(?s)" + x._4.foldLeft(if (x._3==null){""}else{x._3.toString}) {
-              (acc, xx) =>
-                val xxx = xx.replace("$", "\\$")
-                  .replace("{", "\\{")
-                  .replace("}", "\\}")
-                acc.replaceFirst(xxx, "(.+)")
-            }).r
 
-            val matchValue = if(target==null)
-            {
-              ""
-            }
-            else {
-              target.getCellTypeEnum match {
-                case CellType.STRING =>
-                  target.getStringCellValue
-                case CellType.NUMERIC =>
-                  target.getNumericCellValue.toString
-                case CellType.BLANK =>
-                  ""
-                case CellType.FORMULA =>
-                  target.getStringCellValue
-                case _ =>
-                  target.getStringCellValue
-              }
-            }
+            target match {
+              case null =>
+                x._4.map {
+                  xx =>
+                    results += (getBindName(xx) -> null)
+                }
+              case xx:Cell =>
+                xx.getCellTypeEnum match {
+                  case CellType.NUMERIC =>
+                    val format = ExcelNumberFormat.from(xx.getCellStyle)
+                    if(DateUtil.isADateFormat(format)){
+                      x._4.map {
+                        xxx =>
+                          results += (getBindName(xxx) -> xx.getDateCellValue)
+                      }
+                    } else {
+                      x._4.map {
+                        xxx =>
+                          results += (getBindName(xxx) -> xx.getNumericCellValue)
+                      }
+                    }
 
-            val all = regEx.findFirstMatchIn(matchValue)
+                  case (CellType.STRING | CellType.FORMULA) =>
+                    //construct regular expression from a template cell
+                    //consider multiple binder like `${id1}-${id2}`
+                    val regEx = ("(?s)" + x._4.foldLeft(if (x._3==null){""}else{x._3.toString}) {
+                      (acc, xx) =>
+                        val xxx = xx.replace("$", "\\$")
+                          .replace("{", "\\{")
+                          .replace("}", "\\}")
+                        acc.replaceFirst(xxx, "(.+)")
+                    }).r
 
-            if (all.size>0) {
-              (for (i <- 0 until all.get.groupCount) yield {
-                results += (getBindName(x._4(i)) -> all.get.group(i + 1))
-              })
-            }
-            else {
-              (x._4.map {
-                xx =>
-                  results += (getBindName(xx) -> null)
-              })
+                    val all = regEx.findFirstMatchIn(xx.getStringCellValue)
+
+                    if (all.size>0) {
+                      (for (i <- 0 until all.get.groupCount) yield {
+                        results += (getBindName(x._4(i)) -> all.get.group(i + 1))
+                      })
+                    }
+                    else {
+                      (x._4.map {
+                        xx =>
+                          results += (getBindName(xx) -> null)
+                      })
+                    }
+
+                  case _ =>
+
+                    val g = ""
+
+                }
             }
         }
        sheet.getSheetName -> results

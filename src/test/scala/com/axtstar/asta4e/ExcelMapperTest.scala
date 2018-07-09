@@ -1,6 +1,8 @@
 package com.axtstar.asta4e
 
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
 
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
@@ -35,18 +37,19 @@ class ExcelMapperTest extends Specification {
       target(0)("B3") must be_==("B3")
       target(0)("C5") must be_==("C5")
     }
-/*
+
     "getData with format" in {
       val target = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample4.xlsx")
 
-      target(0)("numeric") must be_==(30)
-      target(0)("string") must be_==("30")
-      target(0)("date") must be_==("B3")
-      target(0)("formula") must be_==("C5")
+      target(0)("numeric") must be_==(111)
+      target(0)("string") must be_==("111")
+      val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
+      target(0)("date") must be_==(dateFormat.parse("1970/1/1"))
+      target(0)("formula") must be_==("111")
     }
-*/
+
     "setDataAsTemplate to getDataAsTemplate" in {
 
       val target = ExcelMapper.setDataAsTemplate(
