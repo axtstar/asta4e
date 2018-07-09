@@ -51,11 +51,39 @@ class ExcelMapperTest extends Specification {
       target(0)("bool") must be_==(true)
 
       val timeFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
-      //TODO : Excel return 1899
+      //TODO : Excel return 1900/01/00 HH:mm:ss
       target(0)("time") must be_==(timeFormat.parse("1899/12/31 17:25:47"))
 
       target(0)("userDate") must be_==(timeFormat.parse("2018/07/02 22:35:54"))
   }
+
+    "setData with format to getData with format" in {
+      val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
+
+      val target = ExcelMapper.setData(
+        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
+        s"${currentDir}/src/test/resources/excel/output_template4.xlsx",
+        s"${currentDir}/target/output4_1.xlsx",
+        "Sheet1" -> (
+          "numeric" -> 1001 &
+          "string" -> "1000" &
+          "date" -> dateFormat.parse("2018/7/7")
+        )
+      )
+
+      val result = ExcelMapper.getData(
+        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
+        s"${currentDir}/target/output4_1.xlsx",
+        List()
+      )
+
+      result(0)._2("numeric") must be_==(1001)
+      result(0)._2("string") must be_==("1000")
+      result(0)._2("date") must be_==(dateFormat.parse("2018/7/7"))
+
+    }
+
+
 
     "setDataAsTemplate to getDataAsTemplate" in {
 

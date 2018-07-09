@@ -1,6 +1,7 @@
 package com.axtstar.asta4e
 
 import java.io.{File, FileInputStream, FileOutputStream}
+import java.util.Date
 
 import org.apache.poi.ss.usermodel._
 import org.apache.poi.ss.util.{CellAddress, CellReference}
@@ -184,7 +185,7 @@ object ExcelMapper {
         val sheet = workbook.getSheet(sheetMap._1)
 
         sheetMap._2.foreach {
-          _ =>
+          sMap =>
 
             locationMap.foreach {
               x =>
@@ -199,18 +200,36 @@ object ExcelMapper {
                       val row = sheet.getRow(ref.getRow)
                       val target = row.getCell(ref.getCol)
 
-                      val alt =
-                        sheetMap._2.foldLeft(x._3.toString) {
-                          (acc, xxx) =>
-                            val alt = if (xxx._2 == null) {
-                              ""
-                            } else {
-                              xxx._2.toString
-                            }
-                            acc.replaceAll("\\$\\{" + s"${xxx._1}" + "\\}", alt)
-                        }
+                      target.getCellTypeEnum match{
+                        case CellType.NUMERIC =>
+                          sMap._2 match {
+                            case null =>
+                              target.setCellType(CellType.BLANK)
+                            case tiny:Date =>
+                              target.setCellValue(tiny)
+                            case tiny:Double =>
+                              target.setCellValue(tiny)
+                            case tiny:Integer =>
+                              target.setCellValue(tiny.toDouble)
+                            case _ =>
+                              target.setCellType(CellType.NUMERIC)
+                              target.setCellValue(sMap._2.toString)
+                          }
 
-                      target.setCellValue(alt)
+                        case CellType.BOOLEAN =>
+                          target.setCellValue(if(sMap._2==null)null.asInstanceOf[Boolean] else sMap._2.asInstanceOf[Boolean])
+                        case _ =>
+                          val alt = sheetMap._2.foldLeft(x._3.toString) {
+                            (acc, xxx) =>
+                              val alt = if (xxx._2 == null) {
+                                ""
+                              } else {
+                                xxx._2.toString
+                              }
+                              acc.replaceAll("\\$\\{" + s"${xxx._1}" + "\\}", alt)
+                          }
+                          target.setCellValue(alt)
+                      }
                     }
                   }
                 }
@@ -238,17 +257,19 @@ object ExcelMapper {
                          inputXlsPath:String,
                          ignoreSheet:List[String]=List()
                        ):List[Map[String, Any]] = {
-    val stream = new FileInputStream(inputXlsPath)
+
+    val dataTemplateXlsStream = new FileInputStream(dataTemplateXls)
+    val iStream = new FileInputStream(inputXlsPath)
 
     getDataAsTemplate(
-      dataTemplateXls,
-      stream,
+      dataTemplateXlsStream,
+      iStream,
       ignoreSheet
     )
   }
 
   def getDataAsTemplate(
-               dataTemplateXls:String,
+               dataTemplateXls:FileInputStream,
                iStream:FileInputStream,
                ignoreSheet:List[String]
 
@@ -264,19 +285,36 @@ object ExcelMapper {
     }.toList
   }
 
+  def getData(
+               dataTemplateXls:String,
+               inputXlsPath:String,
+               ignoreSheet:List[String]
+             ): IndexedSeq[(String, Map[String, Any])] = {
+
+    val dataTemplateXlsStream = new FileInputStream(dataTemplateXls)
+    val iStream = new FileInputStream(inputXlsPath)
+
+    getData(
+      dataTemplateXlsStream,
+      iStream,
+      ignoreSheet
+    )
+
+  }
+
 
     /**
     * get databind Map from Excel
-    * @param dataTemplateXls template Excel file path
+    * @param dataTemplateXlsStream template Excel file stream
     * @param iStream input Excel
     * @param ignoreSheet ignore Sheet names
     */
   def getData(
-                         dataTemplateXls:String,
+                         dataTemplateXlsStream:FileInputStream,
                          iStream:FileInputStream,
                          ignoreSheet:List[String]
                        ): IndexedSeq[(String, Map[String, Any])]={
-    val locations = getExcelLocation(dataTemplateXls)
+    val locations = getExcelLocation(dataTemplateXlsStream)
 
     val f = iStream
     val workbook = WorkbookFactory.create(f)
