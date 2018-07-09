@@ -180,19 +180,22 @@ object ExcelMapper {
     }
 
     bindData.foreach {
-      sheetMap:(String, Map[String, Any]) =>
+      bindDataASheet:(String, Map[String, Any]) =>
         //determine sheet
-        val sheet = workbook.getSheet(sheetMap._1)
+        val sheet = workbook.getSheet(bindDataASheet._1)
 
-        sheetMap._2.foreach {
-          sMap =>
+        bindDataASheet._2.foreach {
+          bindMap =>
 
-            locationMap.foreach {
+            locationMap.filter(
+              p =>
+                p._4.contains("${" + bindMap._1 + "}")
+            ).foreach {
               x =>
                 //iterate ${}
                 x._4.foreach {
                   xx => {
-                    if ( sheetMap._2.exists(
+                    if ( bindDataASheet._2.exists(
                       p =>
                         "${" + s"${p._1}" + "}"==xx)
                     ) {
@@ -202,24 +205,27 @@ object ExcelMapper {
 
                       target.getCellTypeEnum match{
                         case CellType.NUMERIC =>
-                          sMap._2 match {
+                          bindMap._2 match {
                             case null =>
                               target.setCellType(CellType.BLANK)
                             case tiny:Date =>
                               target.setCellValue(tiny)
-                            case tiny:Double =>
-                              target.setCellValue(tiny)
                             case tiny:Integer =>
                               target.setCellValue(tiny.toDouble)
+                            case Double | Int  =>
+                              target.setCellValue(bindMap._2.asInstanceOf[Double])
                             case _ =>
-                              target.setCellType(CellType.NUMERIC)
-                              target.setCellValue(sMap._2.toString)
+                              target.setCellValue(bindMap._2.toString)
                           }
 
                         case CellType.BOOLEAN =>
-                          target.setCellValue(if(sMap._2==null)null.asInstanceOf[Boolean] else sMap._2.asInstanceOf[Boolean])
+                          target.setCellValue(if(bindMap._2==null)null.asInstanceOf[Boolean] else bindMap._2.asInstanceOf[Boolean])
+
+                        case CellType.FORMULA =>
+                          target.setCellValue(if(bindMap._2==null)null.asInstanceOf[String] else bindMap._2.toString)
+
                         case _ =>
-                          val alt = sheetMap._2.foldLeft(x._3.toString) {
+                          val alt = bindDataASheet._2.foldLeft(x._3.toString) {
                             (acc, xxx) =>
                               val alt = if (xxx._2 == null) {
                                 ""

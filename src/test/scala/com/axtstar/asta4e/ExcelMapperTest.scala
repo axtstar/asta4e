@@ -59,6 +59,9 @@ class ExcelMapperTest extends Specification {
 
     "setData with format to getData with format" in {
       val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
+      val timeFormat = new SimpleDateFormat("HH:mm:ss")
+
+      val dateFormatFull = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
 
       val target = ExcelMapper.setData(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
@@ -67,7 +70,11 @@ class ExcelMapperTest extends Specification {
         "Sheet1" -> (
           "numeric" -> 1001 &
           "string" -> "1000" &
-          "date" -> dateFormat.parse("2018/7/7")
+          "date" -> dateFormat.parse("2018/7/7") &
+          "formula" -> "=B2" &
+          "bool" -> true &
+          "time" -> timeFormat.parse("23:32:41") &
+          "userDate" -> dateFormatFull.parse("2018/11/23 18:52:56")
         )
       )
 
@@ -80,6 +87,10 @@ class ExcelMapperTest extends Specification {
       result(0)._2("numeric") must be_==(1001)
       result(0)._2("string") must be_==("1000")
       result(0)._2("date") must be_==(dateFormat.parse("2018/7/7"))
+      result(0)._2("formula") must be_==("=B2")
+      result(0)._2("bool") must be_==(true)
+      result(0)._2("time") must be_==(timeFormat.parse("23:32:41"))
+      result(0)._2("userDate") must be_==(dateFormatFull.parse("2018/11/23 18:52:56"))
 
     }
 
