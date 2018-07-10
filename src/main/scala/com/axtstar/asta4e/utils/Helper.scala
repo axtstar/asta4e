@@ -20,28 +20,16 @@ object Helper {
                          ): Map[String, Any] = {
       val m: Map[tmr.Key, tmr.Value] = tmr(gen.to(a))
       m.map {
+        case (k: Symbol, n:None.type ) =>
+          k.name -> null
+        case (k: Symbol, Some(v)) =>
+          k.name -> v
         case (k: Symbol, v) =>
           k.name -> v
         case _ =>
           throw new IllegalArgumentException
       }
     }
-
-    def toExcel[L <: HList](
-                             dataTemplateXls:String,
-                             outTemplate:String,
-                             outXlsPath:String)(implicit
-                            gen: LabelledGeneric.Aux[A, L],
-                            tmr: ToMap[L]) = {
-      val target = toMap[L](gen,tmr)
-      ExcelMapper.setDataAsTemplate(
-        dataTemplateXls,
-        outTemplate,
-        outXlsPath,
-        target
-      )
-    }
-
   }
 
   trait FromMap[L <: HList] {
@@ -93,6 +81,18 @@ object Helper {
     */
   class ConvertHelper[A] {
 
+    def fromOp[R <: HList](m: Map[String, Any])(implicit
+                                                gen: LabelledGeneric.Aux[A, R],
+                                                fromMap: FromMap[R]
+    ): Option[A] = {
+      val target = fromMap(m.map{mm=>mm._1 -> Option(mm._2)}).map {
+        x =>
+          gen.from(x)
+      }
+      target
+    }
+
+
     def from[R <: HList](m: Map[String, Any])(implicit
                                               gen: LabelledGeneric.Aux[A, R],
                                               fromMap: FromMap[R]
@@ -103,6 +103,8 @@ object Helper {
       }
       target
     }
+
+
   }
 
   def to[A]: ConvertHelper[A] = {

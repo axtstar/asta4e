@@ -27,27 +27,6 @@ class HelperTest extends Specification {
     }
   }
 
-  "ToMapOps" should {
-    "toExcel" in {
-      val d = Data("axtstar","Tokyo, Japan")
-      Helper.ToMapOps(d).toExcel(
-        s"${currentDir}/src/test/resources/excel/bind_template2.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_sample2.xlsx",
-        s"${currentDir}/target/output2.xlsx"
-      )
-
-      val target = ExcelMapper.getDataAsTemplate(
-        s"${currentDir}/src/test/resources/excel/bind_template2.xlsx",
-        s"${currentDir}/target/output2.xlsx"
-      )
-
-      val result = Helper.to[Data].from(target(0))
-
-      result.get.name must be_==("axtstar")
-      result.get.address must be_==("Tokyo, Japan")
-    }
-  }
-
   "Helper" should {
     "from[Map]" in {
       val result:Option[Data] = Helper.to[Data].from(map)
@@ -129,7 +108,7 @@ class HelperTest extends Specification {
 
     }
 
-    "Etc" in {
+    "Etc7" in {
       val target = ExcelMapper.getData(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample4.xlsx",
@@ -151,6 +130,61 @@ class HelperTest extends Specification {
       result.get.bool must be_==(true)
       result.get.time must be_==(dateFormatFull.parse("1899/12/31 17:25:47"))
       result.get.userDate must be_==(dateFormatFull.parse("2018/7/2 22:35:54"))
+
+    }
+
+    "Etc7Option" in {
+      val target = ExcelMapper.getData(
+        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample4.xlsx",
+        List("設定")
+      )
+
+      val result = Helper.to[Etc7Option].fromOp(target.head._2)
+
+      val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
+      val timeFormat = new SimpleDateFormat("HH:mm:ss")
+
+      val dateFormatFull = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
+
+      result.get.numeric must be_==(Some(111))
+      result.get.string must be_==(Some("111"))
+
+      result.get.date must be_==(Some(dateFormat.parse("1970/01/01")))
+      result.get.formula must be_==(Some("111"))
+      result.get.bool must be_==(Some(true))
+      result.get.time must be_==(Some(dateFormatFull.parse("1899/12/31 17:25:47")))
+      result.get.userDate must be_==(Some(dateFormatFull.parse("2018/7/2 22:35:54")))
+
+    }
+
+    "Etc7Option null" in {
+      val target = ExcelMapper.getData(
+        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample4-1.xlsx",
+        List("設定")
+      )
+
+      val result = Helper.to[Etc7Option].fromOp(target.head._2)
+
+      val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
+      val timeFormat = new SimpleDateFormat("HH:mm:ss")
+
+      val dateFormatFull = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
+
+      result.get.numeric must be_==(Some(2))
+      result.get.string must be_==(None)
+
+      result.get.date must be_==(None)
+      result.get.formula must be_==(None)
+      result.get.bool must be_==(None)
+      result.get.time must be_==(None)
+      result.get.userDate must be_==(None)
+
+      val result2 = Helper.ToMapOps(result.get).toMap
+
+      result2("numeric") must be_==(2)
+      result2("numeric") must be_==(2)
 
     }
 
