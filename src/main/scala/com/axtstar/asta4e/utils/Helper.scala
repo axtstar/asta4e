@@ -81,9 +81,9 @@ object Helper {
     */
   class ConvertHelper[A] {
 
-    def fromOp[R <: HList](m: Map[String, Any])(implicit
-                                                gen: LabelledGeneric.Aux[A, R],
-                                                fromMap: FromMap[R]
+    def fromAsOption[R <: HList](m: Map[String, Any])(implicit
+                                                      gen: LabelledGeneric.Aux[A, R],
+                                                      fromMap: FromMap[R]
     ): Option[A] = {
       val target = fromMap(m.map{mm=>mm._1 -> Option(mm._2)}).map {
         x =>

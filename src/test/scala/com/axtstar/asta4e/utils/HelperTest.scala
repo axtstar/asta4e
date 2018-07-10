@@ -140,7 +140,7 @@ class HelperTest extends Specification {
         List("設定")
       )
 
-      val result = Helper.to[Etc7Option].fromOp(target.head._2)
+      val result = Helper.to[Etc7Option].fromAsOption(target.head._2)
 
       val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
       val timeFormat = new SimpleDateFormat("HH:mm:ss")
@@ -165,7 +165,7 @@ class HelperTest extends Specification {
         List("設定")
       )
 
-      val result = Helper.to[Etc7Option].fromOp(target.head._2)
+      val result = Helper.to[Etc7Option].fromAsOption(target.head._2)
 
       val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
       val timeFormat = new SimpleDateFormat("HH:mm:ss")
