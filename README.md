@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/axtstar/asta4e.svg?branch=master)](https://travis-ci.org/axtstar/asta4e)
+[![Build Status](https://travis-ci.org/axtstar/asta4e.svg?branch=master)](https://travis-ci.org/axtstar/asta4e) [![Coverage Status](https://coveralls.io/repos/github/axtstar/asta4e/badge.svg?branch=master)](https://coveralls.io/github/axtstar/asta4e?branch=master)
 
 # Asta4e
 
