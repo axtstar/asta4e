@@ -3,14 +3,14 @@ package com.axtstar.asta4e.utils
 import java.io.File
 import java.text.SimpleDateFormat
 
-import com.axtstar.asta4e.ExcelMapper
+import com.axtstar.asta4e.{ExcelMapper}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 
 
 @RunWith(classOf[JUnitRunner])
-class HelperTest extends Specification {
+class ExcelMapperTest extends Specification {
 
   val currentDir = new File(".").getAbsoluteFile().getParent()
 
@@ -22,14 +22,14 @@ class HelperTest extends Specification {
   "ToMap" should {
     "toMap" in {
       val d = Data("axtstar","Tokyo, Japan")
-      val target = Helper.ToMapOps(d).toMap
+      val target = ExcelMapper.ToMapOps(d).toMap
       target must be_==(Map( "name" -> "axtstar", "address" -> "Tokyo, Japan" ))
     }
   }
 
-  "Helper" should {
+  "ExcelMapper" should {
     "from[Map]" in {
-      val result:Option[Data] = Helper.to[Data].from(map)
+      val result:Option[Data] = ExcelMapper.to[Data].from(map)
 
       result.get.name must be_==("axtstar")
       result.get.address must be_==("Tokyo, Japan")
@@ -37,11 +37,12 @@ class HelperTest extends Specification {
     }
 
     "from[get]" in {
-      val target = ExcelMapper.getDataAsTemplate(
+      val target = ExcelMapper.apply.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template2.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample2.xlsx")
 
-      val result = Helper.to[Data].from(target(0))
+//      val result = ExcelMapper.apply[Data].from(target(0))
+      val result = ExcelMapper.to[Data].from(target(0))
 
       result.get.name must be_==("axtstar")
       result.get.address must be_==("Tokyo, Japan")
@@ -49,11 +50,11 @@ class HelperTest extends Specification {
     }
 
     "Data23" in {
-      val target = ExcelMapper.getDataAsTemplate(
+      val target = ExcelMapper.apply.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
 
-      val result = Helper.to[Data23].from(target(0))
+      val result = ExcelMapper.to[Data23].from(target(0))
 
       result.get.A1 must be_==("A1")
       result.get.A2 must be_==("A2")
@@ -61,11 +62,11 @@ class HelperTest extends Specification {
     }
 
     "Data28" in {
-      val target = ExcelMapper.getDataAsTemplate(
+      val target = ExcelMapper.apply.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
 
-      val result = Helper.to[Data28].from(target(0))
+      val result = ExcelMapper.to[Data28].from(target(0))
 
       result.get.A1 must be_==("A1")
       result.get.A2 must be_==("A2")
@@ -73,11 +74,11 @@ class HelperTest extends Specification {
     }
 
     "Data29" in {
-      val target = ExcelMapper.getDataAsTemplate(
+      val target = ExcelMapper.apply.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
 
-      val result = Helper.to[Data29].from(target(0))
+      val result = ExcelMapper.to[Data29].from(target(0))
 
       result.get.A1 must be_==("A1")
       result.get.A2 must be_==("A2")
@@ -85,11 +86,11 @@ class HelperTest extends Specification {
     }
 
     "Data64" in {
-      val target = ExcelMapper.getDataAsTemplate(
+      val target = ExcelMapper.apply.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
 
-      val result = Helper.to[Data64].from(target(0))
+      val result = ExcelMapper.to[Data64].from(target(0))
 
       result.get.A1 must be_==("A1")
       result.get.A2 must be_==("A2")
@@ -97,11 +98,11 @@ class HelperTest extends Specification {
     }
 
     "Last10" in {
-      val target = ExcelMapper.getDataAsTemplate(
+      val target = ExcelMapper.apply.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
 
-      val result = Helper.to[Last10].from(target(0))
+      val result = ExcelMapper.to[Last10].from(target(0))
 
       result.get.B16 must be_==("B16")
       result.get.D16 must be_==("D16")
@@ -109,13 +110,13 @@ class HelperTest extends Specification {
     }
 
     "Etc7" in {
-      val target = ExcelMapper.getData(
+      val target = ExcelMapper.apply.getData(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample4.xlsx",
         List("設定")
       )
 
-      val result = Helper.to[Etc7].from(target.head._2)
+      val result = ExcelMapper.to[Etc7].from(target.head._2)
 
       val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
       val timeFormat = new SimpleDateFormat("HH:mm:ss")
@@ -134,13 +135,13 @@ class HelperTest extends Specification {
     }
 
     "Etc7Option" in {
-      val target = ExcelMapper.getData(
+      val target = ExcelMapper.apply.getData(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample4.xlsx",
         List("設定")
       )
 
-      val result = Helper.to[Etc7Option].fromAsOption(target.head._2)
+      val result = ExcelMapper.to[Etc7Option].fromAsOption(target.head._2)
 
       val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
       val timeFormat = new SimpleDateFormat("HH:mm:ss")
@@ -159,13 +160,13 @@ class HelperTest extends Specification {
     }
 
     "Etc7Option null" in {
-      val target = ExcelMapper.getData(
+      val target = ExcelMapper.apply.getData(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample4-1.xlsx",
         List("設定")
       )
 
-      val result = Helper.to[Etc7Option].fromAsOption(target.head._2)
+      val result = ExcelMapper.to[Etc7Option].fromAsOption(target.head._2)
 
       val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
       val timeFormat = new SimpleDateFormat("HH:mm:ss")
@@ -181,7 +182,7 @@ class HelperTest extends Specification {
       result.get.time must be_==(None)
       result.get.userDate must be_==(None)
 
-      val result2 = Helper.ToMapOps(result.get).toMap
+      val result2 = ExcelMapper.ToMapOps(result.get).toMap
 
       result2("numeric") must be_==(2)
       result2("numeric") must be_==(2)
