@@ -2,7 +2,6 @@ package com.axtstar.asta4e
 
 import com.axtstar.asta4e.core.{ExcelBasic, Helper}
 import shapeless._
-import labelled.{FieldType, field}
 
 object ExcelMapper extends ExcelBasic with Helper {
 
@@ -40,29 +39,6 @@ object ExcelMapper extends ExcelBasic with Helper {
     * @tparam A
     */
   class ExcelMapper[A] extends ExcelBasic {
-
-    def fromAsOption[R <: HList](m: Map[String, Any])(implicit
-                                                      gen: LabelledGeneric.Aux[A, R],
-                                                      fromMap: FromMap[R]
-    ): Option[A] = {
-      val target = fromMap(m.map { mm => mm._1 -> Option(mm._2) }).map {
-        x =>
-          gen.from(x)
-      }
-      target
-    }
-
-
-    def from[R <: HList](m: Map[String, Any])(implicit
-                                              gen: LabelledGeneric.Aux[A, R],
-                                              fromMap: FromMap[R]
-    ): Option[A] = {
-      val target = fromMap(m).map {
-        x =>
-          gen.from(x)
-      }
-      target
-    }
 
     def getDataAsAny[R <: HList](
                                   dataTemplateXls: String,

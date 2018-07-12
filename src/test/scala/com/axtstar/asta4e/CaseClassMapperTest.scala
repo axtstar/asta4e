@@ -3,6 +3,7 @@ package com.axtstar.asta4e
 import java.io.File
 import java.text.SimpleDateFormat
 
+import com.axtstar.asta4e.core._
 import com.axtstar.asta4e.test_class._
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
@@ -29,7 +30,7 @@ class CaseClassMapperTest extends Specification {
 
   "ExcelMapper" should {
     "from[Map]" in {
-      val result:Option[Data] = ExcelMapper.to[Data].from(map)
+      val result:Option[Data] = ExcelHelper.to[Data].from(map)
 
       result.get.name must be_==("axtstar")
       result.get.address must be_==("Tokyo, Japan")
@@ -42,7 +43,7 @@ class CaseClassMapperTest extends Specification {
         s"${currentDir}/src/test/resources/excel/read_sample2.xlsx")
 
 //      val result = ExcelMapper.apply[Data].from(target(0))
-      val result = ExcelMapper.to[Data].from(target(0))
+      val result = ExcelHelper.to[Data].from(target(0))
 
       result.get.name must be_==("axtstar")
       result.get.address must be_==("Tokyo, Japan")
@@ -54,7 +55,7 @@ class CaseClassMapperTest extends Specification {
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
 
-      val result = ExcelMapper.to[Data23].from(target(0))
+      val result = ExcelHelper.to[Data23].from(target(0))
 
       result.get.A1 must be_==("A1")
       result.get.A2 must be_==("A2")
@@ -66,7 +67,7 @@ class CaseClassMapperTest extends Specification {
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
 
-      val result = ExcelMapper.to[Data28].from(target(0))
+      val result = ExcelHelper.to[Data28].from(target(0))
 
       result.get.A1 must be_==("A1")
       result.get.A2 must be_==("A2")
@@ -90,7 +91,7 @@ class CaseClassMapperTest extends Specification {
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
 
-      val result = ExcelMapper.to[Data64].from(target(0))
+      val result = ExcelHelper.to[Data64].from(target(0))
 
       result.get.A1 must be_==("A1")
       result.get.A2 must be_==("A2")
@@ -102,7 +103,7 @@ class CaseClassMapperTest extends Specification {
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
 
-      val result = ExcelMapper.to[Last10].from(target(0))
+      val result = ExcelHelper.to[Last10].from(target(0))
 
       result.get.B16 must be_==("B16")
       result.get.D16 must be_==("D16")
@@ -116,7 +117,7 @@ class CaseClassMapperTest extends Specification {
         List("設定")
       )
 
-      val result = ExcelMapper.to[Etc7].from(target.head._2)
+      val result = ExcelHelper.to[Etc7].from(target.head._2)
 
       val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
       val timeFormat = new SimpleDateFormat("HH:mm:ss")
@@ -141,7 +142,7 @@ class CaseClassMapperTest extends Specification {
         List("設定")
       )
 
-      val result = ExcelMapper.to[Etc7Option].fromAsOption(target.head._2)
+      val result = ExcelHelper.to[Etc7Option].fromAsOption(target.head._2)
 
       val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
       val timeFormat = new SimpleDateFormat("HH:mm:ss")
@@ -189,7 +190,7 @@ class CaseClassMapperTest extends Specification {
         List("設定")
       )
 
-      val result = ExcelMapper.to[Etc7Option].fromAsOption(target.head._2)
+      val result = ExcelHelper.to[Etc7Option].fromAsOption(target.head._2)
 
       val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
       val timeFormat = new SimpleDateFormat("HH:mm:ss")
