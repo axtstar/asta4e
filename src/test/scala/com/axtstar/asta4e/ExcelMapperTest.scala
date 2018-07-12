@@ -38,6 +38,20 @@ class ExcelMapperTest extends Specification {
       target(0)("C5") must be_==("C5")
     }
 
+    "getDataAsNumeric" in {
+
+      val target = ExcelMapper.to[Etc3Option].getDataAsOption(
+        s"${currentDir}/src/test/resources/excel/bind_template5.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample5.xlsx",
+        List()
+      )
+
+      target(0)._2.get.numeric1 must be_==(111D)
+      target(0)._2.get.numeric2 must be_==(112D)
+      target(0)._2.get.numeric3 must be_==(113D)
+    }
+
+
     "getData with format" in {
       val target = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
