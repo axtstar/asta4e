@@ -1,4 +1,4 @@
-package com.axtstar.asta4e.utils
+package com.axtstar.asta4e.test_class
 
 case class Last10(
   C14:String,

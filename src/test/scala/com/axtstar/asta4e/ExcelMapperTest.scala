@@ -2,13 +2,12 @@ package com.axtstar.asta4e
 
 import java.io.File
 import java.text.SimpleDateFormat
-import java.util.Date
 
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 import com.axtstar.asta4e.converter.E._
-import com.axtstar.asta4e.utils.Etc7Option
+import com.axtstar.asta4e.test_class._
 
 case class Data(name:String, address:String)
 
@@ -20,14 +19,14 @@ class ExcelMapperTest extends Specification {
   "ExcelMapper" should {
     "getExcelLocation" in {
 
-      val target = ExcelMapper.apply.getExcelLocation(s"${currentDir}/src/test/resources/excel/bind_template1.xlsx")
+      val target = ExcelMapper.getExcelLocation(s"${currentDir}/src/test/resources/excel/bind_template1.xlsx")
       target.size must be_==(240)
 
     }
 
     "getDataAsTemplate" in {
 
-      val target = ExcelMapper.apply.getDataAsTemplate(
+      val target = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample1.xlsx")
 
@@ -40,7 +39,7 @@ class ExcelMapperTest extends Specification {
     }
 
     "getData with format" in {
-      val target = ExcelMapper.apply.getDataAsTemplate(
+      val target = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample4.xlsx")
 
@@ -64,7 +63,7 @@ class ExcelMapperTest extends Specification {
 
       val dateFormatFull = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
 
-      val target = ExcelMapper.apply.setData(
+      val target = ExcelMapper.setData(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
         s"${currentDir}/src/test/resources/excel/output_template4.xlsx",
         s"${currentDir}/target/output4_1.xlsx",
@@ -79,7 +78,7 @@ class ExcelMapperTest extends Specification {
         )
       )
 
-      val result = ExcelMapper.apply.getData(
+      val result = ExcelMapper.getData(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
         s"${currentDir}/target/output4_1.xlsx",
         List()
@@ -104,12 +103,14 @@ class ExcelMapperTest extends Specification {
       )
 
       result.size must be_==(1)
+      result.head._2.head.numeric.get must be_==(111.0D)
+      result.head._2.head.string.get must be_==("111")
 
     }
 
     "setDataAsTemplate to getDataAsTemplate" in {
 
-      val target = ExcelMapper.apply.setDataAsTemplate(
+      val target = ExcelMapper.setDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
         s"${currentDir}/src/test/resources/excel/output_template1.xlsx",
       s"${currentDir}/target/output1.xlsx",
@@ -124,7 +125,7 @@ class ExcelMapperTest extends Specification {
         "A4" -> 1
       )
 
-      val result = ExcelMapper.apply.getDataAsTemplate(
+      val result = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
         s"${currentDir}/target/output1.xlsx")
 
@@ -143,7 +144,7 @@ class ExcelMapperTest extends Specification {
 
     "setData to getDataAsTemplate" in {
 
-      val target = ExcelMapper.apply.setData(
+      val target = ExcelMapper.setData(
         s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
         s"${currentDir}/src/test/resources/excel/output_template1.xlsx",
         s"${currentDir}/target/output3.xlsx",
@@ -158,7 +159,7 @@ class ExcelMapperTest extends Specification {
           "A4" -> 1)
       )
 
-      val result = ExcelMapper.apply.getDataAsTemplate(
+      val result = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
         s"${currentDir}/target/output3.xlsx")
 
@@ -177,7 +178,7 @@ class ExcelMapperTest extends Specification {
 
     "setData 2Sheets to getDataAsTemplate" in {
 
-      val target = ExcelMapper.apply.setData(
+      val target = ExcelMapper.setData(
         s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
         s"${currentDir}/src/test/resources/excel/output_template1.xlsx",
         s"${currentDir}/target/output4.xlsx",
@@ -201,7 +202,7 @@ class ExcelMapperTest extends Specification {
             "A4" -> 1) :_*
       )
 
-      val result = ExcelMapper.apply.getDataAsTemplate(
+      val result = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
         s"${currentDir}/target/output4.xlsx")
 
@@ -222,7 +223,7 @@ class ExcelMapperTest extends Specification {
 
     "setData 3Sheets to getDataAsTemplate" in {
 
-      val target = ExcelMapper.apply.setData(
+      val target = ExcelMapper.setData(
         s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
         s"${currentDir}/src/test/resources/excel/output_template1.xlsx",
         s"${currentDir}/target/output5.xlsx",
@@ -255,7 +256,7 @@ class ExcelMapperTest extends Specification {
             "A4" -> 1) :_*
       )
 
-      val result = ExcelMapper.apply.getDataAsTemplate(
+      val result = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
         s"${currentDir}/target/output5.xlsx")
 

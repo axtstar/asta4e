@@ -1,16 +1,16 @@
-package com.axtstar.asta4e.utils
+package com.axtstar.asta4e
 
 import java.io.File
 import java.text.SimpleDateFormat
 
-import com.axtstar.asta4e.{ExcelMapper}
+import com.axtstar.asta4e.test_class._
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 
 
 @RunWith(classOf[JUnitRunner])
-class ExcelMapperTest extends Specification {
+class CaseClassMapperTest extends Specification {
 
   val currentDir = new File(".").getAbsoluteFile().getParent()
 
@@ -37,7 +37,7 @@ class ExcelMapperTest extends Specification {
     }
 
     "from[get]" in {
-      val target = ExcelMapper.apply.getDataAsTemplate(
+      val target = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template2.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample2.xlsx")
 
@@ -50,7 +50,7 @@ class ExcelMapperTest extends Specification {
     }
 
     "Data23" in {
-      val target = ExcelMapper.apply.getDataAsTemplate(
+      val target = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
 
@@ -62,7 +62,7 @@ class ExcelMapperTest extends Specification {
     }
 
     "Data28" in {
-      val target = ExcelMapper.apply.getDataAsTemplate(
+      val target = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
 
@@ -74,19 +74,19 @@ class ExcelMapperTest extends Specification {
     }
 
     "Data29" in {
-      val target = ExcelMapper.apply.getDataAsTemplate(
+      val result = ExcelMapper.to[Data29].getDataAsAny(
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
+        s"${currentDir}/src/test/resources/excel/read_sample3.xlsx",
+        List()
+      )
 
-      val result = ExcelMapper.to[Data29].from(target(0))
-
-      result.get.A1 must be_==("A1")
-      result.get.A2 must be_==("A2")
+      result.head._2.get.A1 must be_==("A1")
+      result.head._2.get.A2 must be_==("A2")
 
     }
 
     "Data64" in {
-      val target = ExcelMapper.apply.getDataAsTemplate(
+      val target = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
 
@@ -98,7 +98,7 @@ class ExcelMapperTest extends Specification {
     }
 
     "Last10" in {
-      val target = ExcelMapper.apply.getDataAsTemplate(
+      val target = ExcelMapper.getDataAsTemplate(
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx")
 
@@ -110,7 +110,7 @@ class ExcelMapperTest extends Specification {
     }
 
     "Etc7" in {
-      val target = ExcelMapper.apply.getData(
+      val target = ExcelMapper.getData(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample4.xlsx",
         List("設定")
@@ -135,7 +135,7 @@ class ExcelMapperTest extends Specification {
     }
 
     "Etc7Option" in {
-      val target = ExcelMapper.apply.getData(
+      val target = ExcelMapper.getData(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample4.xlsx",
         List("設定")
@@ -159,8 +159,31 @@ class ExcelMapperTest extends Specification {
 
     }
 
+    "Etc7Option(alt)" in {
+      val result = ExcelMapper.to[Etc7Option].getDataAsOption(
+        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample4.xlsx",
+        List("設定")
+      )
+
+      val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
+      val timeFormat = new SimpleDateFormat("HH:mm:ss")
+
+      val dateFormatFull = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
+
+      result(0)._2.get.numeric must be_==(Some(111))
+      result(0)._2.get.string must be_==(Some("111"))
+
+      result(0)._2.get.date must be_==(Some(dateFormat.parse("1970/01/01")))
+      result(0)._2.get.formula must be_==(Some("111"))
+      result(0)._2.get.bool must be_==(Some(true))
+      result(0)._2.get.time must be_==(Some(dateFormatFull.parse("1899/12/31 17:25:47")))
+      result(0)._2.get.userDate must be_==(Some(dateFormatFull.parse("2018/7/2 22:35:54")))
+
+    }
+
     "Etc7Option null" in {
-      val target = ExcelMapper.apply.getData(
+      val target = ExcelMapper.getData(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample4-1.xlsx",
         List("設定")

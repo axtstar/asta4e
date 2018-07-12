@@ -1,4 +1,4 @@
-package com.axtstar.asta4e.utils
+package com.axtstar.asta4e.test_class
 
 case class Data28(
   A1:String,
