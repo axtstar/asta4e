@@ -12,7 +12,7 @@ This library provide a template engine functionality for Excel for scala.
 
 # Required
 
-- scala 2.11
+- scala 2.11 or
 - scala 2.12
 
 # Usage
@@ -21,7 +21,7 @@ add dependency like the below
 
 ```sbt
 libraryDependencies ++= Seq(
-      "com.axtstar" %% "asta4e" % "0.0.3"
+      "com.axtstar" %% "asta4e" % "0.0.4"
 )
 ```
 
@@ -39,7 +39,7 @@ val target = ExcelMapper.getDataAsTemplate(
 
 - set bind data to Excel
 
-  The function also needs 2 input Excel, first is Excel as same as the above, second is layout template Excel which copy to output data, asta4e does not manupilate excel layout.
+  The function also needs 2 input Excel, first is Excel as same as the above, second is layout template Excel which copy to output data, asta4e does not manipulate excel layout.
 
 ```scala
 import com.axtstar.asta4e.converter.E._
