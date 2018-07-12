@@ -79,7 +79,11 @@ object ExcelMapper extends ExcelBasic with Helper {
       target.map {
         m =>
 
-          val frm = fromMap(m._2.map { mm => mm._1 -> Option(mm._2) })
+          println(fromMap.getClass.getSimpleName)
+          val frm = fromMap(m._2.map {
+            mm =>
+              mm._1 -> Option(mm._2)
+          })
           val target = frm.map {
             x =>
               gen.from(x)

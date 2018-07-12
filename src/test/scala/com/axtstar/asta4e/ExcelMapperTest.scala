@@ -46,9 +46,9 @@ class ExcelMapperTest extends Specification {
         List()
       )
 
-      target(0)._2.get.numeric1 must be_==(111D)
-      target(0)._2.get.numeric2 must be_==(112D)
-      target(0)._2.get.numeric3 must be_==(113D)
+      target(0)._2.get.getNum1 must be_==(111D)
+      target(0)._2.get.getNum2 must be_==(123D)
+      target(0)._2.get.getNum3 must be_==(124D)
     }
 
 
