@@ -36,40 +36,49 @@ trait ExcelBasic {
 
     val workbook = WorkbookFactory.create(stream)
 
-    val results = (for (i <- 0 until workbook.getNumberOfSheets) yield {
-      val sheet = workbook.getSheetAt(i)
-      (for (rowID <- 0 to sheet.getLastRowNum) yield {
-        val row = sheet.getRow(rowID)
-        (for (columnID <- 0 to row.getLastCellNum) yield {
-          val cell = row.getCell(columnID)
-          cell match {
-            case null =>
-              (null, null, null, Nil)
-            case x: Cell =>
-              val all = allReplaceBrace.findAllIn(x.toString)
-              var result: List[String] = Nil
-              while (all.hasNext) {
-                val d = all.next()
-                result = d :: result
-              }
-              if (result == Nil) {
+    try {
+
+      val results = (for (i <- 0 until workbook.getNumberOfSheets) yield {
+        val sheet = workbook.getSheetAt(i)
+        (for (rowID <- 0 to sheet.getLastRowNum) yield {
+          val row = sheet.getRow(rowID)
+          (for (columnID <- 0 to row.getLastCellNum) yield {
+            val cell = row.getCell(columnID)
+            cell match {
+              case null =>
                 (null, null, null, Nil)
-              } else {
-                // sheet name -> cell address -> cell(value) -> List(binder)
-                (sheet.getSheetName, cell.getAddress, cell, result.reverse)
-              }
-          }
+              case x: Cell =>
+                val all = allReplaceBrace.findAllIn(x.toString)
+                var result: List[String] = Nil
+                while (all.hasNext) {
+                  val d = all.next()
+                  result = d :: result
+                }
+                if (result == Nil) {
+                  (null, null, null, Nil)
+                } else {
+                  // sheet name -> cell address -> cell(value) -> List(binder)
+                  (sheet.getSheetName, cell.getAddress, cell, result.reverse)
+                }
+            }
+          })
+            .filter(_._1 != null) //ignore null
+            .toList
         })
-          .filter(_._1 != null) //ignore null
+          .filter(_.nonEmpty)
           .toList
-      })
-        .filter(_.nonEmpty)
-        .toList
-    }).flatten.flatten.toList
+      }).flatten.flatten.toList
 
-    workbook.close()
-
-    results
+      results
+    }
+    catch {
+      case ex:Throwable =>
+        throw ex
+    }
+    finally{
+      workbook.close()
+      stream.close()
+    }
   }
 
   /**
@@ -80,7 +89,7 @@ trait ExcelBasic {
     * @param outXlsPath        Output Excel path
     * @param locationDataArray DataBinder which consists Map of name of ${} and value
     */
-  //  @deprecated("use setData instead","0.0.3")
+  @deprecated("use setData instead","0.0.4")
   def setDataAsTemplate(
                          dataTemplateXls: String,
                          outTemplate: String,
@@ -107,7 +116,7 @@ trait ExcelBasic {
     * @param outXlsPath            Output Excel path
     * @param locationDataArray     DataBinder which consists Map of name of ${} and value
     */
-  //  @deprecated("use setData instead","0.0.3")
+  @deprecated("use setData instead","0.0.4")
   def setDataAsTemplate(
                          dataTemplateXlsStream: FileInputStream,
                          outTemplateStream: FileInputStream,
@@ -170,89 +179,99 @@ trait ExcelBasic {
 
     val workbook = WorkbookFactory.create(outTemplateStream)
 
-    //check sheet names
-    val sheetNames = for (i <- 0 until workbook.getNumberOfSheets) yield {
-      (i, workbook.getSheetAt(i).getSheetName)
-    }
+    val out = new FileOutputStream(new File(outXlsPath))
 
-    //Clone Sheet if not exists
-    bindData.foreach {
-      sheetMap =>
-        if (!sheetNames.exists(_._2 == sheetMap._1)) {
-          workbook.cloneSheet(0)
-          workbook.setSheetName(workbook.getNumberOfSheets - 1, sheetMap._1)
-        }
-    }
+    try {
 
-    bindData.foreach {
-      bindDataASheet: (String, Map[String, Any]) =>
-        //determine sheet
-        val sheet = workbook.getSheet(bindDataASheet._1)
+      //check sheet names
+      val sheetNames = for (i <- 0 until workbook.getNumberOfSheets) yield {
+        (i, workbook.getSheetAt(i).getSheetName)
+      }
 
-        bindDataASheet._2.foreach {
-          bindMap =>
+      //Clone Sheet if not exists
+      bindData.foreach {
+        sheetMap =>
+          if (!sheetNames.exists(_._2 == sheetMap._1)) {
+            workbook.cloneSheet(0)
+            workbook.setSheetName(workbook.getNumberOfSheets - 1, sheetMap._1)
+          }
+      }
 
-            locationMap.filter(
-              p =>
-                p._4.contains("${" + bindMap._1 + "}")
-            ).foreach {
-              x =>
-                //iterate ${}
-                x._4.foreach {
-                  xx => {
-                    if (bindDataASheet._2.exists(
-                      p =>
-                        "${" + s"${p._1}" + "}" == xx)
-                    ) {
-                      val ref = new CellReference(x._2.toString)
-                      val row = sheet.getRow(ref.getRow)
-                      val target = row.getCell(ref.getCol)
+      bindData.foreach {
+        bindDataASheet: (String, Map[String, Any]) =>
+          //determine sheet
+          val sheet = workbook.getSheet(bindDataASheet._1)
 
-                      target.getCellTypeEnum match {
-                        case CellType.NUMERIC =>
-                          bindMap._2 match {
-                            case null =>
-                              target.setCellType(CellType.BLANK)
-                            case tiny: Date =>
-                              target.setCellValue(tiny)
-                            case tiny: Integer =>
-                              target.setCellValue(tiny.toDouble)
-                            case Double | Int =>
-                              target.setCellValue(bindMap._2.asInstanceOf[Double])
-                            case _ =>
-                              target.setCellValue(bindMap._2.toString)
-                          }
+          bindDataASheet._2.foreach {
+            bindMap =>
 
-                        case CellType.BOOLEAN =>
-                          target.setCellValue(if (bindMap._2 == null) null.asInstanceOf[Boolean] else bindMap._2.asInstanceOf[Boolean])
+              locationMap.filter(
+                p =>
+                  p._4.contains("${" + bindMap._1 + "}")
+              ).foreach {
+                x =>
+                  //iterate ${}
+                  x._4.foreach {
+                    xx => {
+                      if (bindDataASheet._2.exists(
+                        p =>
+                          "${" + s"${p._1}" + "}" == xx)
+                      ) {
+                        val ref = new CellReference(x._2.toString)
+                        val row = sheet.getRow(ref.getRow)
+                        val target = row.getCell(ref.getCol)
 
-                        case CellType.FORMULA =>
-                          target.setCellValue(if (bindMap._2 == null) null.asInstanceOf[String] else bindMap._2.toString)
+                        target.getCellTypeEnum match {
+                          case CellType.NUMERIC =>
+                            bindMap._2 match {
+                              case null =>
+                                target.setCellType(CellType.BLANK)
+                              case tiny: Date =>
+                                target.setCellValue(tiny)
+                              case tiny: Integer =>
+                                target.setCellValue(tiny.toDouble)
+                              case Double | Int =>
+                                target.setCellValue(bindMap._2.asInstanceOf[Double])
+                              case _ =>
+                                target.setCellValue(bindMap._2.toString)
+                            }
 
-                        case _ =>
-                          val alt = bindDataASheet._2.foldLeft(x._3.toString) {
-                            (acc, xxx) =>
-                              val alt = if (xxx._2 == null) {
-                                ""
-                              } else {
-                                xxx._2.toString
-                              }
-                              acc.replaceAll("\\$\\{" + s"${xxx._1}" + "\\}", alt)
-                          }
-                          target.setCellValue(alt)
+                          case CellType.BOOLEAN =>
+                            target.setCellValue(if (bindMap._2 == null) null.asInstanceOf[Boolean] else bindMap._2.asInstanceOf[Boolean])
+
+                          case CellType.FORMULA =>
+                            target.setCellValue(if (bindMap._2 == null) null.asInstanceOf[String] else bindMap._2.toString)
+
+                          case _ =>
+                            val alt = bindDataASheet._2.foldLeft(x._3.toString) {
+                              (acc, xxx) =>
+                                val alt = if (xxx._2 == null) {
+                                  ""
+                                } else {
+                                  xxx._2.toString
+                                }
+                                acc.replaceAll("\\$\\{" + s"${xxx._1}" + "\\}", alt)
+                            }
+                            target.setCellValue(alt)
+                        }
                       }
                     }
                   }
-                }
-            }
-        }
+              }
+          }
+      }
+
+      workbook.write(out)
     }
-
-    val w = new File(outXlsPath)
-    val out = new FileOutputStream(w)
-
-    workbook.write(out)
-    workbook.close()
+    catch{
+      case ex:Throwable =>
+        throw ex
+    }
+    finally{
+      out.close()
+      workbook.close()
+      outTemplateStream.close()
+    }
   }
 
   /**
@@ -328,117 +347,125 @@ trait ExcelBasic {
              ): IndexedSeq[(String, Map[String, Any])] = {
     val locations = getExcelLocation(dataTemplateXlsStream)
 
-    val f = iStream
-    val workbook = WorkbookFactory.create(f)
+    val workbook = WorkbookFactory.create(iStream)
 
-    val result = (for (index <- 0 until workbook.getNumberOfSheets) yield {
-      val sheet = workbook.getSheetAt(index)
+    try {
 
-      if (ignoreSheet.contains(sheet.getSheetName)) {
-        null
-      } else {
+      val result = (for (index <- 0 until workbook.getNumberOfSheets) yield {
+        val sheet = workbook.getSheetAt(index)
 
-        var results = scala.collection.immutable.Map[String, Any]()
+        if (ignoreSheet.contains(sheet.getSheetName)) {
+          null
+        } else {
 
-
-        locations.foreach {
-          x =>
-            //target cell
-            val target = {
-              val ref = new CellReference(x._2.toString)
-              val row = sheet.getRow(ref.getRow)
-
-              if (ref == null || row == null) {
-                null
-              }
-              else {
-                row.getCell(ref.getCol)
-              }
-            }
+          var results = scala.collection.immutable.Map[String, Any]()
 
 
-            target match {
-              case null =>
-                x._4.foreach {
-                  xx =>
-                    results += (getBindName(xx) -> null)
+          locations.foreach {
+            x =>
+              //target cell
+              val target = {
+                val ref = new CellReference(x._2.toString)
+                val row = sheet.getRow(ref.getRow)
+
+                if (ref == null || row == null) {
+                  null
                 }
-              case xx: Cell =>
-                xx.getCellTypeEnum match {
-                  case CellType.NUMERIC =>
-                    val format = ExcelNumberFormat.from(xx.getCellStyle)
-                    if (DateUtil.isADateFormat(format)) {
+                else {
+                  row.getCell(ref.getCol)
+                }
+              }
+
+
+              target match {
+                case null =>
+                  x._4.foreach {
+                    xx =>
+                      results += (getBindName(xx) -> null)
+                  }
+                case xx: Cell =>
+                  xx.getCellTypeEnum match {
+                    case CellType.NUMERIC =>
+                      val format = ExcelNumberFormat.from(xx.getCellStyle)
+                      if (DateUtil.isADateFormat(format)) {
+                        x._4.foreach {
+                          xxx =>
+                            results += (getBindName(xxx) -> xx.getDateCellValue)
+                        }
+                      } else {
+                        x._4.foreach {
+                          xxx =>
+                            results += (getBindName(xxx) -> xx.getNumericCellValue)
+                        }
+                      }
+
+                    case CellType.BOOLEAN =>
                       x._4.foreach {
                         xxx =>
-                          results += (getBindName(xxx) -> xx.getDateCellValue)
+                          results += (getBindName(xxx) -> xx.getBooleanCellValue)
                       }
-                    } else {
+
+                    case CellType.BLANK =>
                       x._4.foreach {
                         xxx =>
-                          results += (getBindName(xxx) -> xx.getNumericCellValue)
+                          results += (getBindName(xxx) -> null)
                       }
-                    }
 
-                  case CellType.BOOLEAN =>
-                    x._4.foreach {
-                      xxx =>
-                        results += (getBindName(xxx) -> xx.getBooleanCellValue)
-                    }
-
-                  case CellType.BLANK =>
-                    x._4.foreach {
-                      xxx =>
-                        results += (getBindName(xxx) -> null)
-                    }
-
-                  case CellType._NONE =>
-                    x._4.foreach {
-                      xxx =>
-                        results += (getBindName(xxx) -> null)
-                    }
-
-                  case CellType.STRING | CellType.FORMULA =>
-                    //construct regular expression from a template cell
-                    //consider multiple binder like `${id1}-${id2}`
-                    val regEx = ("(?s)" + x._4.foldLeft(if (x._3 == null) {
-                      ""
-                    } else {
-                      x._3.toString
-                    }) {
-                      (acc, xx) =>
-                        val xxx = xx.replace("$", "\\$")
-                          .replace("{", "\\{")
-                          .replace("}", "\\}")
-                        acc.replaceFirst(xxx, "(.+)")
-                    }).r
-
-                    val all = regEx.findFirstMatchIn(xx.getStringCellValue)
-
-                    if (all.isDefined) {
-                      for (i <- 0 until all.get.groupCount) {
-                        results += getBindName(x._4(i)) -> all.get.group(i + 1)
-                      }
-                    }
-                    else {
+                    case CellType._NONE =>
                       x._4.foreach {
-                        xx =>
-                          results += getBindName(xx) -> null
+                        xxx =>
+                          results += (getBindName(xxx) -> null)
                       }
-                    }
 
-                  case _ =>
+                    case CellType.STRING | CellType.FORMULA =>
+                      //construct regular expression from a template cell
+                      //consider multiple binder like `${id1}-${id2}`
+                      val regEx = ("(?s)" + x._4.foldLeft(if (x._3 == null) {
+                        ""
+                      } else {
+                        x._3.toString
+                      }) {
+                        (acc, xx) =>
+                          val xxx = xx.replace("$", "\\$")
+                            .replace("{", "\\{")
+                            .replace("}", "\\}")
+                          acc.replaceFirst(xxx, "(.+)")
+                      }).r
 
-                    val g = ""
+                      val all = regEx.findFirstMatchIn(xx.getStringCellValue)
 
-                }
-            }
+                      if (all.isDefined) {
+                        for (i <- 0 until all.get.groupCount) {
+                          results += getBindName(x._4(i)) -> all.get.group(i + 1)
+                        }
+                      }
+                      else {
+                        x._4.foreach {
+                          xx =>
+                            results += getBindName(xx) -> null
+                        }
+                      }
+
+                    case _ =>
+                      throw new IllegalArgumentException
+
+                  }
+              }
+          }
+          sheet.getSheetName -> results
         }
-        sheet.getSheetName -> results
-      }
-    }).filter(_ != null)
+      }).filter(_ != null)
 
-    workbook.close()
-    result
+      result
+
+    } catch {
+      case ex:Throwable =>
+        throw ex
+    }
+    finally{
+      workbook.close()
+      iStream.close()
+    }
   }
 
 

@@ -6,15 +6,23 @@ This library provide a template engine functionality for Excel for scala.
 
 # Feature
 
-- retrieve data from Excel and convert them to Map[String, Any] or a case class
+- Retrieve data from Excel and convert them to Map[String, Any] or a case class
 
-- create Excel from Map[String, Any] or a case class
+- Create Excel from Map[String, Any] or a case class
 
 # Required
 
 - scala 2.11 or
 - scala 2.12
 
+# Concept
+
+ This library avoids a lot of boilerplate and location definitions.
+
+ Ordinary, typical apache poi coding is like location definitions, and they likely make mistakes a lot.
+
+ In order to avoid location definition in code, asta4e needs to prepare template Excel as location definition.
+  
 # Usage
 
 add dependency like the below
@@ -29,13 +37,32 @@ libraryDependencies ++= Seq(
  
   The function needs 2 Excel files, first template Excel contains ${}. Second is data Excel file which contains data as exact same location as template Excel file.
 
+  Arbitrary given excel template must contains data binder such as ${numeric}.
+
 ```scala
-val target = ExcelMapper.getDataAsTemplate(
+val target = ExcelMapper.getData(
         "template.xlsx",
-        "data.xlsx")
+        "data.xlsx",
+        List("ignoresheets"))
 ```
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  then, return to binddata to `target` 
+Excel template has two paramater, then you can create case class as same parameter.
+
+```scala
+case class Data(numeric:Double, string:String)
+```
+
+Then, get the data to the class from Excel like the below code. 
+
+```scala
+val data:Option[Data] = ExcelMapper.to[Data].getDataAsAny(
+        "template.xlsx",
+        "data.xlsx",
+        List("ignoresheets"))
+```
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  then, return to bind data to `target` 
 
 - set bind data to Excel
 
@@ -43,7 +70,8 @@ val target = ExcelMapper.getDataAsTemplate(
 
 ```scala
 import com.axtstar.asta4e.converter.E._
-ExcelMapper.setDataAsTemplate(
+ExcelMapper.setData(
+    "Sheet1" -> (
         "template.xlsx",
         "data_template.xlsx",
         "output.xlsx",
@@ -51,6 +79,7 @@ ExcelMapper.setDataAsTemplate(
         "A2" -> null &
         "A3" -> "test3" &
         "A4" -> 1
+        )
 )
 ```
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  output Excel. 
