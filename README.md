@@ -71,14 +71,14 @@ val data:Option[Data] = ExcelMapper.to[Data].getDataAsAny(
 ```scala
 import com.axtstar.asta4e.converter.E._
 ExcelMapper.setData(
-    "Sheet1" -> (
         "template.xlsx",
         "data_template.xlsx",
         "output.xlsx",
-        "A1" -> "test1" &
-        "A2" -> null &
-        "A3" -> "test3" &
-        "A4" -> 1
+        "Sheet1" -> (
+            "A1" -> "test1" &
+            "A2" -> null &
+            "A3" -> "test3" &
+            "A4" -> 1
         )
 )
 ```
