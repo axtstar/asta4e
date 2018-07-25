@@ -27,8 +27,6 @@ object ExcelMapper extends ExcelBasic with Helper {
           k.name -> v
         case (k: Symbol, v) =>
           k.name -> v
-        case _ =>
-          throw new IllegalArgumentException
       }
     }
   }

@@ -80,7 +80,7 @@ class ExcelMapperTest extends Specification {
       val target = ExcelMapper.setData(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
         s"${currentDir}/src/test/resources/excel/output_template4.xlsx",
-        s"${currentDir}/target/output4_1.xlsx",
+        s"${currentDir}/target/output4_2.xlsx",
         "Sheet1" -> (
           "numeric" -> 1001 &
           "string" -> "1000" &
@@ -89,12 +89,21 @@ class ExcelMapperTest extends Specification {
           "bool" -> true &
           "time" -> timeFormat.parse("23:32:41") &
           "userDate" -> dateFormatFull.parse("2018/11/23 18:52:56")
-        )
+        ) &
+        "Sheet2" -> (
+          "numeric" -> 1002 &
+            "string" -> "1001" &
+            "date" -> dateFormat.parse("2018/7/7") &
+            "formula" -> "=B2" &
+            "bool" -> true &
+            "time" -> timeFormat.parse("23:32:41") &
+            "userDate" -> dateFormatFull.parse("2018/11/23 18:52:56")
+          ) :_*
       )
 
       val result = ExcelMapper.getData(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
-        s"${currentDir}/target/output4_1.xlsx",
+        s"${currentDir}/target/output4_2.xlsx",
         List()
       )
 
