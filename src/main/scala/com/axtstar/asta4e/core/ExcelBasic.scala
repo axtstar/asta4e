@@ -21,7 +21,7 @@ trait ExcelBasic {
     * @param xlsPath template excel path
     * @return tuple 4
     */
-  def getExcelLocation(xlsPath: String): List[(String, CellAddress, Cell, List[String])] = {
+  protected def getExcelLocation(xlsPath: String): List[(String, CellAddress, Cell, List[String])] = {
     val stream = new FileInputStream(xlsPath)
     getExcelLocation(stream)
   }
@@ -32,7 +32,7 @@ trait ExcelBasic {
     * @param stream template Excel file stream
     *
     */
-  def getExcelLocation(stream: FileInputStream): List[(String, CellAddress, Cell, List[String])] = {
+  protected def getExcelLocation(stream: FileInputStream): List[(String, CellAddress, Cell, List[String])] = {
 
     val workbook = WorkbookFactory.create(stream)
 

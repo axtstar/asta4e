@@ -17,13 +17,6 @@ class ExcelMapperTest extends Specification {
   val currentDir = new File(".").getAbsoluteFile().getParent()
 
   "ExcelMapper" should {
-    "getExcelLocation" in {
-
-      val target = ExcelMapper.getExcelLocation(s"${currentDir}/src/test/resources/excel/bind_template1.xlsx")
-      target.size must be_==(240)
-
-    }
-
     "getDataAsTemplate" in {
 
       val target = ExcelMapper.getDataAsTemplate(
