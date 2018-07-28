@@ -108,6 +108,14 @@ class ExcelMapperTest extends Specification {
       result(0)._2("time") must be_==(timeFormat.parse("23:32:41"))
       result(0)._2("userDate") must be_==(dateFormatFull.parse("2018/11/23 18:52:56"))
 
+      ExcelMapper.setData(
+        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
+        s"${currentDir}/target/output4_2.xlsx",
+        s"${currentDir}/target/output4_3.xlsx",
+        result :_*
+      )
+
+      "" must be_==("")
     }
 
     "getDataAsClass" in {

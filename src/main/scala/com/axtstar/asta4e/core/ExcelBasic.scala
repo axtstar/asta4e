@@ -230,10 +230,8 @@ trait ExcelBasic {
                                 target.setCellValue(tiny)
                               case tiny: Integer =>
                                 target.setCellValue(tiny.toDouble)
-                              case Double | Int =>
-                                target.setCellValue(bindMap._2.asInstanceOf[Double])
                               case _ =>
-                                target.setCellValue(bindMap._2.toString)
+                                target.setCellValue(bindMap._2.asInstanceOf[Double])
                             }
 
                           case CellType.BOOLEAN =>
