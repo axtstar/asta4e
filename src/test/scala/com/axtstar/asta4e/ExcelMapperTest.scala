@@ -115,7 +115,19 @@ class ExcelMapperTest extends Specification {
         result :_*
       )
 
-      "" must be_==("")
+      val result2 = ExcelMapper.getData(
+        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
+        s"${currentDir}/target/output4_3.xlsx",
+        List()
+      )
+
+      result2(0)._2("numeric") must be_==(1001)
+      result2(0)._2("string") must be_==("1000")
+      result2(0)._2("date") must be_==(dateFormat.parse("2018/7/7"))
+      result2(0)._2("formula") must be_==("=B2")
+      result2(0)._2("bool") must be_==(true)
+      result2(0)._2("time") must be_==(timeFormat.parse("23:32:41"))
+      result2(0)._2("userDate") must be_==(dateFormatFull.parse("2018/11/23 18:52:56"))
     }
 
     "getDataAsClass" in {
