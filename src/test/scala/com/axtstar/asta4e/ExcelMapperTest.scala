@@ -142,6 +142,27 @@ class ExcelMapperTest extends Specification {
       result.head._2.head.numeric.get must be_==(111.0D)
       result.head._2.head.string.get must be_==("111")
 
+      val result2 = ExcelMapper.by[Etc6].getDataAsAny(
+        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample4.xlsx",
+        List()
+      )
+
+      result2.size must be_==(1)
+      result2.head._2.head.bool must be_==(true)
+      result2.head._2.head.string must be_==("111")
+
+      val result3 = ExcelMapper.by[Etc8].getDataAsAny(
+        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample4.xlsx",
+        List()
+      )
+
+      result3.size must be_==(1)
+      result3.head._2 must be_==(None)
+
+
+
     }
 
     "setDataAsTemplate to getDataAsTemplate" in {
