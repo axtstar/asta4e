@@ -38,6 +38,31 @@ object ExcelMapper extends ExcelBasic with Helper {
     */
   class ExcelMapper[A] extends ExcelBasic {
 
+    import ops.record._
+
+    def setData4Case[L <: HList](
+                                   dataTemplateXls: String,
+                                   outTemplate: String,
+                                   outXlsPath: String,
+                                   a:IndexedSeq[(String,Option[A])]
+                                 )(implicit
+                                   gen: LabelledGeneric.Aux[A, L],
+                                   tmr: ToMap[L]
+                                 ) = {
+
+      val aToMap = a.map {
+        x =>
+          x._1 -> ToMapOps(x._2.get).toMap
+      }
+
+      setData(
+        dataTemplateXls,
+        outTemplate,
+        outXlsPath,
+        aToMap: _*
+      )
+    }
+
     def getDataAsAny[R <: HList](
                                   dataTemplateXls: String,
                                   inputXlsPath: String,
