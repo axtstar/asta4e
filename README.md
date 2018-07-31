@@ -55,7 +55,7 @@ case class Data(numeric:Double, string:String)
 Then, get the data to the class from Excel like the below code. 
 
 ```scala
-val data:Option[Data] = ExcelMapper.to[Data].getDataAsAny(
+val data:Option[Data] = ExcelMapper.by[Data].getDataAsAny(
         "template.xlsx",
         "data.xlsx",
         List("ignoresheets"))

@@ -23,7 +23,7 @@ class CaseClassMapperTest extends Specification {
   "ToMap" should {
     "toMap" in {
       val d = Data("axtstar","Tokyo, Japan")
-      val target = ExcelMapper.ToMapOps(d).toMap
+      val target = ExcelMapper.By(d).toMap
       target must be_==(Map( "name" -> "axtstar", "address" -> "Tokyo, Japan" ))
     }
   }
@@ -75,7 +75,7 @@ class CaseClassMapperTest extends Specification {
     }
 
     "Data29" in {
-      val result = ExcelMapper.to[Data29].getDataAsAny(
+      val result = ExcelMapper.by[Data29].getDataAsAny(
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx",
         List()
@@ -84,7 +84,7 @@ class CaseClassMapperTest extends Specification {
       result.head._2.get.A1 must be_==("A1")
       result.head._2.get.A2 must be_==("A2")
 
-      ExcelMapper.to[Data29].setData4cc(
+      ExcelMapper.by[Data29].setData4cc(
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/target/output3_1.xlsx",
@@ -170,7 +170,7 @@ class CaseClassMapperTest extends Specification {
     }
 
     "Etc7Option(alt)" in {
-      val result = ExcelMapper.to[Etc7Option].getDataAsOption(
+      val result = ExcelMapper.by[Etc7Option].getDataAsOption(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample4.xlsx",
         List("設定")
@@ -190,7 +190,7 @@ class CaseClassMapperTest extends Specification {
       result(0)._2.get.time must be_==(Some(dateFormatFull.parse("1899/12/31 17:25:47")))
       result(0)._2.get.userDate must be_==(Some(dateFormatFull.parse("2018/7/2 22:35:54")))
 
-      ExcelMapper.to[Etc7Option].setData4cc(
+      ExcelMapper.by[Etc7Option].setData4cc(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx",
         s"${currentDir}/target/output4_4.xlsx",
@@ -224,7 +224,7 @@ class CaseClassMapperTest extends Specification {
       result.get.time must be_==(None)
       result.get.userDate must be_==(None)
 
-      val result2 = ExcelMapper.ToMapOps(result.get).toMap
+      val result2 = ExcelMapper.By(result.get).toMap
 
       result2("numeric") must be_==(2)
       result2("numeric") must be_==(2)

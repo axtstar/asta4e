@@ -33,7 +33,7 @@ class ExcelMapperTest extends Specification {
 
     "getDataAsNumeric" in {
 
-      val target = ExcelMapper.to[Etc3Option].getDataAsOption(
+      val target = ExcelMapper.by[Etc3Option].getDataAsOption(
         s"${currentDir}/src/test/resources/excel/bind_template5.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample5.xlsx",
         List()
@@ -132,7 +132,7 @@ class ExcelMapperTest extends Specification {
 
     "getDataAsClass" in {
 
-      val result = ExcelMapper.to[Etc7Option].getDataAsOption(
+      val result = ExcelMapper.by[Etc7Option].getDataAsOption(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample4.xlsx",
         List()

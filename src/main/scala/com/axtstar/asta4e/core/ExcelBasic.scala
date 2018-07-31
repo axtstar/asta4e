@@ -85,19 +85,19 @@ trait ExcelBasic {
     * output Excel from Map
     *
     * @param dataTemplateXls   Excel template File path which has ${} binder
-    * @param outTemplate       Output template Excel File path
+    * @param outLayout       Output template Excel File path
     * @param outXlsPath        Output Excel path
     * @param locationDataArray DataBinder which consists Map of name of ${} and value
     */
   @deprecated("use setData instead","0.0.4")
   def setDataAsTemplate(
                          dataTemplateXls: String,
-                         outTemplate: String,
+                         outLayout: String,
                          outXlsPath: String,
                          locationDataArray: Map[String, Any]*
                        ): Unit = {
     val dataTemplateXlsStream = new FileInputStream(dataTemplateXls)
-    val outTemplateStream = new FileInputStream(outTemplate)
+    val outTemplateStream = new FileInputStream(outLayout)
 
     setDataAsTemplate(
       dataTemplateXlsStream,
@@ -112,21 +112,21 @@ trait ExcelBasic {
     * output Excel from Map
     *
     * @param dataTemplateXlsStream Excel template File stream which has ${} binder
-    * @param outTemplateStream     Output template Excel File stream
+    * @param outlayoutStream     Output template Excel File stream
     * @param outXlsPath            Output Excel path
     * @param locationDataArray     DataBinder which consists Map of name of ${} and value
     */
   @deprecated("use setData instead","0.0.4")
   def setDataAsTemplate(
                          dataTemplateXlsStream: FileInputStream,
-                         outTemplateStream: FileInputStream,
+                         outlayoutStream: FileInputStream,
                          outXlsPath: String,
                          locationDataArray: Map[String, Any]*
                        ): Unit = {
     var index = 0
     setData(
       dataTemplateXlsStream,
-      outTemplateStream,
+      outlayoutStream,
       outXlsPath,
       locationDataArray.map {
         x =>
@@ -140,18 +140,18 @@ trait ExcelBasic {
     * output Excel from Map
     *
     * @param dataTemplateXls Excel template File path which has ${} binder
-    * @param outTemplate     Output template Excel File path
+    * @param outLayout     Output template Excel File path
     * @param outXlsPath      Output Excel path
     * @param bindData        DataBinder which consists Map of name of ${} and value
     */
   def setData(
                dataTemplateXls: String,
-               outTemplate: String,
+               outLayout: String,
                outXlsPath: String,
                bindData: (String, Map[String, Any])*
              ): Unit = {
     val dataTemplateXlsStream = new FileInputStream(dataTemplateXls)
-    val outTemplateStream = new FileInputStream(outTemplate)
+    val outTemplateStream = new FileInputStream(outLayout)
 
     setData(
       dataTemplateXlsStream,
@@ -165,19 +165,19 @@ trait ExcelBasic {
     * output Excel from Map
     *
     * @param dataTemplateXlsStream Excel template File stream which has ${} binderes
-    * @param outTemplateStream     Output templae Excel File stream
+    * @param outLayoutStream     Output templae Excel File stream
     * @param outXlsPath            Output Excel path
     * @param bindData              DataBinder which consists Map of name of ${} and value
     */
   def setData(
                dataTemplateXlsStream: FileInputStream,
-               outTemplateStream: FileInputStream,
+               outLayoutStream: FileInputStream,
                outXlsPath: String,
                bindData: (String, Map[String, Any])*
              ): Unit = {
     val locationMap = getExcelLocation(dataTemplateXlsStream)
 
-    val workbook = WorkbookFactory.create(outTemplateStream)
+    val workbook = WorkbookFactory.create(outLayoutStream)
 
     val out = new FileOutputStream(new File(outXlsPath))
 
@@ -268,7 +268,7 @@ trait ExcelBasic {
     finally{
       out.close()
       workbook.close()
-      outTemplateStream.close()
+      outLayoutStream.close()
     }
   }
 

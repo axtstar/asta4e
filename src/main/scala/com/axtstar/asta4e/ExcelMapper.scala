@@ -11,7 +11,7 @@ object ExcelMapper extends ExcelBasic with Helper {
     * @param a
     * @tparam A
     */
-  implicit class ToMapOps[A](val a: A) extends AnyVal {
+  implicit class By[A](val a: A) extends AnyVal {
 
     import ops.record._
 
@@ -41,10 +41,10 @@ object ExcelMapper extends ExcelBasic with Helper {
     import ops.record._
 
     def setData4cc[L <: HList](
-                                   dataTemplateXls: String,
-                                   outTemplate: String,
-                                   outXlsPath: String,
-                                   a:IndexedSeq[(String,Option[A])]
+                                dataTemplateXls: String,
+                                outLayout: String,
+                                outXlsPath: String,
+                                a:IndexedSeq[(String,Option[A])]
                                  )(implicit
                                    gen: LabelledGeneric.Aux[A, L],
                                    tmr: ToMap[L]
@@ -52,12 +52,12 @@ object ExcelMapper extends ExcelBasic with Helper {
 
       val aToMap = a.map {
         x =>
-          x._1 -> ToMapOps(x._2.get).toMap
+          x._1 -> By(x._2.get).toMap
       }
 
       setData(
         dataTemplateXls,
-        outTemplate,
+        outLayout,
         outXlsPath,
         aToMap: _*
       )
@@ -119,6 +119,13 @@ object ExcelMapper extends ExcelBasic with Helper {
     //End ExcelMapper[A]
   }
 
+  def by[A]: ExcelMapper[A] = {
+    val target = new ExcelMapper[A]
+    target
+  }
+
+
+  @deprecated("use by instead","0.0.6")
   def to[A]: ExcelMapper[A] = {
     val target = new ExcelMapper[A]
     target
