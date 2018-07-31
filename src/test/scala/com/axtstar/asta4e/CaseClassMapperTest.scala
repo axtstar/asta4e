@@ -84,7 +84,7 @@ class CaseClassMapperTest extends Specification {
       result.head._2.get.A1 must be_==("A1")
       result.head._2.get.A2 must be_==("A2")
 
-      ExcelMapper.to[Data29].setData4Case(
+      ExcelMapper.to[Data29].setData4cc(
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/target/output3_1.xlsx",
@@ -190,7 +190,7 @@ class CaseClassMapperTest extends Specification {
       result(0)._2.get.time must be_==(Some(dateFormatFull.parse("1899/12/31 17:25:47")))
       result(0)._2.get.userDate must be_==(Some(dateFormatFull.parse("2018/7/2 22:35:54")))
 
-      ExcelMapper.to[Etc7Option].setData4Case(
+      ExcelMapper.to[Etc7Option].setData4cc(
         s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx",
         s"${currentDir}/target/output4_4.xlsx",

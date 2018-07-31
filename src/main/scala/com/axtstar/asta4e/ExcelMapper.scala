@@ -40,7 +40,7 @@ object ExcelMapper extends ExcelBasic with Helper {
 
     import ops.record._
 
-    def setData4Case[L <: HList](
+    def setData4cc[L <: HList](
                                    dataTemplateXls: String,
                                    outTemplate: String,
                                    outXlsPath: String,
