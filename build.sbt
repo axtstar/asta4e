@@ -43,3 +43,5 @@ publishTo := {
     Some("releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2")
 }
 
+publishConfiguration := publishConfiguration.value.withOverwrite(true)
+publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true)
