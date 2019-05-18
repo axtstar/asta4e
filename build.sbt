@@ -11,7 +11,7 @@ licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 publishMavenStyle := true
 
 name := "asta4e"
-version := "0.0.6"
+version := "0.0.7"
 
 scalaVersion := "2.11.12"
 crossScalaVersions := Seq("2.11.12", "2.12.6")
@@ -43,3 +43,5 @@ publishTo := {
     Some("releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2")
 }
 
+publishConfiguration := publishConfiguration.value.withOverwrite(true)
+publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true)

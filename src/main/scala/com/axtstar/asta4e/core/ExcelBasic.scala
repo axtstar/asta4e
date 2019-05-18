@@ -466,5 +466,162 @@ trait ExcelBasic {
     }
   }
 
+  def getDataDown(
+               dataTemplateXls: String,
+               inputXlsPath: String,
+               ignoreSheet: List[String]
+             ): IndexedSeq[(String, IndexedSeq[Map[String, Any]])] = {
+
+    val dataTemplateXlsStream = new FileInputStream(dataTemplateXls)
+    val iStream = new FileInputStream(inputXlsPath)
+
+    getDataDown(
+      dataTemplateXlsStream,
+      iStream,
+      ignoreSheet
+    )
+
+  }
+
+
+  /**
+    * get databind list Map from Excel
+    *
+    * @param dataTemplateXlsStream template Excel file stream
+    * @param iStream               input Excel
+    * @param ignoreSheet           ignore Sheet names
+    */
+  def getDataDown(
+               dataTemplateXlsStream: FileInputStream,
+               iStream: FileInputStream,
+               ignoreSheet: List[String]
+             ): IndexedSeq[(String, IndexedSeq[Map[String, Any]])] = {
+    val locations = getExcelLocation(dataTemplateXlsStream)
+
+    val workbook = WorkbookFactory.create(iStream)
+
+    try {
+
+      val result = (for (index <- 0 until workbook.getNumberOfSheets) yield {
+        val sheet = workbook.getSheetAt(index)
+
+        if (ignoreSheet.contains(sheet.getSheetName)) {
+          null
+        } else {
+
+          var minRow = 0
+          var maxRow = sheet.getLastRowNum()
+          sheet.getSheetName -> (for (i <- minRow to maxRow ) yield {
+            var results = scala.collection.immutable.Map[String, Any]()
+
+            locations.foreach {
+              x =>
+                //target cell
+                val target = {
+                  val ref = new CellReference(x._2.toString)
+                  val row = sheet.getRow(ref.getRow + i)
+
+                  if (ref == null || row == null) {
+                    null
+                  }
+                  else {
+                    row.getCell(ref.getCol)
+                  }
+                }
+
+
+                target match {
+                  case null =>
+                    x._4.foreach {
+                      xx =>
+                        results += (getBindName(xx) -> null)
+                    }
+                  case xx: Cell =>
+                    xx.getCellTypeEnum match {
+                      case CellType.NUMERIC =>
+                        val format = ExcelNumberFormat.from(xx.getCellStyle)
+                        if (DateUtil.isADateFormat(format)) {
+                          x._4.foreach {
+                            xxx =>
+                              results += (getBindName(xxx) -> xx.getDateCellValue)
+                          }
+                        } else {
+                          x._4.foreach {
+                            xxx =>
+                              results += (getBindName(xxx) -> xx.getNumericCellValue)
+                          }
+                        }
+
+                      case CellType.BOOLEAN =>
+                        x._4.foreach {
+                          xxx =>
+                            results += (getBindName(xxx) -> xx.getBooleanCellValue)
+                        }
+
+                      case CellType.BLANK =>
+                        x._4.foreach {
+                          xxx =>
+                            results += (getBindName(xxx) -> null)
+                        }
+
+                      case CellType._NONE =>
+                        x._4.foreach {
+                          xxx =>
+                            results += (getBindName(xxx) -> null)
+                        }
+
+                      case CellType.STRING | CellType.FORMULA =>
+                        //construct regular expression from a template cell
+                        //consider multiple binder like `${id1}-${id2}`
+                        val regEx = ("(?s)" + x._4.foldLeft(if (x._3 == null) {
+                          ""
+                        } else {
+                          x._3.toString
+                        }) {
+                          (acc, xx) =>
+                            val xxx = xx.replace("$", "\\$")
+                              .replace("{", "\\{")
+                              .replace("}", "\\}")
+                            acc.replaceFirst(xxx, "(.+)")
+                        }).r
+
+                        val all = regEx.findFirstMatchIn(xx.getStringCellValue)
+
+                        if (all.isDefined) {
+                          for (i <- 0 until all.get.groupCount) {
+                            results += getBindName(x._4(i)) -> all.get.group(i + 1)
+                          }
+                        }
+                        else {
+                          x._4.foreach {
+                            xx =>
+                              results += getBindName(xx) -> null
+                          }
+                        }
+
+                      case _ =>
+                        throw new IllegalArgumentException
+
+                    }
+                }
+            }
+            results
+
+          })
+        }
+      }).filter(_ != null)
+
+      result
+
+    } catch {
+      case ex:Throwable =>
+        throw ex
+    }
+    finally{
+      workbook.close()
+      iStream.close()
+    }
+  }
+
 
 }

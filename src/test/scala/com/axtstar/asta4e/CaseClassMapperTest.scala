@@ -231,6 +231,44 @@ class CaseClassMapperTest extends Specification {
 
     }
 
+    "GetDataDown" in {
+      val target = ExcelMapper.getDataDown(
+        s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample6.xlsx",
+        List("設定")
+      )
+
+      val result = ExcelHelper.to[Etc7Option].fromAsOption(target.head._2.head)
+
+      val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
+      val timeFormat = new SimpleDateFormat("HH:mm:ss")
+
+      val dateFormatFull = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
+
+      result.get.numeric must be_==(Some(1.0))
+      result.get.string must be_==(Some("Test"))
+
+      result.get.date must be_==(Some(dateFormat.parse("2020/01/02")))
+      result.get.formula must be_==(Some("Str"))
+      result.get.bool must be_==(Some(true))
+      result.get.time must be_==(Some(dateFormat.parse("2020/01/02")))
+      result.get.userDate must be_==(Some(dateFormat.parse("2020/01/02")))
+
+      val result2 = ExcelHelper.to[Etc7Option].fromAsOption(target.head._2.tail.head)
+
+      result2.get.numeric must be_==(Some(2.0))
+      result2.get.string must be_==(Some("漢字"))
+
+      result2.get.date must be_==(Some(dateFormat.parse("2020/01/02")))
+      result2.get.formula must be_==(Some("Rts"))
+      result2.get.bool must be_==(Some(false))
+      result2.get.time must be_==(Some(dateFormat.parse("2020/01/02")))
+      result2.get.userDate must be_==(Some(dateFormat.parse("2020/01/02")))
+
+
+    }
+
+
 
   }
 }
