@@ -81,60 +81,6 @@ trait ExcelBasic {
     }
   }
 
-  /**
-    * output Excel from Map
-    *
-    * @param dataTemplateXls   Excel template File path which has ${} binder
-    * @param outLayout       Output template Excel File path
-    * @param outXlsPath        Output Excel path
-    * @param locationDataArray DataBinder which consists Map of name of ${} and value
-    */
-  @deprecated("use setData instead","0.0.4")
-  def setDataAsTemplate(
-                         dataTemplateXls: String,
-                         outLayout: String,
-                         outXlsPath: String,
-                         locationDataArray: Map[String, Any]*
-                       ): Unit = {
-    val dataTemplateXlsStream = new FileInputStream(dataTemplateXls)
-    val outTemplateStream = new FileInputStream(outLayout)
-
-    setDataAsTemplate(
-      dataTemplateXlsStream,
-      outTemplateStream,
-      outXlsPath,
-      locationDataArray: _*
-    )
-  }
-
-
-  /**
-    * output Excel from Map
-    *
-    * @param dataTemplateXlsStream Excel template File stream which has ${} binder
-    * @param outlayoutStream     Output template Excel File stream
-    * @param outXlsPath            Output Excel path
-    * @param locationDataArray     DataBinder which consists Map of name of ${} and value
-    */
-  @deprecated("use setData instead","0.0.4")
-  def setDataAsTemplate(
-                         dataTemplateXlsStream: FileInputStream,
-                         outlayoutStream: FileInputStream,
-                         outXlsPath: String,
-                         locationDataArray: Map[String, Any]*
-                       ): Unit = {
-    var index = 0
-    setData(
-      dataTemplateXlsStream,
-      outlayoutStream,
-      outXlsPath,
-      locationDataArray.map {
-        x =>
-          index = index + 1
-          s"Sheet$index" -> x
-      }: _*
-    )
-  }
 
   /**
     * output Excel from Map
@@ -272,45 +218,87 @@ trait ExcelBasic {
     }
   }
 
-  /**
-    * get data bind Map from Excel
-    *
-    * @param dataTemplateXls template Excel file path
-    * @param inputXlsPath    input Excel file path
-    * @param ignoreSheet     ignore sheet names
-    * @return Map
-    */
-  def getDataAsTemplate(
-                         dataTemplateXls: String,
-                         inputXlsPath: String,
-                         ignoreSheet: List[String] = List()
-                       ): List[Map[String, Any]] = {
+  def getOneCell(target:Cell, x:(String, CellAddress, Cell, List[String])):scala.collection.immutable.Map[String, Any]={
 
-    val dataTemplateXlsStream = new FileInputStream(dataTemplateXls)
-    val iStream = new FileInputStream(inputXlsPath)
+    x match { case (name, cellAddress, cell, expression ) =>
 
-    getDataAsTemplate(
-      dataTemplateXlsStream,
-      iStream,
-      ignoreSheet
-    )
-  }
+      var results = scala.collection.immutable.Map[String, Any]()
+      target match {
+        case null =>
+          expression.foreach {
+            xx =>
+              results += (getBindName(xx) -> null)
+          }
+        case xx: Cell =>
+          xx.getCellTypeEnum match {
+            case CellType.NUMERIC =>
+              val format = ExcelNumberFormat.from(xx.getCellStyle)
+              if (DateUtil.isADateFormat(format)) {
+                expression.foreach {
+                  xxx =>
+                    results += (getBindName(xxx) -> xx.getDateCellValue)
+                }
+              } else {
+                expression.foreach {
+                  xxx =>
+                    results += (getBindName(xxx) -> xx.getNumericCellValue)
+                }
+              }
 
-  def getDataAsTemplate(
-                         dataTemplateXls: FileInputStream,
-                         iStream: FileInputStream,
-                         ignoreSheet: List[String]
+            case CellType.BOOLEAN =>
+              expression.foreach {
+                xxx =>
+                  results += (getBindName(xxx) -> xx.getBooleanCellValue)
+              }
 
-                       ): List[Map[String, Any]] = {
-    val target = getData(
-      dataTemplateXls,
-      iStream,
-      ignoreSheet
-    )
-    target.map {
-      x =>
-        x._2
-    }.toList
+            case CellType.BLANK =>
+              expression.foreach {
+                xxx =>
+                  results += (getBindName(xxx) -> null)
+              }
+
+            case CellType._NONE =>
+              expression.foreach {
+                xxx =>
+                  results += (getBindName(xxx) -> null)
+              }
+
+            case CellType.STRING | CellType.FORMULA =>
+              //construct regular expression from a template cell
+              //consider multiple binder like `${id1}-${id2}`
+              val regEx = ("(?s)" + x._4.foldLeft(if (x._3 == null) {
+                ""
+              } else {
+                cell.toString
+              }) {
+                (acc, xx) =>
+                  val xxx = xx.replace("$", "\\$")
+                    .replace("{", "\\{")
+                    .replace("}", "\\}")
+                  acc.replaceFirst(xxx, "(.+)")
+              }).r
+
+              val all = regEx.findFirstMatchIn(xx.getStringCellValue)
+
+              if (all.isDefined) {
+                for (i <- 0 until all.get.groupCount) {
+                  results += getBindName(x._4(i)) -> all.get.group(i + 1)
+                }
+              }
+              else {
+                expression.foreach {
+                  xx =>
+                    results += getBindName(xx) -> null
+                }
+              }
+
+            case _ =>
+              throw new IllegalArgumentException
+
+          }
+      }
+      results
+    }
   }
 
   def getData(
@@ -374,81 +362,7 @@ trait ExcelBasic {
                 }
               }
 
-
-              target match {
-                case null =>
-                  x._4.foreach {
-                    xx =>
-                      results += (getBindName(xx) -> null)
-                  }
-                case xx: Cell =>
-                  xx.getCellTypeEnum match {
-                    case CellType.NUMERIC =>
-                      val format = ExcelNumberFormat.from(xx.getCellStyle)
-                      if (DateUtil.isADateFormat(format)) {
-                        x._4.foreach {
-                          xxx =>
-                            results += (getBindName(xxx) -> xx.getDateCellValue)
-                        }
-                      } else {
-                        x._4.foreach {
-                          xxx =>
-                            results += (getBindName(xxx) -> xx.getNumericCellValue)
-                        }
-                      }
-
-                    case CellType.BOOLEAN =>
-                      x._4.foreach {
-                        xxx =>
-                          results += (getBindName(xxx) -> xx.getBooleanCellValue)
-                      }
-
-                    case CellType.BLANK =>
-                      x._4.foreach {
-                        xxx =>
-                          results += (getBindName(xxx) -> null)
-                      }
-
-                    case CellType._NONE =>
-                      x._4.foreach {
-                        xxx =>
-                          results += (getBindName(xxx) -> null)
-                      }
-
-                    case CellType.STRING | CellType.FORMULA =>
-                      //construct regular expression from a template cell
-                      //consider multiple binder like `${id1}-${id2}`
-                      val regEx = ("(?s)" + x._4.foldLeft(if (x._3 == null) {
-                        ""
-                      } else {
-                        x._3.toString
-                      }) {
-                        (acc, xx) =>
-                          val xxx = xx.replace("$", "\\$")
-                            .replace("{", "\\{")
-                            .replace("}", "\\}")
-                          acc.replaceFirst(xxx, "(.+)")
-                      }).r
-
-                      val all = regEx.findFirstMatchIn(xx.getStringCellValue)
-
-                      if (all.isDefined) {
-                        for (i <- 0 until all.get.groupCount) {
-                          results += getBindName(x._4(i)) -> all.get.group(i + 1)
-                        }
-                      }
-                      else {
-                        x._4.foreach {
-                          xx =>
-                            results += getBindName(xx) -> null
-                        }
-                      }
-
-                    case _ =>
-                      throw new IllegalArgumentException
-
-                  }
-              }
+              results ++= getOneCell(target, x)
           }
           sheet.getSheetName -> results
         }
@@ -508,9 +422,9 @@ trait ExcelBasic {
         if (ignoreSheet.contains(sheet.getSheetName)) {
           null
         } else {
-
-          var minRow = 0
-          var maxRow = sheet.getLastRowNum()
+          val maxRowDef = locations.maxBy(_._3.getRowIndex)._3.getRowIndex
+          val minRow = 0
+          val maxRow = sheet.getLastRowNum() - maxRowDef
           sheet.getSheetName -> (for (i <- minRow to maxRow ) yield {
             var results = scala.collection.immutable.Map[String, Any]()
 
@@ -529,81 +443,7 @@ trait ExcelBasic {
                   }
                 }
 
-
-                target match {
-                  case null =>
-                    x._4.foreach {
-                      xx =>
-                        results += (getBindName(xx) -> null)
-                    }
-                  case xx: Cell =>
-                    xx.getCellTypeEnum match {
-                      case CellType.NUMERIC =>
-                        val format = ExcelNumberFormat.from(xx.getCellStyle)
-                        if (DateUtil.isADateFormat(format)) {
-                          x._4.foreach {
-                            xxx =>
-                              results += (getBindName(xxx) -> xx.getDateCellValue)
-                          }
-                        } else {
-                          x._4.foreach {
-                            xxx =>
-                              results += (getBindName(xxx) -> xx.getNumericCellValue)
-                          }
-                        }
-
-                      case CellType.BOOLEAN =>
-                        x._4.foreach {
-                          xxx =>
-                            results += (getBindName(xxx) -> xx.getBooleanCellValue)
-                        }
-
-                      case CellType.BLANK =>
-                        x._4.foreach {
-                          xxx =>
-                            results += (getBindName(xxx) -> null)
-                        }
-
-                      case CellType._NONE =>
-                        x._4.foreach {
-                          xxx =>
-                            results += (getBindName(xxx) -> null)
-                        }
-
-                      case CellType.STRING | CellType.FORMULA =>
-                        //construct regular expression from a template cell
-                        //consider multiple binder like `${id1}-${id2}`
-                        val regEx = ("(?s)" + x._4.foldLeft(if (x._3 == null) {
-                          ""
-                        } else {
-                          x._3.toString
-                        }) {
-                          (acc, xx) =>
-                            val xxx = xx.replace("$", "\\$")
-                              .replace("{", "\\{")
-                              .replace("}", "\\}")
-                            acc.replaceFirst(xxx, "(.+)")
-                        }).r
-
-                        val all = regEx.findFirstMatchIn(xx.getStringCellValue)
-
-                        if (all.isDefined) {
-                          for (i <- 0 until all.get.groupCount) {
-                            results += getBindName(x._4(i)) -> all.get.group(i + 1)
-                          }
-                        }
-                        else {
-                          x._4.foreach {
-                            xx =>
-                              results += getBindName(xx) -> null
-                          }
-                        }
-
-                      case _ =>
-                        throw new IllegalArgumentException
-
-                    }
-                }
+                results ++= getOneCell(target, x)
             }
             results
 
