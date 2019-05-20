@@ -150,12 +150,4 @@ object ExcelMapper extends ExcelBasic with Helper {
     val target = new ExcelMapper[A]
     target
   }
-
-
-  @deprecated("use by instead","0.0.6")
-  def to[A]: ExcelMapper[A] = {
-    val target = new ExcelMapper[A]
-    target
-  }
-
 }

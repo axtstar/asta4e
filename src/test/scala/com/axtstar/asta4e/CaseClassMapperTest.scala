@@ -277,17 +277,23 @@ class CaseClassMapperTest extends Specification {
 
       val result3 = ExcelMapper.By(result.get).toMap
 
+      //case class
       ExcelMapper.by[List[Etc7Option]].setDataDown(
         s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
-        s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
+        s"${currentDir}/src/test/resources/excel/output_template6.xlsx",
         s"${currentDir}/target/output6_1.xlsx",
         "Sheet1" -> IndexedSeq(ExcelMapper.By(result.get).toMap, ExcelMapper.By(result2.get).toMap)
       )
 
+      //Map
+      ExcelMapper.setDataDown(
+        s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
+        s"${currentDir}/src/test/resources/excel/output_template6.xlsx",
+        s"${currentDir}/target/output6_2.xlsx",
+        target:_*
+      )
+
       "" must_==("")
-
-
-
     }
 
 
