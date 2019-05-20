@@ -275,6 +275,18 @@ class CaseClassMapperTest extends Specification {
       result2.get.time must be_==(Some(dateFormat.parse("2020/01/02")))
       result2.get.userDate must be_==(Some(dateFormat.parse("2020/01/02")))
 
+      val result3 = ExcelMapper.By(result.get).toMap
+
+      ExcelMapper.by[List[Etc7Option]].setDataDown(
+        s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
+        s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
+        s"${currentDir}/target/output6_1.xlsx",
+        "Sheet1" -> IndexedSeq(ExcelMapper.By(result.get).toMap, ExcelMapper.By(result2.get).toMap)
+      )
+
+      "" must_==("")
+
+
 
     }
 

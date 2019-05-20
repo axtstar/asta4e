@@ -63,6 +63,33 @@ object ExcelMapper extends ExcelBasic with Helper {
       )
     }
 
+    /*
+    //@experimental
+    def setData4ccl[L <: HList](
+                                dataTemplateXls: String,
+                                outLayout: String,
+                                outXlsPath: String,
+                                a:IndexedSeq[(String,IndexedSeq[Option[A]])]
+                              )(implicit
+                                gen: LabelledGeneric.Aux[A, IndexedSeq[L]],
+                                tmr: ToMap[IndexedSeq[L]]
+                              ) = {
+
+      val aToMap = a.map {
+        x =>
+          x._1 ->  x._2.map { xx => By(xx).toMap }
+      }
+
+      setDataDown(
+        dataTemplateXls,
+        outLayout,
+        outXlsPath,
+        aToMap: _*
+      )
+    }
+    */
+
+
     def getDataAsAny[R <: HList](
                                   dataTemplateXls: String,
                                   inputXlsPath: String,
