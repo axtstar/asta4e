@@ -3,7 +3,7 @@ package com.axtstar.asta4e.core
 import shapeless._
 import com.axtstar.asta4e.converter.CC._
 
-object ExcelHelper extends Helper {
+object ExcelHelper {
 
   class ExcelHelper[A] {
     def fromAsOption[R <: HList](m: Map[String, Any])(implicit

@@ -1,11 +1,11 @@
 package com.axtstar.asta4e
 
-import com.axtstar.asta4e.core.{ExcelBasic, Helper}
+import com.axtstar.asta4e.core.ExcelBasic
 import shapeless._
 import com.axtstar.asta4e.converter.CC._
 
 
-object ExcelMapper extends ExcelBasic with Helper {
+object ExcelMapper extends ExcelBasic {
 
   /**
     * case class to Map
