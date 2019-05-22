@@ -21,8 +21,8 @@ object ExcelHelper {
     def from[R <: HList](m: Map[String, Any])(implicit
                                               gen: LabelledGeneric.Aux[A, R],
                                               fromMap: FromMap[R],
-                                              tt:Typeable[A]
-    ): Option[A] = {
+                                              typeable: Typeable[A]
+    ): A = {
 
       val target = fromMap( m.map{ mm =>
         mm._1 -> mm._2
@@ -30,7 +30,11 @@ object ExcelHelper {
         x =>
           gen.from(x)
       }
-      target
+      if(typeable.describe.startsWith("Option")){
+        target.get
+      } else {
+        target.get
+      }
     }
 
   }

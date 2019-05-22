@@ -30,10 +30,10 @@ class CaseClassMapperTest extends Specification {
 
   "ExcelMapper" should {
     "from[Map]" in {
-      val result:Option[Data] = ExcelHelper.to[Data].from(map)
+      val result = ExcelHelper.to[Data].from(map)
 
-      result.get.name must be_==("axtstar")
-      result.get.address must be_==("Tokyo, Japan")
+      result.name must be_==("axtstar")
+      result.address must be_==("Tokyo, Japan")
 
     }
 
@@ -47,8 +47,8 @@ class CaseClassMapperTest extends Specification {
 //      val result = ExcelMapper.apply[Data].from(target(0))
       val result = ExcelHelper.to[Data].from(target.head._2)
 
-      result.get.name must be_==("axtstar")
-      result.get.address must be_==("Tokyo, Japan")
+      result.name must be_==("axtstar")
+      result.address must be_==("Tokyo, Japan")
 
     }
 
@@ -61,8 +61,8 @@ class CaseClassMapperTest extends Specification {
 
       val result = ExcelHelper.to[Data23].from(target.head._2)
 
-      result.get.A1 must be_==("A1")
-      result.get.A2 must be_==("A2")
+      result.A1 must be_==("A1")
+      result.A2 must be_==("A2")
 
     }
 
@@ -75,8 +75,8 @@ class CaseClassMapperTest extends Specification {
 
       val result = ExcelHelper.to[Data28].from(target.head._2)
 
-      result.get.A1 must be_==("A1")
-      result.get.A2 must be_==("A2")
+      result.A1 must be_==("A1")
+      result.A2 must be_==("A2")
 
     }
 
@@ -110,8 +110,8 @@ class CaseClassMapperTest extends Specification {
 
       val result = ExcelHelper.to[Data64].from(target.head._2)
 
-      result.get.A1 must be_==("A1")
-      result.get.A2 must be_==("A2")
+      result.A1 must be_==("A1")
+      result.A2 must be_==("A2")
 
     }
 
@@ -124,33 +124,8 @@ class CaseClassMapperTest extends Specification {
 
       val result = ExcelHelper.to[Last10].from(target.head._2)
 
-      result.get.B16 must be_==("B16")
-      result.get.D16 must be_==("D16")
-
-    }
-
-    "Etc7" in {
-      val target = ExcelMapper.getData(
-        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_sample4.xlsx",
-        List("設定")
-      )
-
-      val result = ExcelHelper.to[Etc7].from(target.head._2)
-
-      val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
-      val timeFormat = new SimpleDateFormat("HH:mm:ss")
-
-      val dateFormatFull = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
-
-      result.get.numeric must be_==(111)
-      result.get.string must be_==("111")
-
-      result.get.date must be_==(dateFormat.parse("1970/01/01"))
-      result.get.formula must be_==("111")
-      result.get.bool must be_==(true)
-      result.get.time must be_==(dateFormatFull.parse("1899/12/31 17:25:47"))
-      result.get.userDate must be_==(dateFormatFull.parse("2018/7/2 22:35:54"))
+      result.B16 must be_==("B16")
+      result.D16 must be_==("D16")
 
     }
 
@@ -257,16 +232,16 @@ class CaseClassMapperTest extends Specification {
 
       val dateFormatFull = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
 
-      result.get.numeric must be_==(2.0D)
-      result.get.string must be_==("")
+      result.numeric must be_==(2.0D)
+      result.string must be_==("")
 
-      result.get.date must be_==(new java.util.Date(Long.MinValue))
-      result.get.formula must be_==("")
-      result.get.bool must be_==(false)
-      result.get.time must be_==(new java.util.Date(Long.MinValue))
-      result.get.userDate must be_==(new java.util.Date(Long.MinValue))
+      result.date must be_==(new java.util.Date(Long.MinValue))
+      result.formula must be_==("")
+      result.bool must be_==(false)
+      result.time must be_==(new java.util.Date(Long.MinValue))
+      result.userDate must be_==(new java.util.Date(Long.MinValue))
 
-      val result2 = ExcelMapper.By(result.get).toMap
+      val result2 = ExcelMapper.By(result).toMap
 
       result2("numeric") must be_==(2)
       result2("numeric") must be_==(2)
