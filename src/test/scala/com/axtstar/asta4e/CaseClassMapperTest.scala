@@ -241,6 +241,39 @@ class CaseClassMapperTest extends Specification {
 
     }
 
+    "Etc7 null" in {
+      val target = ExcelMapper.getData(
+        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample4-1.xlsx",
+        List("設定")
+      )
+
+      // not Option case class return naked primitive value
+      // if not determine from excel data, asta4e return default value or something
+      val result = ExcelHelper.to[Etc7].from(target.head._2)
+
+      val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
+      val timeFormat = new SimpleDateFormat("HH:mm:ss")
+
+      val dateFormatFull = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
+
+      result.get.numeric must be_==(2.0D)
+      result.get.string must be_==("")
+
+      result.get.date must be_==(None)
+      result.get.formula must be_==("")
+      result.get.bool must be_==(false)
+      result.get.time must be_==(None)
+      result.get.userDate must be_==(None)
+
+      val result2 = ExcelMapper.By(result.get).toMap
+
+      result2("numeric") must be_==(2)
+      result2("numeric") must be_==(2)
+
+    }
+
+
     "GetDataDown" in {
       val target = ExcelMapper.getDataDown(
         s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",

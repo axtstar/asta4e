@@ -5,9 +5,9 @@ import java.util.Date
 case class Etc7(
               numeric: Double,
               string:String,
-              date:Date,
+              date:Date = new Date(),
               formula:String,
-              bool:Boolean,
+              bool:Boolean = true,
               time:Date,
               userDate:Date
 ){

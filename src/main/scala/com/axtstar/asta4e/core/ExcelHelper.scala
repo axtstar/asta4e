@@ -2,6 +2,8 @@ package com.axtstar.asta4e.core
 
 import shapeless._
 
+import scala.reflect.ClassTag
+
 object ExcelHelper extends Helper {
 
   class ExcelHelper[A] {
@@ -19,9 +21,13 @@ object ExcelHelper extends Helper {
 
     def from[R <: HList](m: Map[String, Any])(implicit
                                               gen: LabelledGeneric.Aux[A, R],
-                                              fromMap: FromMap[R]
+                                              fromMap: FromMap[R],
+                                              tt:Typeable[A]
     ): Option[A] = {
-      val target = fromMap(m).map {
+
+      val target = fromMap( m.map{ mm =>
+        mm._1 -> mm._2
+      }).map {
         x =>
           gen.from(x)
       }
