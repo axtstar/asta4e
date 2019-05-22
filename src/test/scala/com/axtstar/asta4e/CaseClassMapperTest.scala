@@ -260,11 +260,11 @@ class CaseClassMapperTest extends Specification {
       result.get.numeric must be_==(2.0D)
       result.get.string must be_==("")
 
-      result.get.date must be_==(None)
+      result.get.date must be_==(new java.util.Date(Long.MinValue))
       result.get.formula must be_==("")
       result.get.bool must be_==(false)
-      result.get.time must be_==(None)
-      result.get.userDate must be_==(None)
+      result.get.time must be_==(new java.util.Date(Long.MinValue))
+      result.get.userDate must be_==(new java.util.Date(Long.MinValue))
 
       val result2 = ExcelMapper.By(result.get).toMap
 

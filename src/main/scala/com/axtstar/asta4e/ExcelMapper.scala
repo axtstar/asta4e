@@ -2,6 +2,8 @@ package com.axtstar.asta4e
 
 import com.axtstar.asta4e.core.{ExcelBasic, Helper}
 import shapeless._
+import com.axtstar.asta4e.converter.CC._
+
 
 object ExcelMapper extends ExcelBasic with Helper {
 

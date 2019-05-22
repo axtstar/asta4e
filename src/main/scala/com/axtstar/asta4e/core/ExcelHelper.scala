@@ -1,8 +1,7 @@
 package com.axtstar.asta4e.core
 
 import shapeless._
-
-import scala.reflect.ClassTag
+import com.axtstar.asta4e.converter.CC._
 
 object ExcelHelper extends Helper {
 
