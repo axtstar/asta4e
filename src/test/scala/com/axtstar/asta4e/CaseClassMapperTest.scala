@@ -136,21 +136,21 @@ class CaseClassMapperTest extends Specification {
         List("設定")
       )
 
-      val result = ExcelHelper.to[Etc7Option].fromAsOption(target.head._2)
+      val result = ExcelHelper.to[Etc7Option].from(target.head._2)
 
       val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
       val timeFormat = new SimpleDateFormat("HH:mm:ss")
 
       val dateFormatFull = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
 
-      result.get.numeric must be_==(Some(111))
-      result.get.string must be_==(Some("111"))
+      result.numeric must be_==(Some(111))
+      result.string must be_==(Some("111"))
 
-      result.get.date must be_==(Some(dateFormat.parse("1970/01/01")))
-      result.get.formula must be_==(Some("111"))
-      result.get.bool must be_==(Some(true))
-      result.get.time must be_==(Some(dateFormatFull.parse("1899/12/31 17:25:47")))
-      result.get.userDate must be_==(Some(dateFormatFull.parse("2018/7/2 22:35:54")))
+      result.date must be_==(Some(dateFormat.parse("1970/01/01")))
+      result.formula must be_==(Some("111"))
+      result.bool must be_==(Some(true))
+      result.time must be_==(Some(dateFormatFull.parse("1899/12/31 17:25:47")))
+      result.userDate must be_==(Some(dateFormatFull.parse("2018/7/2 22:35:54")))
 
     }
 

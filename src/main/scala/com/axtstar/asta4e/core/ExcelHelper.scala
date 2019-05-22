@@ -8,13 +8,11 @@ object ExcelHelper {
   class ExcelHelper[A] {
     def fromAsOption[R <: HList](m: Map[String, Any])(implicit
                                                       gen: LabelledGeneric.Aux[A, R],
-                                                      fromMap: FromMap[R]
+                                                      fromMap: FromMap[R],
+                                                      typeable: Typeable[A]
     ): Option[A] = {
-      val target = fromMap(m.map { mm => mm._1 -> Option(mm._2) }).map {
-        x =>
-          gen.from(x)
-      }
-      target
+      val target = from(m)
+      Option(target)
     }
 
 
@@ -33,7 +31,12 @@ object ExcelHelper {
       if(typeable.describe.startsWith("Option")){
         target.get
       } else {
-        target.get
+        target match {
+          case Some(tt) =>
+            tt
+          case _ =>
+            None.asInstanceOf[A]
+        }
       }
     }
 

@@ -43,7 +43,7 @@ class Etc7Test extends Specification {
 
 
     val result2 = ExcelHelper.to[Etc7Comp].from(target.head._2)
-    result2.bool must_==(0)
+    result2.bool must_==(true)
 
 
   }

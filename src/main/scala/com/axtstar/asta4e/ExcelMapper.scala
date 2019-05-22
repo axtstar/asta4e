@@ -65,33 +65,6 @@ object ExcelMapper extends ExcelBasic {
       )
     }
 
-    /*
-    //@experimental
-    def setData4ccl[L <: HList](
-                                dataTemplateXls: String,
-                                outLayout: String,
-                                outXlsPath: String,
-                                a:IndexedSeq[(String,IndexedSeq[Option[A]])]
-                              )(implicit
-                                gen: LabelledGeneric.Aux[A, IndexedSeq[L]],
-                                tmr: ToMap[IndexedSeq[L]]
-                              ) = {
-
-      val aToMap = a.map {
-        x =>
-          x._1 ->  x._2.map { xx => By(xx).toMap }
-      }
-
-      setDataDown(
-        dataTemplateXls,
-        outLayout,
-        outXlsPath,
-        aToMap: _*
-      )
-    }
-    */
-
-
     def getDataAsAny[R <: HList](
                                   dataTemplateXls: String,
                                   inputXlsPath: String,
@@ -122,26 +95,11 @@ object ExcelMapper extends ExcelBasic {
                                      ignoreSheet: List[String]
                                    )(implicit gen: LabelledGeneric.Aux[A, R]
                                      , fromMap: FromMap[R]) = {
-      val target = getData(
-        dataTemplateXls,
-        inputXlsPath,
-        ignoreSheet
-      )
 
-      target.map {
-        m =>
-
-          println(fromMap.getClass.getSimpleName)
-          val frm = fromMap(m._2.map {
-            mm =>
-              mm._1 -> Option(mm._2)
-          })
-          val target = frm.map {
-            x =>
-              gen.from(x)
-          }
-
-          m._1 -> target
+      val result = getDataAsAny(dataTemplateXls,inputXlsPath,ignoreSheet)
+      result.map {
+        x =>
+          x._1 -> x._2
       }
     }
 
