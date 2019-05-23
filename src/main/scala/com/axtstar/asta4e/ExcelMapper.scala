@@ -42,7 +42,26 @@ object ExcelMapper extends ExcelBasic {
 
     import ops.record._
 
+    @deprecated("this method will be removed, use setData, instead", "0.8.0")
     def setData4cc[L <: HList](
+                             dataTemplateXls: String,
+                             outLayout: String,
+                             outXlsPath: String,
+                             a:IndexedSeq[(String,Option[A])]
+                           )(implicit
+                             gen: LabelledGeneric.Aux[A, L],
+                             tmr: ToMap[L]
+                           ) = {
+      setData(
+        dataTemplateXls,
+        outLayout,
+        outXlsPath,
+        a
+      )
+    }
+
+
+    def setData[L <: HList](
                                 dataTemplateXls: String,
                                 outLayout: String,
                                 outXlsPath: String,
@@ -57,7 +76,7 @@ object ExcelMapper extends ExcelBasic {
           x._1 -> By(x._2.get).toMap
       }
 
-      setData(
+      super.setData(
         dataTemplateXls,
         outLayout,
         outXlsPath,

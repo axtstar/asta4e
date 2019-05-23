@@ -6,8 +6,6 @@ import java.text.SimpleDateFormat
 import com.axtstar.asta4e.core.ExcelHelper
 import com.axtstar.asta4e.test_class.{Etc7, Etc7Comp}
 
-import com.axtstar.asta4e.core._
-import com.axtstar.asta4e.test_class._
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner

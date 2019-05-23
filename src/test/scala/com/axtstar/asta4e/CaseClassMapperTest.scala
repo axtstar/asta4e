@@ -39,7 +39,7 @@ class CaseClassMapperTest extends Specification {
 
     "from[get]" in {
       val target = ExcelMapper.getData(
-        s"${currentDir}/src/test/resources/excel/bind_template2.xlsx",
+        s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample2.xlsx",
         List()
       )
@@ -98,20 +98,6 @@ class CaseClassMapperTest extends Specification {
       )
 
       "" must be_==("")
-
-    }
-
-    "Data64" in {
-      val target = ExcelMapper.getData(
-        s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_sample3.xlsx",
-        List()
-      )
-
-      val result = ExcelHelper.to[Data64].from(target.head._2)
-
-      result.A1 must be_==("A1")
-      result.A2 must be_==("A2")
 
     }
 
