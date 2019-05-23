@@ -81,7 +81,7 @@ class CaseClassMapperTest extends Specification {
     }
 
     "Data29" in {
-      val result = ExcelMapper.by[Data29].getDataAsAny(
+      val result = ExcelMapper.by[Data29].getData(
         s"${currentDir}/src/test/resources/excel/bind_template3.xlsx",
         s"${currentDir}/src/test/resources/excel/read_sample3.xlsx",
         List()
@@ -300,6 +300,14 @@ class CaseClassMapperTest extends Specification {
         s"${currentDir}/target/output6_2.xlsx",
         target:_*
       )
+
+      val result4 = ExcelMapper.by[Etc7Option].getDataDown(
+        s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_sample6.xlsx",
+        List()
+      )
+
+      result4.size must be_==(1) // 1 sheet
 
       "" must_==("")
     }

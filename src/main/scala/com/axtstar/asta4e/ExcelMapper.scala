@@ -65,13 +65,27 @@ object ExcelMapper extends ExcelBasic {
       )
     }
 
-    def getDataAsAny[R <: HList](
+    @deprecated("this method will be removed, use getData, instead", "0.8.0")
+    def getDateAsAny[R <: HList](
                                   dataTemplateXls: String,
                                   inputXlsPath: String,
                                   ignoreSheet: List[String]
                                 )(implicit gen: LabelledGeneric.Aux[A, R]
                                   , fromMap: FromMap[R]) = {
-      val target = getData(
+      getData(
+        dataTemplateXls,
+        inputXlsPath,
+        ignoreSheet
+      )
+    }
+
+    def getData[R <: HList](
+                                  dataTemplateXls: String,
+                                  inputXlsPath: String,
+                                  ignoreSheet: List[String]
+                                )(implicit gen: LabelledGeneric.Aux[A, R]
+                                  , fromMap: FromMap[R]) = {
+      val target = super.getData(
         dataTemplateXls,
         inputXlsPath,
         ignoreSheet
@@ -89,6 +103,7 @@ object ExcelMapper extends ExcelBasic {
       }
     }
 
+    @deprecated("this method will be removed, use getData, instead", "0.8.0")
     def getDataAsOption[R <: HList](
                                      dataTemplateXls: String,
                                      inputXlsPath: String,
@@ -96,13 +111,33 @@ object ExcelMapper extends ExcelBasic {
                                    )(implicit gen: LabelledGeneric.Aux[A, R]
                                      , fromMap: FromMap[R]) = {
 
-      val result = getDataAsAny(dataTemplateXls,inputXlsPath,ignoreSheet)
+      val result = getData(dataTemplateXls,inputXlsPath,ignoreSheet)
       result.map {
         x =>
           x._1 -> x._2
       }
     }
 
+    def getDataDown[R <: HList](
+                                       dataTemplateXls: String,
+                                       inputXlsPath: String,
+                                       ignoreSheet: List[String]
+
+                                     )(implicit gen: LabelledGeneric.Aux[A, R]
+                                       , fromMap: FromMap[R]) = {
+      val target = super.getDataDown(dataTemplateXls, inputXlsPath, ignoreSheet)
+      val result = target.map {
+        x =>
+          x._1 -> x._2.map {
+            xx =>
+              fromMap(xx).map {
+                xxx =>
+                  gen.from(xxx)
+              }
+          }
+      }
+      result
+    }
     //End ExcelMapper[A]
   }
 
