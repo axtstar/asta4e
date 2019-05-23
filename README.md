@@ -5,31 +5,27 @@
 This library provide a template engine functionality for Excel for scala.
 
 # Feature
-
 - Retrieve data from Excel and convert them to Map[String, Any] or a case class
 
 - Create Excel from Map[String, Any] or a case class
 
 # Required
-
 - scala 2.11 or
 - scala 2.12
 
 # Concept
-
- This library avoids a lot of boilerplate and location definitions.
+- This library avoids a lot of boilerplate and location definitions.
 
  Ordinary, typical apache poi coding is like location definitions, and they likely make mistakes a lot.
 
  In order to avoid location definition in code, asta4e needs to prepare template Excel as location definition.
   
 # Usage
-
-add dependency like the below
+- add dependency like the below
 
 ```sbt
 libraryDependencies ++= Seq(
-      "com.axtstar" %% "asta4e" % "0.0.6"
+      "com.axtstar" %% "asta4e" % "0.0.8"
 )
 ```
 
@@ -43,7 +39,7 @@ libraryDependencies ++= Seq(
 val target = ExcelMapper.getData(
         "template.xlsx",
         "data.xlsx",
-        List("ignoresheets"))
+        List("ignoreSheetName"))
 ```
 
 Excel template has two paramater, then you can create case class as same parameter.
@@ -55,10 +51,10 @@ case class Data(numeric:Double, string:String)
 Then, get the data to the class from Excel like the below code. 
 
 ```scala
-val data:Option[Data] = ExcelMapper.by[Data].getDataAsAny(
+val data = ExcelMapper.by[Data].getData(
         "template.xlsx",
         "data.xlsx",
-        List("ignoresheets"))
+        List())
 ```
 
 
@@ -87,8 +83,7 @@ ExcelMapper.setData(
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  `com.axtstar.asta4e.converter.E._` is companion utilites for implicit conversion and gethering separeted tuple to Map.
 
 # LICENSE
-
-```
+- ```
 Copyright 2018 axt
 
 Licensed under the Apache License, Version 2.0 (the "License");

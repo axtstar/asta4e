@@ -52,12 +52,15 @@ object ExcelMapper extends ExcelBasic {
                              gen: LabelledGeneric.Aux[A, L],
                              tmr: ToMap[L]
                            ) = {
-      setData(
-        dataTemplateXls,
-        outLayout,
-        outXlsPath,
-        a
-      )
+      a.map {
+        aa =>
+        setData(
+          dataTemplateXls,
+          outLayout,
+          outXlsPath,
+          a
+        )
+      }
     }
 
 
@@ -83,6 +86,33 @@ object ExcelMapper extends ExcelBasic {
         aToMap: _*
       )
     }
+
+    def setDataDown[L <: HList](
+                             dataTemplateXls: String,
+                             outLayout: String,
+                             outXlsPath: String,
+                             a:IndexedSeq[(String,IndexedSeq[Option[A]])]
+                           )(implicit
+                             gen: LabelledGeneric.Aux[A, L],
+                             tmr: ToMap[L]
+                           ) = {
+
+      val aToMap = a.map {
+        aa =>
+          aa._1 -> (aa._2.map {
+            aaa =>
+              By(aaa.get).toMap
+          })
+      }
+
+      super.setDataDown(
+        dataTemplateXls,
+        outLayout,
+        outXlsPath,
+        aToMap: _*
+      )
+    }
+
 
     @deprecated("this method will be removed, use getData, instead", "0.8.0")
     def getDateAsAny[R <: HList](

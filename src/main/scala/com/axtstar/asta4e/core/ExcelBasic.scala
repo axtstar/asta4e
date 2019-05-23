@@ -201,8 +201,17 @@ trait ExcelBasic {
                               "${" + s"${p._1}" + "}" == xx)
                           ) {
                             val ref = new CellReference(x._2.toString)
-                            val row = sheet.getRow(ref.getRow)
-                            val target = row.getCell(ref.getCol)
+                            var row = sheet.getRow(ref.getRow)
+                            if (row==null){
+                              sheet.createRow(ref.getRow)
+                              row = sheet.getRow(ref.getRow)
+                            }
+
+                            var target = row.getCell(ref.getCol)
+                            if(target==null){
+                              row.createCell(ref.getCol)
+                              target = row.getCell(ref.getCol)
+                            }
 
                             setOneCell(target, bindMap, map, x)
                           }
