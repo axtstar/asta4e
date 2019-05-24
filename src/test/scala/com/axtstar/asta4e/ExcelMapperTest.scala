@@ -30,7 +30,7 @@ class ExcelMapperTest extends Specification {
       }
 
       "column sizes" in {
-        target(0)._2.size must be_==(9)
+        target(0)._2.size must be_==(16)
       }
 
       "string" in {
@@ -68,11 +68,9 @@ class ExcelMapperTest extends Specification {
         target.head._2("formula") must be_==(5.0)
       }
 
-      /*
       "stringOpt" in {
-        target.head._2("stringOpt") must be_==(Some("STRING1"))
+        target.head._2("stringOpt") must be_==("STRING1")
       }
-      */
 
 
     }

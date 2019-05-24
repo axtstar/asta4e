@@ -66,6 +66,14 @@ class ExcelHelperTest extends Specification {
       result.float must be_==(1110.1F)
       result.double must be_==(1.000009D)
       result.formula must be_==("5.0")
+      result.stringOpt must be_==(Some("STRING1"))
+      result.intOpt must be_==(Some(11101.0D))
+      result.longOpt must be_==(Some(11101.0D))
+      result.dateOpt must be_==(Some(dateFormat.parse("2019/6/1")))
+      result.booleanOpt must be_==(Some(true))
+      result.floatOpt must be_==(Some(1110.1F))
+      result.doubleOpt must be_==(Some(1.000009D))
+      result.formulaOpt must be_==(Some("5.0"))
     }
 
     "cast from null" in {
@@ -94,6 +102,14 @@ class ExcelHelperTest extends Specification {
       result.float must be_==(0F)
       result.double must be_==(0D)
       result.formula must be_==("")
+      result.stringOpt must be_==(None)
+      result.intOpt must be_==(None)
+      result.longOpt must be_==(None)
+      result.dateOpt must be_==(None)
+      result.booleanOpt must be_==(None)
+      result.floatOpt must be_==(None)
+      result.doubleOpt must be_==(None)
+      result.formulaOpt must be_==(None)
     }
 
   }

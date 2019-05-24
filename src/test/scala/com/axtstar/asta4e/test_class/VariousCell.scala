@@ -11,7 +11,14 @@ case class VariousCell(
               float:Float,
               double:Double,
               formula:String,
-              stringOpt:Option[String]
+              stringOpt:Option[String],
+              intOpt:Option[Int],
+              longOpt:Option[Long],
+              dateOpt:Option[Date],
+              booleanOpt:Option[Boolean],
+              floatOpt:Option[Float],
+              doubleOpt:Option[Double],
+              formulaOpt:Option[String]
 ){
   val result : Boolean = false
   def getResult = {
