@@ -2,7 +2,7 @@ package com.axtstar.asta4e.test_class
 
 import java.util.Date
 
-case class Etc3Option(
+case class AllOption(
               numeric1: Option[String],
               numeric2: Option[String],
               numeric3: Option[String]

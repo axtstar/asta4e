@@ -3,13 +3,12 @@ package com.axtstar.asta4e
 import java.io.File
 import java.text.SimpleDateFormat
 
+import com.axtstar.asta4e.core.ExcelHelper
+import com.axtstar.asta4e.test_class.Etc7Option
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
-import com.axtstar.asta4e.converter.E._
-import com.axtstar.asta4e.test_class._
-
-case class Data(name:String, address:String)
+import org.specs2.specification.Scope
 
 @RunWith(classOf[JUnitRunner])
 class ExcelMapperTest extends Specification {
@@ -17,321 +16,138 @@ class ExcelMapperTest extends Specification {
   val currentDir = new File(".").getAbsoluteFile().getParent()
 
   "ExcelMapper" should {
-    "getDataAsTemplate" in {
 
-      val target = ExcelMapper.getDataAsTemplate(
-        s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_sample1.xlsx")
+    "primitive" should {
 
-      target(0).size must be_==(240)
-      target(0)("A1") must be_==("A1")
-      target(0)("A2") must be_==("A2")
-
-      target(0)("B3") must be_==("B3")
-      target(0)("C5") must be_==("C5")
-    }
-
-    "getDataAsNumeric" in {
-
-      val target = ExcelMapper.by[Etc3Option].getDataAsOption(
-        s"${currentDir}/src/test/resources/excel/bind_template5.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_sample5.xlsx",
+      val target = ExcelMapper.getData(
+        s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx",
+        s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx",
         List()
       )
 
-      target(0)._2.get.getNum1 must be_==(111D)
-      target(0)._2.get.getNum2 must be_==(123D)
-      target(0)._2.get.getNum3 must be_==(124D)
-    }
+      "sheets size" in {
+        target.size must be_==(1)
+      }
+
+      "column sizes" in {
+        target(0)._2.size must be_==(16)
+      }
+
+      "string" in {
+        target.head._2("string") must be_==("STRING")
+      }
+
+      "int" in {
+        target.head._2("int") must be_==(11101)
+      }
+
+      "long" in {
+        target.head._2("long") must be_==(11101)
+      }
+
+      "date" in {
+        val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
+        target.head._2("date") must be_==(dateFormat.parse("2019/6/1"))
+
+      }
+
+      "boolean" in {
+        target.head._2("boolean") must be_==(true)
+      }
 
 
-    "getData with format" in {
-      val target = ExcelMapper.getDataAsTemplate(
-        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_sample4.xlsx")
+      "float" in {
+        target.head._2("float") must be_==(1110.1D)
+      }
 
-      target(0)("numeric") must be_==(111)
-      target(0)("string") must be_==("111")
-      val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
-      target(0)("date") must be_==(dateFormat.parse("1970/1/1"))
-      target(0)("formula") must be_==("111")
-      target(0)("bool") must be_==(true)
+      "double" in {
+        target.head._2("double") must be_==(1.000009D)
+      }
 
-      val timeFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
-      //TODO : Excel return 1900/01/00 HH:mm:ss
-      target(0)("time") must be_==(timeFormat.parse("1899/12/31 17:25:47"))
+      "formula" in {
+        target.head._2("formula") must be_==(5.0)
+      }
 
-      target(0)("userDate") must be_==(timeFormat.parse("2018/07/02 22:35:54"))
-  }
-
-    "setData with format to getData with format" in {
-      val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
-      val timeFormat = new SimpleDateFormat("HH:mm:ss")
-
-      val dateFormatFull = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
-
-      val target = ExcelMapper.setData(
-        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
-        s"${currentDir}/src/test/resources/excel/output_template4.xlsx",
-        s"${currentDir}/target/output4_2.xlsx",
-        "Sheet1" -> (
-          "numeric" -> 1001 &
-          "string" -> "1000" &
-          "date" -> dateFormat.parse("2018/7/7") &
-          "formula" -> "=B2" &
-          "bool" -> true &
-          "time" -> timeFormat.parse("23:32:41") &
-          "userDate" -> dateFormatFull.parse("2018/11/23 18:52:56")
-        ) &
-        "Sheet2" -> (
-          "numeric" -> 1002 &
-            "string" -> "1001" &
-            "date" -> dateFormat.parse("2018/7/7") &
-            "formula" -> "=B2" &
-            "bool" -> true &
-            "time" -> timeFormat.parse("23:32:41") &
-            "userDate" -> dateFormatFull.parse("2018/11/23 18:52:56")
-          ) :_*
-      )
-
-      val result = ExcelMapper.getData(
-        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
-        s"${currentDir}/target/output4_2.xlsx",
-        List()
-      )
-
-      result(0)._2("numeric") must be_==(1001)
-      result(0)._2("string") must be_==("1000")
-      result(0)._2("date") must be_==(dateFormat.parse("2018/7/7"))
-      result(0)._2("formula") must be_==("=B2")
-      result(0)._2("bool") must be_==(true)
-      result(0)._2("time") must be_==(timeFormat.parse("23:32:41"))
-      result(0)._2("userDate") must be_==(dateFormatFull.parse("2018/11/23 18:52:56"))
-
-      ExcelMapper.setData(
-        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
-        s"${currentDir}/target/output4_2.xlsx",
-        s"${currentDir}/target/output4_3.xlsx",
-        result :_*
-      )
-
-      val result2 = ExcelMapper.getData(
-        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
-        s"${currentDir}/target/output4_3.xlsx",
-        List()
-      )
-
-      result2(0)._2("numeric") must be_==(1001)
-      result2(0)._2("string") must be_==("1000")
-      result2(0)._2("date") must be_==(dateFormat.parse("2018/7/7"))
-      result2(0)._2("formula") must be_==("=B2")
-      result2(0)._2("bool") must be_==(true)
-      result2(0)._2("time") must be_==(timeFormat.parse("23:32:41"))
-      result2(0)._2("userDate") must be_==(dateFormatFull.parse("2018/11/23 18:52:56"))
-    }
-
-    "getDataAsClass" in {
-
-      val result = ExcelMapper.by[Etc7Option].getDataAsOption(
-        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_sample4.xlsx",
-        List()
-      )
-
-      result.size must be_==(1)
-      result.head._2.head.numeric.get must be_==(111.0D)
-      result.head._2.head.string.get must be_==("111")
-
-      val result2 = ExcelMapper.by[Etc6].getDataAsAny(
-        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_sample4.xlsx",
-        List()
-      )
-
-      result2.size must be_==(1)
-      result2.head._2.head.bool must be_==(true)
-      result2.head._2.head.string must be_==("111")
-
-      val result3 = ExcelMapper.by[Etc8].getDataAsAny(
-        s"${currentDir}/src/test/resources/excel/bind_template4.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_sample4.xlsx",
-        List()
-      )
-
-      result3.size must be_==(1)
-      result3.head._2 must be_==(None)
-
+      "stringOpt" in {
+        target.head._2("stringOpt") must be_==("STRING1")
+      }
 
 
     }
 
-    "setDataAsTemplate to getDataAsTemplate" in {
+    "top level function" should {
 
-      val target = ExcelMapper.setDataAsTemplate(
-        s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
-        s"${currentDir}/src/test/resources/excel/output_template1.xlsx",
-      s"${currentDir}/target/output1.xlsx",
-       "A1" ->
-         """t
-           |e
-           |s
-           |t
-           |1""".stripMargin &
-        "A2" -> null &
-        "A3" -> "test3" &
-        "A4" -> 1
-      )
+      "ToMap" should {
+        "toMap" in {
+          val d = Data("axtstar","Tokyo, Japan")
+          val target = ExcelMapper.By(d).toMap
+          target must be_==(Map( "name" -> "axtstar", "address" -> "Tokyo, Japan" ))
+        }
+      }
 
-      val result = ExcelMapper.getDataAsTemplate(
-        s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
-        s"${currentDir}/target/output1.xlsx")
+      "map to A" in {
+        val target = ExcelMapper.getDataDown(
+          s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
+          s"${currentDir}/src/test/resources/excel/read_sample6.xlsx",
+          List()
+        )
 
-      result(0)("A1") must be_==(
-          """t
-            |e
-            |s
-            |t
-            |1""".stripMargin
-      )
-      result(0)("A2") must be_==(null)
-      result(0)("A3") must be_==("test3")
-      result(0)("A4") must be_==("1")
+        val result = ExcelHelper.to[Etc7Option].from(target.head._2.head)
 
+        val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
+        val timeFormat = new SimpleDateFormat("HH:mm:ss")
+
+        val dateFormatFull = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
+
+        result.numeric must be_==(Some(1.0))
+        result.string must be_==(Some("Test"))
+
+        result.date must be_==(Some(dateFormat.parse("2020/01/02")))
+        result.formula must be_==(Some("Str"))
+        result.bool must be_==(Some(true))
+        result.time must be_==(Some(dateFormat.parse("2020/01/02")))
+        result.userDate must be_==(Some(dateFormat.parse("2020/01/02")))
+
+        val result2 = ExcelHelper.to[Etc7Option].fromAsOption(target.head._2.tail.head)
+
+        result2.get.numeric must be_==(Some(2.0))
+        result2.get.string must be_==(Some("漢字"))
+
+        result2.get.date must be_==(Some(dateFormat.parse("2020/01/02")))
+        result2.get.formula must be_==(Some("Rts"))
+        result2.get.bool must be_==(Some(false))
+        result2.get.time must be_==(Some(dateFormat.parse("2020/01/02")))
+        result2.get.userDate must be_==(Some(dateFormat.parse("2020/01/02")))
+
+        val result3 = ExcelMapper.By(result).toMap
+
+        //case class
+        ExcelMapper.by[List[Etc7Option]].setDataDown(
+          s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
+          s"${currentDir}/src/test/resources/excel/output_template6.xlsx",
+          s"${currentDir}/target/output6_1.xlsx",
+          "Sheet1" -> IndexedSeq(ExcelMapper.By(result).toMap, ExcelMapper.By(result2.get).toMap)
+        )
+
+        //Map
+        ExcelMapper.setDataDown(
+          s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
+          s"${currentDir}/src/test/resources/excel/output_template6.xlsx",
+          s"${currentDir}/target/output6_2.xlsx",
+          target: _*
+        )
+
+        val result4 = ExcelMapper.by[Etc7Option].getDataDown(
+          s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
+          s"${currentDir}/src/test/resources/excel/read_sample6.xlsx",
+          List()
+        )
+
+        result4.size must be_==(1) // 1 sheet
+
+        "" must_== ("")
+      }
     }
-
-    "setData to getDataAsTemplate" in {
-
-      val target = ExcelMapper.setData(
-        s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
-        s"${currentDir}/src/test/resources/excel/output_template1.xlsx",
-        s"${currentDir}/target/output3.xlsx",
-        "Sheet1" -> ("A1" ->
-          """t
-            |e
-            |s
-            |t
-            |1""".stripMargin &
-          "A2" -> null &
-          "A3" -> "test3" &
-          "A4" -> 1)
-      )
-
-      val result = ExcelMapper.getDataAsTemplate(
-        s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
-        s"${currentDir}/target/output3.xlsx")
-
-      result(0)("A1") must be_==(
-        """t
-          |e
-          |s
-          |t
-          |1""".stripMargin
-      )
-      result(0)("A2") must be_==(null)
-      result(0)("A3") must be_==("test3")
-      result(0)("A4") must be_==("1")
-
-    }
-
-    "setData 2Sheets to getDataAsTemplate" in {
-
-      val target = ExcelMapper.setData(
-        s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
-        s"${currentDir}/src/test/resources/excel/output_template1.xlsx",
-        s"${currentDir}/target/output4.xlsx",
-        "Sheet1" -> ("A1" ->
-          """t
-            |e
-            |s
-            |t
-            |1""".stripMargin &
-          "A2" -> null &
-          "A3" -> "test3" &
-          "A4" -> 1) &
-          "Sheet2" -> ("A1" ->
-            """t
-              |e
-              |s
-              |t
-              |1""".stripMargin &
-            "A2" -> null &
-            "A3" -> "test3" &
-            "A4" -> 1) :_*
-      )
-
-      val result = ExcelMapper.getDataAsTemplate(
-        s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
-        s"${currentDir}/target/output4.xlsx")
-
-      result.size must be_==(2)
-
-      result(0)("A1") must be_==(
-        """t
-          |e
-          |s
-          |t
-          |1""".stripMargin
-      )
-      result(0)("A2") must be_==(null)
-      result(0)("A3") must be_==("test3")
-      result(0)("A4") must be_==("1")
-
-    }
-
-    "setData 3Sheets to getDataAsTemplate" in {
-
-      val target = ExcelMapper.setData(
-        s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
-        s"${currentDir}/src/test/resources/excel/output_template1.xlsx",
-        s"${currentDir}/target/output5.xlsx",
-        "Sheet1" -> ("A1" ->
-          """t
-            |e
-            |s
-            |t
-            |1""".stripMargin &
-          "A2" -> null &
-          "A3" -> "test3" &
-          "A4" -> 1) &
-          "Sheet2" -> ("A1" ->
-            """t
-              |e
-              |s
-              |t
-              |1""".stripMargin &
-            "A2" -> null &
-            "A3" -> "test3" &
-            "A4" -> 1)  &
-          "Sheet3" -> ("A1" ->
-            """t
-              |e
-              |s
-              |t
-              |1""".stripMargin &
-            "A2" -> null &
-            "A3" -> "test3" &
-            "A4" -> 1) :_*
-      )
-
-      val result = ExcelMapper.getDataAsTemplate(
-        s"${currentDir}/src/test/resources/excel/bind_template1.xlsx",
-        s"${currentDir}/target/output5.xlsx")
-
-      result.size must be_==(3)
-
-      result(0)("A1") must be_==(
-        """t
-          |e
-          |s
-          |t
-          |1""".stripMargin
-      )
-      result(0)("A2") must be_==(null)
-      result(0)("A3") must be_==("test3")
-      result(0)("A4") must be_==("1")
-
-    }
-
 
   }
 }

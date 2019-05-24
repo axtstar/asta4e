@@ -1,9 +1,11 @@
 package com.axtstar.asta4e
 
-import com.axtstar.asta4e.core.{ExcelBasic, Helper}
+import com.axtstar.asta4e.core.ExcelBasic
 import shapeless._
+import com.axtstar.asta4e.converter.CC._
 
-object ExcelMapper extends ExcelBasic with Helper {
+
+object ExcelMapper extends ExcelBasic {
 
   /**
     * case class to Map
@@ -40,7 +42,29 @@ object ExcelMapper extends ExcelBasic with Helper {
 
     import ops.record._
 
+    @deprecated("this method will be removed, use setData, instead", "0.8.0")
     def setData4cc[L <: HList](
+                             dataTemplateXls: String,
+                             outLayout: String,
+                             outXlsPath: String,
+                             a:IndexedSeq[(String,Option[A])]
+                           )(implicit
+                             gen: LabelledGeneric.Aux[A, L],
+                             tmr: ToMap[L]
+                           ) = {
+      a.map {
+        aa =>
+        setData(
+          dataTemplateXls,
+          outLayout,
+          outXlsPath,
+          a
+        )
+      }
+    }
+
+
+    def setData[L <: HList](
                                 dataTemplateXls: String,
                                 outLayout: String,
                                 outXlsPath: String,
@@ -55,7 +79,7 @@ object ExcelMapper extends ExcelBasic with Helper {
           x._1 -> By(x._2.get).toMap
       }
 
-      setData(
+      super.setData(
         dataTemplateXls,
         outLayout,
         outXlsPath,
@@ -63,13 +87,54 @@ object ExcelMapper extends ExcelBasic with Helper {
       )
     }
 
-    def getDataAsAny[R <: HList](
+    def setDataDown[L <: HList](
+                             dataTemplateXls: String,
+                             outLayout: String,
+                             outXlsPath: String,
+                             a:IndexedSeq[(String,IndexedSeq[Option[A]])]
+                           )(implicit
+                             gen: LabelledGeneric.Aux[A, L],
+                             tmr: ToMap[L]
+                           ) = {
+
+      val aToMap = a.map {
+        aa =>
+          aa._1 -> (aa._2.map {
+            aaa =>
+              By(aaa.get).toMap
+          })
+      }
+
+      super.setDataDown(
+        dataTemplateXls,
+        outLayout,
+        outXlsPath,
+        aToMap: _*
+      )
+    }
+
+
+    @deprecated("this method will be removed, use getData, instead", "0.8.0")
+    def getDateAsAny[R <: HList](
                                   dataTemplateXls: String,
                                   inputXlsPath: String,
                                   ignoreSheet: List[String]
                                 )(implicit gen: LabelledGeneric.Aux[A, R]
                                   , fromMap: FromMap[R]) = {
-      val target = getData(
+      getData(
+        dataTemplateXls,
+        inputXlsPath,
+        ignoreSheet
+      )
+    }
+
+    def getData[R <: HList](
+                                  dataTemplateXls: String,
+                                  inputXlsPath: String,
+                                  ignoreSheet: List[String]
+                                )(implicit gen: LabelledGeneric.Aux[A, R]
+                                  , fromMap: FromMap[R]) = {
+      val target = super.getData(
         dataTemplateXls,
         inputXlsPath,
         ignoreSheet
@@ -87,35 +152,41 @@ object ExcelMapper extends ExcelBasic with Helper {
       }
     }
 
+    @deprecated("this method will be removed, use getData, instead", "0.8.0")
     def getDataAsOption[R <: HList](
                                      dataTemplateXls: String,
                                      inputXlsPath: String,
                                      ignoreSheet: List[String]
                                    )(implicit gen: LabelledGeneric.Aux[A, R]
                                      , fromMap: FromMap[R]) = {
-      val target = getData(
-        dataTemplateXls,
-        inputXlsPath,
-        ignoreSheet
-      )
 
-      target.map {
-        m =>
-
-          println(fromMap.getClass.getSimpleName)
-          val frm = fromMap(m._2.map {
-            mm =>
-              mm._1 -> Option(mm._2)
-          })
-          val target = frm.map {
-            x =>
-              gen.from(x)
-          }
-
-          m._1 -> target
+      val result = getData(dataTemplateXls,inputXlsPath,ignoreSheet)
+      result.map {
+        x =>
+          x._1 -> x._2
       }
     }
 
+    def getDataDown[R <: HList](
+                                       dataTemplateXls: String,
+                                       inputXlsPath: String,
+                                       ignoreSheet: List[String]
+
+                                     )(implicit gen: LabelledGeneric.Aux[A, R]
+                                       , fromMap: FromMap[R]) = {
+      val target = super.getDataDown(dataTemplateXls, inputXlsPath, ignoreSheet)
+      val result = target.map {
+        x =>
+          x._1 -> x._2.map {
+            xx =>
+              fromMap(xx).map {
+                xxx =>
+                  gen.from(xxx)
+              }
+          }
+      }
+      result
+    }
     //End ExcelMapper[A]
   }
 
@@ -123,12 +194,4 @@ object ExcelMapper extends ExcelBasic with Helper {
     val target = new ExcelMapper[A]
     target
   }
-
-
-  @deprecated("use by instead","0.0.6")
-  def to[A]: ExcelMapper[A] = {
-    val target = new ExcelMapper[A]
-    target
-  }
-
 }
