@@ -11,7 +11,7 @@ import scala.util.matching.Regex
 trait ExcelBasic {
   val allReplaceBrace: Regex = "\\$\\{([^\\}]*)\\}".r
 
-  def getBindName(bindName: String): String = {
+  private def getBindName(bindName: String): String = {
     bindName.replaceAll("^\\$\\{", "").replaceAll("\\}$", "")
   }
 
@@ -330,20 +330,42 @@ trait ExcelBasic {
   }
 
   /**
-    * output Excel from Map
     *
-    * @param dataTemplateXlsStream Excel template File stream which has ${} binderes
-    * @param outLayoutStream     Output templae Excel File stream
-    * @param outXlsPath            Output Excel path
-    * @param bindData              DataBinder which consists Map of name of ${} and value
+    * @param dataTemplateXlsStream
+    * @param outLayoutStream
+    * @param outXlsPath
+    * @param bindData
     */
   def setDataDown(
                    dataTemplateXlsStream: FileInputStream,
                    outLayoutStream: FileInputStream,
                    outXlsPath: String,
                    bindData: (String, IndexedSeq[Map[String, Any]])*
-                 ): Unit = {
+                 ): Unit ={
     val locationMap = getExcelLocation(dataTemplateXlsStream)
+
+    setDataDown(
+      locationMap,
+      outLayoutStream,
+      outXlsPath,
+      bindData:_*
+    )
+
+  }
+
+  /**
+    * output Excel from Map
+    *
+    * @param outLayoutStream     Output templae Excel File stream
+    * @param outXlsPath            Output Excel path
+    * @param bindData              DataBinder which consists Map of name of ${} and value
+    */
+  def setDataDown(
+                   locationMap: List[Location],
+                   outLayoutStream: FileInputStream,
+                   outXlsPath: String,
+                   bindData: (String, IndexedSeq[Map[String, Any]])*
+                 ): Unit = {
 
     val workbook = WorkbookFactory.create(outLayoutStream)
 
