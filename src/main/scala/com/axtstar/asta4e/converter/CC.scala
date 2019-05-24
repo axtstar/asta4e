@@ -27,6 +27,51 @@ object CC {
             //if not determine from data, asta4e convert them to wrapped primitive value
             // TODO : need more precise way of constructing
             typename match {
+              case "Char" =>
+                Some(x match {
+                  case xx:Char =>
+                    xx
+                  case xx:Short =>
+                    if(xx.isValidChar) {
+                      xx.toChar
+                    } else {
+                      0
+                    }
+                  case xx:Int =>
+                    if(xx.isValidChar) {
+                      xx.toChar
+                    } else {
+                      0
+                    }
+                  case xx:Long =>
+                    if(xx.isValidChar) {
+                      xx.toChar
+                    } else {
+                      0
+                    }
+                  case xx:Float =>
+                    if(xx.isValidChar) {
+                      xx.toChar
+                    } else {
+                      0
+                    }
+                  case xx:Double =>
+                    if(xx.isValidChar) {
+                      xx.toChar
+                    } else {
+                      0
+                    }
+                  case xx:Char =>
+                    if(xx.isValidChar) {
+                      xx.toChar
+                    } else {
+                      0
+                    }
+                  case xx:String =>
+                    new String(xx)
+                  case _ =>
+                    0
+                })
               case "String" =>
                 x match {
                   case null =>
@@ -34,9 +79,56 @@ object CC {
                   case _ =>
                     Some(x.toString)
                 }
+              case "Short" =>
+                Some(x match {
+                  case xx:Short =>
+                    xx
+                  case xx:Int =>
+                    if(xx.isValidShort) {
+                      xx.toShort
+                    } else {
+                      0
+                    }
+                  case xx:Long =>
+                    if(xx.isValidShort) {
+                      xx.toShort
+                    } else {
+                      0
+                    }
+                  case xx:Float =>
+                    if(xx.isValidShort) {
+                      xx.toShort
+                    } else {
+                      0
+                    }
+                  case xx:Double =>
+                    if(xx.isValidShort) {
+                      xx.toShort
+                    } else {
+                      0
+                    }
+                  case xx:Byte =>
+                    if(xx.isValidShort) {
+                      xx.toShort
+                    } else {
+                      0
+                    }
+                  case xx:Char =>
+                    if(xx.isValidShort) {
+                      xx.toShort
+                    } else {
+                      0
+                    }
+                  case xx:String =>
+                    Try(xx.toShort).getOrElse(0)
+                  case _ =>
+                    0
+                })
               case "Int" =>
                 Some(x match {
                   case xx:Int =>
+                      xx
+                  case xx:Short =>
                     if(xx.isValidInt) {
                       xx.toInt
                     } else {
@@ -55,6 +147,18 @@ object CC {
                       0
                     }
                   case xx:Double =>
+                    if(xx.isValidInt) {
+                      xx.toInt
+                    } else {
+                      0
+                    }
+                  case xx:Byte =>
+                    if(xx.isValidInt) {
+                      xx.toInt
+                    } else {
+                      0
+                    }
+                  case xx:Char =>
                     if(xx.isValidInt) {
                       xx.toInt
                     } else {
@@ -71,10 +175,16 @@ object CC {
                     xx
                   case xx:Int =>
                     xx.toLong
+                  case xx:Short =>
+                    xx.toLong
                   case xx:Double =>
                     Try(xx.toLong).getOrElse(0L)
                   case xx:Float =>
                     Try(xx.toLong).getOrElse(0L)
+                  case xx:Byte =>
+                    xx.toLong
+                  case xx:Char =>
+                    xx.toLong
                   case xx:String =>
                     Try(xx.toLong).getOrElse(0L)
                   case _ =>
@@ -86,9 +196,15 @@ object CC {
                     xx
                   case xx:Double =>
                     xx.toFloat
+                  case xx:Short =>
+                    xx.toFloat
                   case xx:Int =>
                     xx.toFloat
                   case xx:Long =>
+                    xx.toFloat
+                  case xx:Byte =>
+                    xx.toFloat
+                  case xx:Char =>
                     xx.toFloat
                   case _ =>
                     Try(x.toString.toFloat).getOrElse(0F)
@@ -101,17 +217,74 @@ object CC {
                     xx.toDouble
                   case xx:Int =>
                     xx.toDouble
+                  case xx:Short =>
+                    xx.toDouble
                   case xx:Long =>
+                    xx.toDouble
+                  case xx:Byte =>
+                    xx.toDouble
+                  case xx:Char =>
                     xx.toDouble
                   case _ =>
                     Try(x.toString.toDouble).getOrElse(0D)
                 })
+              case "Byte" =>
+                Some(x match {
+                  case xx:Byte =>
+                    xx
+                  case xx:Short =>
+                    if(xx.isValidByte) {
+                      xx.toByte
+                    } else {
+                      0
+                    }
+                  case xx:Int =>
+                    if(xx.isValidByte) {
+                      xx.toByte
+                    } else {
+                      0
+                    }
+                  case xx:Long =>
+                    if(xx.isValidByte) {
+                      xx.toByte
+                    } else {
+                      0
+                    }
+                  case xx:Float =>
+                    if(xx.isValidByte) {
+                      xx.toByte
+                    } else {
+                      0
+                    }
+                  case xx:Double =>
+                    if(xx.isValidByte) {
+                      xx.toByte
+                    } else {
+                      0
+                    }
+                  case xx:Char =>
+                    if(xx.isValidByte) {
+                      xx.toByte
+                    } else {
+                      0
+                    }
+                  case xx:String =>
+                    Try(xx.toByte).getOrElse(0)
+                  case _ =>
+                    0
+                })
               case "Date" =>
                 Some(x match {
+                  case xx:Short =>
+                    new Date(xx.toLong)
                   case xx:Int =>
                     new Date(xx.toLong)
                   case xx:Long =>
                     new Date(xx)
+                  case xx:Char =>
+                    new Date(xx.toLong)
+                  case xx:Byte =>
+                    new Date(xx.toLong)
                   case xx:Float =>
                     Try(new Date(xx.toLong)).getOrElse(new Date(Long.MinValue))
                   case xx:Double =>
@@ -128,6 +301,8 @@ object CC {
                 Some(x match {
                   case xx:Boolean =>
                     xx
+                  case xx:Short =>
+                    x==0
                   case xx:Int =>
                     x==0
                   case xx:Long =>
@@ -136,6 +311,10 @@ object CC {
                     xx==0F
                   case xx:Double =>
                     xx==0D
+                  case xx:Char =>
+                    x==0
+                  case xx:Byte =>
+                    x==0
                   case xx:String =>
                     xx==""
                   case _ =>
