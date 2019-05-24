@@ -280,7 +280,7 @@ trait ExcelBasic {
                   results += (getBindName(xxx) -> null)
               }
 
-            case CellType.STRING | CellType.FORMULA =>
+            case CellType.STRING =>
               //construct regular expression from a template cell
               //consider multiple binder like `${id1}-${id2}`
               val regEx = ("(?s)" + x._4.foldLeft(if (x._3 == null) {
@@ -307,6 +307,19 @@ trait ExcelBasic {
                   xx =>
                     results += getBindName(xx) -> null
                 }
+              }
+
+            case CellType.FORMULA =>
+              expression.foreach {
+                xx =>
+                  results += getBindName(xx) -> (
+                    target.getCachedFormulaResultTypeEnum match {
+                      case CellType.NUMERIC =>
+                        target.getNumericCellValue
+                      case CellType.STRING =>
+                        target.getStringCellValue
+                    }
+)
               }
 
             case _ =>

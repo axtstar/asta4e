@@ -4,7 +4,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 
 import com.axtstar.asta4e._
-import com.axtstar.asta4e.test_class.{Data_HOLIZONTAL, Etc7, Etc7Comp}
+import com.axtstar.asta4e.test_class.{Data_HOLIZONTAL, VariousCell}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner

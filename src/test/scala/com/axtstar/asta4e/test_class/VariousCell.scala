@@ -2,14 +2,16 @@ package com.axtstar.asta4e.test_class
 
 import java.util.Date
 
-case class Etc7Comp(
-              numeric: Option[Double],
+case class VariousCell(
               string:String,
+              int:Int,
+              long:Long,
               date:Date = new Date(),
+              boolean:Boolean = true,
+              float:Float,
+              double:Double,
               formula:String,
-              bool:Boolean = true,
-              time:Date,
-              userDate:Option[Date]
+              stringOpt:Option[String]
 ){
   val result : Boolean = false
   def getResult = {
