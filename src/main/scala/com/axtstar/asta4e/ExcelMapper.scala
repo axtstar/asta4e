@@ -42,28 +42,6 @@ object ExcelMapper extends ExcelBasic {
 
     import ops.record._
 
-    @deprecated("this method will be removed, use setData, instead", "0.8.0")
-    def setData4cc[L <: HList](
-                             dataTemplateXls: String,
-                             outLayout: String,
-                             outXlsPath: String,
-                             a:IndexedSeq[(String,Option[A])]
-                           )(implicit
-                             gen: LabelledGeneric.Aux[A, L],
-                             tmr: ToMap[L]
-                           ) = {
-      a.map {
-        aa =>
-        setData(
-          dataTemplateXls,
-          outLayout,
-          outXlsPath,
-          a
-        )
-      }
-    }
-
-
     def setData[L <: HList](
                                 dataTemplateXls: String,
                                 outLayout: String,
@@ -113,21 +91,6 @@ object ExcelMapper extends ExcelBasic {
       )
     }
 
-
-    @deprecated("this method will be removed, use getData, instead", "0.8.0")
-    def getDateAsAny[R <: HList](
-                                  dataTemplateXls: String,
-                                  inputXlsPath: String,
-                                  ignoreSheet: List[String]
-                                )(implicit gen: LabelledGeneric.Aux[A, R]
-                                  , fromMap: FromMap[R]) = {
-      getData(
-        dataTemplateXls,
-        inputXlsPath,
-        ignoreSheet
-      )
-    }
-
     def getData[R <: HList](
                                   dataTemplateXls: String,
                                   inputXlsPath: String,
@@ -149,21 +112,6 @@ object ExcelMapper extends ExcelBasic {
           }
 
           m._1 -> target
-      }
-    }
-
-    @deprecated("this method will be removed, use getData, instead", "0.8.0")
-    def getDataAsOption[R <: HList](
-                                     dataTemplateXls: String,
-                                     inputXlsPath: String,
-                                     ignoreSheet: List[String]
-                                   )(implicit gen: LabelledGeneric.Aux[A, R]
-                                     , fromMap: FromMap[R]) = {
-
-      val result = getData(dataTemplateXls,inputXlsPath,ignoreSheet)
-      result.map {
-        x =>
-          x._1 -> x._2
       }
     }
 

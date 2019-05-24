@@ -4,9 +4,13 @@ import java.io.{File, FileInputStream, FileOutputStream}
 import java.util.Date
 
 import org.apache.poi.ss.usermodel._
-import org.apache.poi.ss.util.{CellAddress, CellReference}
+import org.apache.poi.ss.util.{CellReference}
 
 import scala.util.matching.Regex
+
+object ExcelBasic extends ExcelBasic {
+
+}
 
 trait ExcelBasic {
   val allReplaceBrace: Regex = "\\$\\{([^\\}]*)\\}".r
@@ -21,7 +25,7 @@ trait ExcelBasic {
     * @param xlsPath template excel path
     * @return tuple 4
     */
-  private def getExcelLocation(xlsPath: String): List[Location] = {
+  def getExcelLocation(xlsPath: String): List[Location] = {
     val stream = new FileInputStream(xlsPath)
     getExcelLocation(stream)
   }
@@ -33,7 +37,7 @@ trait ExcelBasic {
     *
     */
   //List[(String, CellAddress, Cell, List[String])]
-  private def getExcelLocation(stream: FileInputStream): List[Location] = {
+  def getExcelLocation(stream: FileInputStream): List[Location] = {
 
     val workbook = WorkbookFactory.create(stream)
 
@@ -142,7 +146,24 @@ trait ExcelBasic {
     )
   }
 
-  /**
+  def setData(
+               dataTemplateXlsStream: FileInputStream,
+               outLayoutStream: FileInputStream,
+               outXlsPath: String,
+               bindData: (String, Map[String, Any])*
+             ): Unit = {
+    val locationMap = getExcelLocation(dataTemplateXlsStream)
+
+    setData(
+      locationMap,
+      outLayoutStream,
+      outXlsPath,
+      bindData:_*
+    )
+
+  }
+
+    /**
     * output Excel from Map
     *
     * @param dataTemplateXlsStream Excel template File stream which has ${} binderes
@@ -151,12 +172,11 @@ trait ExcelBasic {
     * @param bindData              DataBinder which consists Map of name of ${} and value
     */
   def setData(
-               dataTemplateXlsStream: FileInputStream,
+               locationMap: List[Location],
                outLayoutStream: FileInputStream,
                outXlsPath: String,
                bindData: (String, Map[String, Any])*
              ): Unit = {
-    val locationMap = getExcelLocation(dataTemplateXlsStream)
 
     val workbook = WorkbookFactory.create(outLayoutStream)
 
@@ -492,8 +512,21 @@ trait ExcelBasic {
 
   }
 
+  def getData(
+               dataTemplateXlsStream: FileInputStream,
+               iStream: FileInputStream,
+               ignoreSheet: List[String]
+             ): IndexedSeq[(String, Map[String, Any])] = {
+    val locations = getExcelLocation(dataTemplateXlsStream)
 
-  /**
+    getData(
+      locations,
+      iStream,
+      ignoreSheet
+    )
+  }
+
+    /**
     * get databind Map from Excel
     *
     * @param dataTemplateXlsStream template Excel file stream
@@ -501,11 +534,10 @@ trait ExcelBasic {
     * @param ignoreSheet           ignore Sheet names
     */
   def getData(
-               dataTemplateXlsStream: FileInputStream,
+               locations: List[Location],
                iStream: FileInputStream,
                ignoreSheet: List[String]
              ): IndexedSeq[(String, Map[String, Any])] = {
-    val locations = getExcelLocation(dataTemplateXlsStream)
 
     val workbook = WorkbookFactory.create(iStream)
 
@@ -571,7 +603,21 @@ trait ExcelBasic {
   }
 
 
-  /**
+  def getDataDown(
+                   dataTemplateXlsStream: FileInputStream,
+                   iStream: FileInputStream,
+                   ignoreSheet: List[String]
+                 ): IndexedSeq[(String, IndexedSeq[Map[String, Any]])] = {
+    val locations = getExcelLocation(dataTemplateXlsStream)
+
+    getDataDown(
+      locations,
+      iStream,
+      ignoreSheet
+    )
+  }
+
+    /**
     * get databind list Map from Excel
     *
     * @param dataTemplateXlsStream template Excel file stream
@@ -579,11 +625,10 @@ trait ExcelBasic {
     * @param ignoreSheet           ignore Sheet names
     */
   def getDataDown(
-               dataTemplateXlsStream: FileInputStream,
-               iStream: FileInputStream,
-               ignoreSheet: List[String]
+                   locations: List[Location],
+                   iStream: FileInputStream,
+                   ignoreSheet: List[String]
              ): IndexedSeq[(String, IndexedSeq[Map[String, Any]])] = {
-    val locations = getExcelLocation(dataTemplateXlsStream)
 
     val workbook = WorkbookFactory.create(iStream)
 
