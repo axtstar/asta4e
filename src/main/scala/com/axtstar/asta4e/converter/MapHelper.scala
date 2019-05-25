@@ -25,7 +25,7 @@ class MapHelper[A] {
                               typeable: Typeable[A]
 
   ):A={
-    val m = CC.Byy(t)
+    val m = CC.By(t)
     from(m.toMap)
   }
 
