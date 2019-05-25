@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import com.axtstar.asta4e.converter._
-import com.axtstar.asta4e.test_class.{Data_HOLIZONTAL, VariousCell}
+import com.axtstar.asta4e.test_class._
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -20,6 +20,42 @@ class MapHelperTest extends Specification {
     "to" in {
       //MapHelper.to[VariousCell].by[VariousCell]()
       MapHelper.to[VariousCell].isInstanceOf[MapHelper[VariousCell]] must be_==(true)
+    }
+
+    "from 2 to" should {
+      val v1 = VariousCell(string = "",
+        int = 1,
+        long = 2L,
+        date = new Date(),
+        boolean = true,
+        float = 3F,
+        double = 4D,
+        formula = "formula",
+        stringOpt = Some("stringOpt"),
+        intOpt = Some(5),
+        longOpt = Some(6L),
+        dateOpt = Some(new Date()),
+        booleanOpt = Some(true),
+        floatOpt = Some(7F),
+        doubleOpt = Some(8D),
+        formulaOpt = Some("formulaOpt")
+      )
+
+      "same signature and same type" in {
+        val target = MapHelper.to[VariousCell1].from(v1)
+        target.string must be_==(v1.string)
+        target.boolean must be_==(v1.boolean)
+        target.float must be_==(v1.float)
+      }
+
+      "same signature but different type" in {
+        val target = MapHelper.to[VariousCell2].from(v1)
+        target.string must be_==(v1.string)
+        target.boolean must be_==(v1.boolean.toString)
+        target.float must be_==(v1.float.toString)
+
+      }
+
     }
 
     "map to A" in {

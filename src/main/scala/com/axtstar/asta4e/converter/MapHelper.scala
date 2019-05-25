@@ -14,23 +14,20 @@ object MapHelper extends MapHelper {
 
 
 class MapHelper[A] {
-/*
-  def from[A,A1,L <: HList,R <: HList](t:A1)(implicit
-                              genT: LabelledGeneric.Aux[A1, L],
-                              tmrT: ToMap[L],
 
+  def from[R <: HList,T,L <: HList](t:T)(implicit
+                              genT: LabelledGeneric.Aux[T, L],
+                              tmrT: ToMap[L],
+                              fromMapT: FromMap[L],
+                              typeableT: Typeable[T],
                               gen: LabelledGeneric.Aux[A, R],
                               fromMap: FromMap[R],
                               typeable: Typeable[A]
+
   ):A={
-    val m = CC.By(t)
-    val target = fromMap(m.toMap).map{
-      x =>
-        gen.from(x)
-    }
-    from(target)
+    val m = CC.Byy(t)
+    from(m.toMap)
   }
-*/
 
   def from[R <: HList](m: Map[String, Any])(implicit
                                             gen: LabelledGeneric.Aux[A, R],
