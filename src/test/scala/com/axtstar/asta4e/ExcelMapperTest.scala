@@ -3,7 +3,7 @@ package com.axtstar.asta4e
 import java.io.File
 import java.text.SimpleDateFormat
 
-import com.axtstar.asta4e.core.MapHelper
+import com.axtstar.asta4e.converter.MapHelper
 import com.axtstar.asta4e.test_class.Etc7Option
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
