@@ -4,8 +4,8 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import com.axtstar.asta4e.core.{ExcelBasic, ExcelHelper}
-import com.axtstar.asta4e.core.ExcelHelper.ExcelHelper
+import com.axtstar.asta4e.core.{ExcelBasic, MapHelper}
+import com.axtstar.asta4e.core.MapHelper.MapHelper
 import com.axtstar.asta4e.test_class.VariousCell
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification

@@ -4,22 +4,22 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import com.axtstar.asta4e.core.ExcelHelper
-import com.axtstar.asta4e.core.ExcelHelper.ExcelHelper
+import com.axtstar.asta4e.core.MapHelper
+import com.axtstar.asta4e.core.MapHelper.MapHelper
 import com.axtstar.asta4e.test_class.{Data_HOLIZONTAL, VariousCell}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ExcelHelperTest extends Specification {
+class MapHelperTest extends Specification {
 
   val currentDir = new File(".").getAbsoluteFile().getParent()
 
 
   "ExcelHelper" should {
     "to" in {
-      ExcelHelper.to[VariousCell].isInstanceOf[ExcelHelper[VariousCell]] must be_==(true)
+      MapHelper.to[VariousCell].isInstanceOf[MapHelper[VariousCell]] must be_==(true)
     }
 
     "map to A" in {
@@ -32,7 +32,7 @@ class ExcelHelperTest extends Specification {
         "address" -> "Tokyo, Japan"
       )
 
-      val result = ExcelHelper.to[Data].from(map)
+      val result = MapHelper.to[Data].from(map)
 
       result.name must be_==("axtstar")
       result.address must be_==("Tokyo, Japan")
@@ -49,7 +49,7 @@ class ExcelHelperTest extends Specification {
       )
 
       val m = target.head._2
-      val result = ExcelHelper.to[VariousCell].from(m)
+      val result = MapHelper.to[VariousCell].from(m)
 
       val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
       val timeFormat = new SimpleDateFormat("HH:mm:ss")
@@ -85,7 +85,7 @@ class ExcelHelperTest extends Specification {
         List()
       )
 
-      val result = ExcelHelper.to[VariousCell].from(target.head._2)
+      val result = MapHelper.to[VariousCell].from(target.head._2)
 
       val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
       val timeFormat = new SimpleDateFormat("HH:mm:ss")

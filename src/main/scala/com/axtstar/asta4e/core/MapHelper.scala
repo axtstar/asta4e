@@ -3,20 +3,9 @@ package com.axtstar.asta4e.core
 import shapeless._
 import com.axtstar.asta4e.converter.CC._
 
-object ExcelHelper {
+object MapHelper {
 
-  class ExcelHelper[A] {
-    @deprecated("this method will be removed, use from, instead", "0.8.0")
-    def fromAsOption[R <: HList](m: Map[String, Any])(implicit
-                                                      gen: LabelledGeneric.Aux[A, R],
-                                                      fromMap: FromMap[R],
-                                                      typeable: Typeable[A]
-    ): Option[A] = {
-      val target = from(m)
-      Option(target)
-    }
-
-
+  class MapHelper[A] {
     def from[R <: HList](m: Map[String, Any])(implicit
                                               gen: LabelledGeneric.Aux[A, R],
                                               fromMap: FromMap[R],
@@ -43,8 +32,8 @@ object ExcelHelper {
 
   }
 
-  def to[A]: ExcelHelper[A] = {
-    val target = new ExcelHelper[A]
+  def to[A]: MapHelper[A] = {
+    val target = new MapHelper[A]
     target
   }
 }
