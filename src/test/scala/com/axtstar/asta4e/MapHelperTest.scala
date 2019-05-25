@@ -18,6 +18,7 @@ class MapHelperTest extends Specification {
 
   "ExcelHelper" should {
     "to" in {
+      //MapHelper.to[VariousCell].by[VariousCell]()
       MapHelper.to[VariousCell].isInstanceOf[MapHelper[VariousCell]] must be_==(true)
     }
 

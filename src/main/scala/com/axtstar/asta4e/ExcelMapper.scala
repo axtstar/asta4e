@@ -3,36 +3,10 @@ package com.axtstar.asta4e
 import com.axtstar.asta4e.core.ExcelBasic
 import shapeless._
 import com.axtstar.asta4e.converter.CC._
+import com.axtstar.asta4e.converter.MapHelper
 
 
 object ExcelMapper extends ExcelBasic {
-
-  /**
-    * case class to Map
-    *
-    * @param a
-    * @tparam A
-    */
-  implicit class By[A](val a: A) extends AnyVal {
-
-    import ops.record._
-
-    def toMap[L <: HList](implicit
-                          gen: LabelledGeneric.Aux[A, L],
-                          tmr: ToMap[L]
-                         ): Map[String, Any] = {
-      val m: Map[tmr.Key, tmr.Value] = tmr(gen.to(a))
-      m.map {
-        case (k: Symbol, n: None.type) =>
-          k.name -> null
-        case (k: Symbol, Some(v)) =>
-          k.name -> v
-        case (k: Symbol, v) =>
-          k.name -> v
-      }
-    }
-  }
-
 
   /**
     *
@@ -54,7 +28,7 @@ object ExcelMapper extends ExcelBasic {
 
       val aToMap = a.map {
         x =>
-          x._1 -> By(x._2.get).toMap
+          x._1 -> MapHelper.By(x._2.get).toMap
       }
 
       super.setData(
@@ -79,7 +53,7 @@ object ExcelMapper extends ExcelBasic {
         aa =>
           aa._1 -> (aa._2.map {
             aaa =>
-              By(aaa.get).toMap
+              MapHelper.By(aaa.get).toMap
           })
       }
 

@@ -80,7 +80,7 @@ class ExcelMapperTest extends Specification {
       "ToMap" should {
         "toMap" in {
           val d = Data("axtstar","Tokyo, Japan")
-          val target = ExcelMapper.By(d).toMap
+          val target = MapHelper.By(d).toMap
           target must be_==(Map( "name" -> "axtstar", "address" -> "Tokyo, Japan" ))
         }
       }
@@ -119,14 +119,14 @@ class ExcelMapperTest extends Specification {
         result2.time must be_==(Some(dateFormat.parse("2020/01/02")))
         result2.userDate must be_==(Some(dateFormat.parse("2020/01/02")))
 
-        val result3 = ExcelMapper.By(result).toMap
+        val result3 = MapHelper.By(result).toMap
 
         //case class
         ExcelMapper.by[List[Etc7Option]].setDataDown(
           s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
           s"${currentDir}/src/test/resources/excel/output_template6.xlsx",
           s"${currentDir}/target/output6_1.xlsx",
-          "Sheet1" -> IndexedSeq(ExcelMapper.By(result).toMap, ExcelMapper.By(result2).toMap)
+          "Sheet1" -> IndexedSeq(MapHelper.By(result).toMap, MapHelper.By(result2).toMap)
         )
 
         //Map
