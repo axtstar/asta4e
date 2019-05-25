@@ -3,7 +3,7 @@ package com.axtstar.asta4e
 import com.axtstar.asta4e.core.ExcelBasic
 import shapeless._
 import com.axtstar.asta4e.converter.CC._
-import com.axtstar.asta4e.converter.MapHelper
+import com.axtstar.asta4e.converter.{CC, MapHelper}
 
 
 object ExcelMapper extends ExcelBasic {
@@ -28,7 +28,7 @@ object ExcelMapper extends ExcelBasic {
 
       val aToMap = a.map {
         x =>
-          x._1 -> MapHelper.By(x._2.get).toMap
+          x._1 -> CC.By(x._2.get).toMap
       }
 
       super.setData(
@@ -53,7 +53,7 @@ object ExcelMapper extends ExcelBasic {
         aa =>
           aa._1 -> (aa._2.map {
             aaa =>
-              MapHelper.By(aaa.get).toMap
+              CC.By(aaa.get).toMap
           })
       }
 

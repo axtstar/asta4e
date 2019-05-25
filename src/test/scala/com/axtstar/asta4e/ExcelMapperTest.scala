@@ -3,7 +3,7 @@ package com.axtstar.asta4e
 import java.io.File
 import java.text.SimpleDateFormat
 
-import com.axtstar.asta4e.converter.MapHelper
+import com.axtstar.asta4e.converter.{CC, MapHelper}
 import com.axtstar.asta4e.test_class.Etc7Option
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
@@ -80,7 +80,7 @@ class ExcelMapperTest extends Specification {
       "ToMap" should {
         "toMap" in {
           val d = Data("axtstar","Tokyo, Japan")
-          val target = MapHelper.By(d).toMap
+          val target = CC.By(d).toMap
           target must be_==(Map( "name" -> "axtstar", "address" -> "Tokyo, Japan" ))
         }
       }
@@ -119,14 +119,14 @@ class ExcelMapperTest extends Specification {
         result2.time must be_==(Some(dateFormat.parse("2020/01/02")))
         result2.userDate must be_==(Some(dateFormat.parse("2020/01/02")))
 
-        val result3 = MapHelper.By(result).toMap
+        val result3 = CC.By(result).toMap
 
         //case class
         ExcelMapper.by[List[Etc7Option]].setDataDown(
           s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
           s"${currentDir}/src/test/resources/excel/output_template6.xlsx",
           s"${currentDir}/target/output6_1.xlsx",
-          "Sheet1" -> IndexedSeq(MapHelper.By(result).toMap, MapHelper.By(result2).toMap)
+          "Sheet1" -> IndexedSeq(CC.By(result).toMap, CC.By(result2).toMap)
         )
 
         //Map

@@ -2,12 +2,39 @@ package com.axtstar.asta4e.converter
 
 import java.util.Date
 
-import shapeless.{::, HList, HNil, LabelledGeneric, Lazy, Typeable, Witness}
+import shapeless.{::, HList, HNil, LabelledGeneric, Lazy, Typeable, Witness, ops}
 import shapeless.labelled.{FieldType, field}
+import shapeless.ops.record.ToMap
 
 import scala.util.Try
 
 object CC {
+  /**
+    * case class to Map
+    *
+    * @param a
+    * @tparam A
+    */
+  implicit class By[A](val a: A) extends AnyVal {
+
+    import ops.record._
+
+    def toMap[L <: HList](implicit
+                          gen: LabelledGeneric.Aux[A, L],
+                          tmr: ToMap[L]
+                         ): Map[String, Any] = {
+      val m: Map[tmr.Key, tmr.Value] = tmr(gen.to(a))
+      m.map {
+        case (k: Symbol, n: None.type) =>
+          k.name -> null
+        case (k: Symbol, Some(v)) =>
+          k.name -> v
+        case (k: Symbol, v) =>
+          k.name -> v
+      }
+    }
+  }
+
   trait FromMap[L <: HList] {
     def apply(m: Map[String, Any]): Option[L]
   }
