@@ -2,22 +2,15 @@ package com.axtstar.asta4e.test_class
 
 import java.util.Date
 
-case class VariousCell2(
+case class VariousCell_less_but_string(
               string:String,
-              int:String,
               long:String,
-              date:String,
               boolean:String,
-              float:String,
-              double:String,
+              double:Double,
               formula:String,
               stringOpt:String,
               intOpt:String,
-              longOpt:String,
               dateOpt:String,
-              booleanOpt:String,
-              floatOpt:String,
-              doubleOpt:String,
               formulaOpt:String
 ){
   val result : Boolean = false

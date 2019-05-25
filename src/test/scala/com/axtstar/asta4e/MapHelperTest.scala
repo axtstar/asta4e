@@ -13,48 +13,64 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class MapHelperTest extends Specification {
 
-  val currentDir = new File(".").getAbsoluteFile().getParent()
+  val currentDir = new File(".").getAbsoluteFile.getParent
 
 
   "ExcelHelper" should {
+
+    val v1 = VariousCell(string = "",
+      int = 1,
+      long = 2L,
+      date = new Date(),
+      boolean = true,
+      float = 3F,
+      double = 4D,
+      formula = "formula",
+      stringOpt = Some("stringOpt"),
+      intOpt = Some(5),
+      longOpt = Some(6L),
+      dateOpt = Some(new Date()),
+      booleanOpt = Some(true),
+      floatOpt = Some(7F),
+      doubleOpt = Some(8D),
+      formulaOpt = Some("formulaOpt")
+    )
+
+
     "to" in {
       //MapHelper.to[VariousCell].by[VariousCell]()
       MapHelper.to[VariousCell].isInstanceOf[MapHelper[VariousCell]] must be_==(true)
     }
 
     "from 2 to" should {
-      val v1 = VariousCell(string = "",
-        int = 1,
-        long = 2L,
-        date = new Date(),
-        boolean = true,
-        float = 3F,
-        double = 4D,
-        formula = "formula",
-        stringOpt = Some("stringOpt"),
-        intOpt = Some(5),
-        longOpt = Some(6L),
-        dateOpt = Some(new Date()),
-        booleanOpt = Some(true),
-        floatOpt = Some(7F),
-        doubleOpt = Some(8D),
-        formulaOpt = Some("formulaOpt")
-      )
 
       "same signature and same type" in {
-        val target = MapHelper.to[VariousCell1].from(v1)
+        val target = MapHelper.to[VariousCell_same].from(v1)
         target.string must be_==(v1.string)
         target.boolean must be_==(v1.boolean)
         target.float must be_==(v1.float)
       }
 
       "same signature but different type" in {
-        val target = MapHelper.to[VariousCell2].from(v1)
+        val target = MapHelper.to[VariousCell_same_but_string].from(v1)
         target.string must be_==(v1.string)
         target.boolean must be_==(v1.boolean.toString)
         target.float must be_==(v1.float.toString)
 
       }
+
+      "less signature and same type" in {
+        val target = MapHelper.to[VariousCell_less].from(v1)
+        target.string must be_==(v1.string)
+        target.boolean must be_==(v1.boolean)
+      }
+
+      "less signature but different type" in {
+        val target = MapHelper.to[VariousCell_less_but_string].from(v1)
+        target.string must be_==(v1.string)
+        target.boolean must be_==(v1.boolean.toString)
+      }
+
 
     }
 

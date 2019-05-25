@@ -4,36 +4,10 @@ import java.util.Date
 
 import shapeless.{::, HList, HNil, LabelledGeneric, Lazy, Typeable, Witness, ops}
 import shapeless.labelled.{FieldType, field}
-import shapeless.ops.record.ToMap
 
 import scala.util.Try
 
 object CC {
-  /**
-    * case class to Map
-    *
-    * @param a
-    * @tparam A
-    */
-  implicit class To[A](val a: A) extends AnyVal {
-
-    import ops.record._
-
-    def toMap[L <: HList](implicit
-                          gen: LabelledGeneric.Aux[A, L],
-                          tmr: ToMap[L]
-                         ): Map[String, Any] = {
-      val m: Map[tmr.Key, tmr.Value] = tmr(gen.to(a))
-      m.map {
-        case (k: Symbol, n: None.type) =>
-          k.name -> null
-        case (k: Symbol, Some(v)) =>
-          k.name -> v
-        case (k: Symbol, v) =>
-          k.name -> v
-      }
-    }
-  }
 
   implicit class By[T](val a: T) extends AnyVal {
 
@@ -109,7 +83,7 @@ object CC {
                     } else {
                       0
                     }
-                  case xx:Char =>
+                  case xx:Byte =>
                     if(xx.isValidChar) {
                       xx.toChar
                     } else {
@@ -307,6 +281,12 @@ object CC {
                   case xx:Double =>
                     if(xx.isValidByte) {
                       xx.toByte
+                    } else {
+                      0
+                    }
+                  case xx:Date =>
+                    if(xx.getTime.isValidByte) {
+                      xx.getTime.toByte
                     } else {
                       0
                     }

@@ -337,8 +337,9 @@ trait ExcelBasic {
                       target.getNumericCellValue
                     case CellType.STRING =>
                       target.getStringCellValue
-                  }
-                  )
+                    case _ =>
+                      null
+                  })
             }
 
           case _ =>
