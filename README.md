@@ -97,6 +97,12 @@ ExcelMapper[Data].setData(
 
 then, you get output.xlsx as output excel.
 
+if you are interested in the library, check my gitter8 repos from the below command.
+
+```bash
+sbt new axtstar/asta4e-sample.g8
+```
+
 # LICENSE
 
 ```
