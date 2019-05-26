@@ -2,63 +2,84 @@
 
 # Asta4e
 
-This library provide a template engine functionality for Excel for scala.
+This library provide a template engine functionality for Excel for scala via case class.
 
 # Feature
-- Retrieve data from Excel and convert them to Map[String, Any] or a case class
+- Retrieve data from Excel and convert them to case class.
 
-- Create Excel from Map[String, Any] or a case class
+- Create Excel from case class.
+
+- A case class to another case class converter.
 
 # Required
 - scala 2.11 or
 - scala 2.12
 
-# Concept
-- This library avoids a lot of boilerplate and location definitions.
+# Motivation
+   This library avoids a lot of boilerplate and location definitions powered by shapeless.
 
- Ordinary, typical apache poi coding is like location definitions, and they likely make mistakes a lot.
+   Ordinary, typical apache poi coding is like location definitions, and they likely make mistakes a lot.
 
- In order to avoid location definition in code, asta4e needs to prepare template Excel as location definition.
+   In order to avoid location definition in code, asta4e needs a case class and a bind Excel as location definition.
+
+   Then you can read excel as a case class way.
   
 # Usage
-- add dependency like the below
+
+add dependency like the below.
 
 ```sbt
 libraryDependencies ++= Seq(
-      "com.axtstar" %% "asta4e" % "0.0.8"
+      "com.axtstar" %% "asta4e" % "0.0.10"
 )
 ```
 
-- get bind data from Excel
- 
-  The function needs 2 Excel files, first template Excel contains ${}. Second is data Excel file which contains data as exact same location as template Excel file.
+import library.
+```scala
+import com.axtstar.asta4e._
+```
 
-  Arbitrary given excel template must contains data binder such as ${numeric}.
+provide case class you want to get.
+```scala
+case class Data(
+  string:String,
+  int:Int,
+  intOpt:Option[Int],
+  date:Date
+)
+```
+
+create excel as location definition.
+
+location definition needs the dollar-brancket parameteres like the below.
+
+${string}
+
+${int}
+
+${intOpt}
+
+${date}
+
+template.xlsx
+
+
+you may reduce a definition from the definitions. so asta4e provides initial(zero) value, which currently cannot provide default value such as `int:Int=10`.
+
+or you may add some another definiton(s) not including in the case class. in that case, asta4e just ignore them.
+
+${another}
+
+- get bind data from Excel
 
 ```scala
-val target = ExcelMapper.getData(
+val target = ExcelMapper[Data].getData(
         "template.xlsx",
         "data.xlsx",
         List("ignoreSheetName"))
 ```
 
-Excel template has two paramater, then you can create case class as same parameter.
-
-```scala
-case class Data(numeric:Double, string:String)
-```
-
-Then, get the data to the class from Excel like the below code. 
-
-```scala
-val data = ExcelMapper.by[Data].getData(
-        "template.xlsx",
-        "data.xlsx",
-        List())
-```
-
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  then, return to bind data to `target` 
+then, return to bind data to `target` as Data type.
 
 - set bind data to Excel
 
@@ -66,24 +87,19 @@ val data = ExcelMapper.by[Data].getData(
 
 ```scala
 import com.axtstar.asta4e.converter.E._
-ExcelMapper.setData(
+ExcelMapper[Data].setData(
         "template.xlsx",
         "data_template.xlsx",
         "output.xlsx",
-        "Sheet1" -> (
-            "A1" -> "test1" &
-            "A2" -> null &
-            "A3" -> "test3" &
-            "A4" -> 1
-        )
+        data
 )
 ```
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  output Excel. 
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  `com.axtstar.asta4e.converter.E._` is companion utilites for implicit conversion and gethering separeted tuple to Map.
+then, you get output.xlsx as output excel.
 
 # LICENSE
-- ```
+
+```
 Copyright 2018 axt
 
 Licensed under the Apache License, Version 2.0 (the "License");

@@ -258,46 +258,45 @@ trait ExcelBasic {
 
   def getOneCell(target:Cell, x:Location):scala.collection.immutable.Map[String, Any]= {
 
-    var results = scala.collection.immutable.Map[String, Any]()
     target match {
       case null =>
-        x.bindNames.foreach {
+        x.bindNames.map {
           xx =>
-            results += (getBindName(xx) -> null)
-        }
+            (getBindName(xx) -> null)
+        }.toMap
       case xx: Cell =>
         xx.getCellTypeEnum match {
           case CellType.NUMERIC =>
             val format = ExcelNumberFormat.from(xx.getCellStyle)
             if (DateUtil.isADateFormat(format)) {
-              x.bindNames.foreach {
+              x.bindNames.map {
                 xxx =>
-                  results += (getBindName(xxx) -> xx.getDateCellValue)
-              }
+                  (getBindName(xxx) -> xx.getDateCellValue)
+              }.toMap
             } else {
-              x.bindNames.foreach {
+              x.bindNames.map {
                 xxx =>
-                  results += (getBindName(xxx) -> xx.getNumericCellValue)
-              }
+                  (getBindName(xxx) -> xx.getNumericCellValue)
+              }.toMap
             }
 
           case CellType.BOOLEAN =>
-            x.bindNames.foreach {
+            x.bindNames.map {
               xxx =>
-                results += (getBindName(xxx) -> xx.getBooleanCellValue)
-            }
+                (getBindName(xxx) -> xx.getBooleanCellValue)
+            }.toMap
 
           case CellType.BLANK =>
-            x.bindNames.foreach {
+            x.bindNames.map {
               xxx =>
-                results += (getBindName(xxx) -> null)
-            }
+                (getBindName(xxx) -> null)
+            }.toMap
 
           case CellType._NONE =>
-            x.bindNames.foreach {
+            x.bindNames.map {
               xxx =>
-                results += (getBindName(xxx) -> null)
-            }
+                (getBindName(xxx) -> null)
+            }.toMap
 
           case CellType.STRING =>
             //construct regular expression from a template cell
@@ -317,21 +316,21 @@ trait ExcelBasic {
             val all = regEx.findFirstMatchIn(xx.getStringCellValue)
 
             if (all.isDefined) {
-              for (i <- 0 until all.get.groupCount) {
-                results += getBindName(x.bindNames(i)) -> all.get.group(i + 1)
-              }
+              (for (i <- 0 until all.get.groupCount) yield{
+                getBindName(x.bindNames(i)) -> all.get.group(i + 1)
+              }).toMap
             }
             else {
-              x.bindNames.foreach {
+              x.bindNames.map {
                 xx =>
-                  results += getBindName(xx) -> null
-              }
+                  (getBindName(xx) -> null)
+              }.toMap
             }
 
           case CellType.FORMULA =>
-            x.bindNames.foreach {
+            x.bindNames.map {
               xx =>
-                results += getBindName(xx) -> (
+                (getBindName(xx) -> (
                   target.getCachedFormulaResultTypeEnum match {
                     case CellType.NUMERIC =>
                       target.getNumericCellValue
@@ -339,15 +338,14 @@ trait ExcelBasic {
                       target.getStringCellValue
                     case _ =>
                       null
-                  })
-            }
+                  }))
+            }.toMap
 
           case _ =>
             throw new IllegalArgumentException
 
         }
     }
-    results
   }
 
   /**
