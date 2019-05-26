@@ -9,5 +9,6 @@ case class Etc7Option(
               formula:Option[String],
               bool:Option[Boolean],
               time:Option[Date],
-              userDate:Option[Date]
+              userDate:Option[Date],
+              var variable:String
 )

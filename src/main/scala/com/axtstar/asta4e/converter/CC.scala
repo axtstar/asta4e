@@ -2,7 +2,8 @@ package com.axtstar.asta4e.converter
 
 import java.util.Date
 
-import shapeless.{::, HList, HNil, LabelledGeneric, Lazy, Typeable, Witness, ops}
+import shapeless.PolyDefns.Case
+import shapeless.{::, HList, HNil, LabelledGeneric, Lazy, Poly0, Poly1, Typeable, Witness, ops}
 import shapeless.labelled.{FieldType, field}
 
 import scala.util.Try
@@ -404,4 +405,13 @@ object CC {
       def apply(m: Map[String, Any]): Option[HNil] = Some(HNil)
     }
   }
+
+  object typeablePoly extends Poly1 {
+    implicit def default[A](implicit typeable: Typeable[A]): Case.Aux[A, String] = at(_ => typeable.describe)
+  }
+
+  object nullPoly extends Poly0 {
+    implicit def default[A]: ProductCase.Aux[HNil, A] = at(null.asInstanceOf[A])
+  }
+
 }

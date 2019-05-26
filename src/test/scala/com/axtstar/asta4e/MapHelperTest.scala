@@ -9,7 +9,6 @@ import com.axtstar.asta4e.test_class._
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
-
 @RunWith(classOf[JUnitRunner])
 class MapHelperTest extends Specification {
 
@@ -71,6 +70,11 @@ class MapHelperTest extends Specification {
         target.boolean must be_==(v1.boolean.toString)
       }
 
+      "more signature" in {
+        val target = MapHelper.to[VariousCell_more].from(v1)
+        target.string must be_==(v1.string)
+        target.boolean must be_==(v1.boolean)
+      }
 
     }
 

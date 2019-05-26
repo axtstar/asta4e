@@ -1,7 +1,8 @@
 package com.axtstar.asta4e.converter
 
-import com.axtstar.asta4e.converter.CC.FromMap
-import shapeless.ops.record.ToMap
+import com.axtstar.asta4e.converter.CC._
+import shapeless.ops.hlist
+import shapeless.ops.record.{Keys, ToMap, Values}
 import shapeless.{HList, LabelledGeneric, Typeable, ops}
 
 object MapHelper extends MapHelper {
@@ -15,29 +16,71 @@ object MapHelper extends MapHelper {
 
 class MapHelper[A] {
 
-  def from[R <: HList,T,L <: HList](t:T)(implicit
+  def from[R <: HList,T,L <: HList, K <: HList, V <: HList, V1 <: HList](t:T)(implicit
                               genT: LabelledGeneric.Aux[T, L],
                               tmrT: ToMap[L],
                               fromMapT: FromMap[L],
                               typeableT: Typeable[T],
                               gen: LabelledGeneric.Aux[A, R],
                               fromMap: FromMap[R],
-                              typeable: Typeable[A]
+                              typeable: Typeable[A],
+                              keys: Keys.Aux[R, K],
+                              ktl: hlist.ToList[K, Symbol],
+                              values: Values.Aux[R, V],
+                              mapper: hlist.Mapper.Aux[typeablePoly.type, V, V1],
+                              fillWith: hlist.FillWith[nullPoly.type, V],
+                              vtl: hlist.ToList[V1, String]
 
   ):A={
     val m = CC.By(t)
     from(m.toMap)
   }
 
-  def from[R <: HList](m: Map[String, Any])(implicit
+  /*
+
+    trait Cpo[A] {
+
+    def withPrimaryKey[R <: HList, K <: HList, V <: HList, V1 <: HList](f: Seq[Symbol] => Seq[Symbol])(implicit
+      labellGeneric: LabelledGeneric.Aux[A, R],
+      keys: Keys.Aux[R, K],
+      ktl: hlist.ToList[K, Symbol],
+      values: Values.Aux[R, V],
+      mapper: hlist.Mapper.Aux[typeablePoly.type, V, V1],
+      fillWith: hlist.FillWith[nullPoly.type, V],
+      vtl: hlist.ToList[V1, String]
+    ): Cpo[A] = {
+      println(ktl(keys())) // List('i, 's)
+      println(vtl(mapper(fillWith()))) // List(Int, String)
+      ???
+    }
+  }
+
+   */
+
+
+  def from[R <: HList, K <: HList, V <: HList, V1 <: HList](m: Map[String, Any])(implicit
                                             gen: LabelledGeneric.Aux[A, R],
                                             fromMap: FromMap[R],
-                                            typeable: Typeable[A]
+                                            typeable: Typeable[A],
+                                            keys: Keys.Aux[R, K],
+                                            ktl: hlist.ToList[K, Symbol],
+                                            values: Values.Aux[R, V],
+                                            mapper: hlist.Mapper.Aux[typeablePoly.type, V, V1],
+                                            fillWith: hlist.FillWith[nullPoly.type, V],
+                                            vtl: hlist.ToList[V1, String]
+
   ): A = {
 
-    val target = fromMap( m.map{ mm =>
-      mm._1 -> mm._2
-    }).map {
+    val columns = ktl(keys())
+
+    val target = fromMap( columns.map{ x =>
+      x.name -> (
+        if(m.contains(x.name)){
+          m(x.name)
+        } else {
+          null
+        })
+    }.toMap).map {
       x =>
         gen.from(x)
     }
