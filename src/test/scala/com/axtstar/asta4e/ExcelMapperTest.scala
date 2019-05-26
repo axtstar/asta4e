@@ -3,7 +3,7 @@ package com.axtstar.asta4e
 import java.io.File
 import java.text.SimpleDateFormat
 
-import com.axtstar.asta4e.core.ExcelHelper
+import com.axtstar.asta4e.converter.{CC, MapHelper}
 import com.axtstar.asta4e.test_class.Etc7Option
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
@@ -80,7 +80,7 @@ class ExcelMapperTest extends Specification {
       "ToMap" should {
         "toMap" in {
           val d = Data("axtstar","Tokyo, Japan")
-          val target = ExcelMapper.By(d).toMap
+          val target = CC.By(d).toMap
           target must be_==(Map( "name" -> "axtstar", "address" -> "Tokyo, Japan" ))
         }
       }
@@ -92,7 +92,7 @@ class ExcelMapperTest extends Specification {
           List()
         )
 
-        val result = ExcelHelper.to[Etc7Option].from(target.head._2.head)
+        val result = MapHelper.to[Etc7Option].from(target.head._2.head)
 
         val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
         val timeFormat = new SimpleDateFormat("HH:mm:ss")
@@ -108,25 +108,25 @@ class ExcelMapperTest extends Specification {
         result.time must be_==(Some(dateFormat.parse("2020/01/02")))
         result.userDate must be_==(Some(dateFormat.parse("2020/01/02")))
 
-        val result2 = ExcelHelper.to[Etc7Option].fromAsOption(target.head._2.tail.head)
+        val result2 = MapHelper.to[Etc7Option].from(target.head._2(1))
 
-        result2.get.numeric must be_==(Some(2.0))
-        result2.get.string must be_==(Some("漢字"))
+        result2.numeric must be_==(Some(2.0))
+        result2.string must be_==(Some("漢字"))
 
-        result2.get.date must be_==(Some(dateFormat.parse("2020/01/02")))
-        result2.get.formula must be_==(Some("Rts"))
-        result2.get.bool must be_==(Some(false))
-        result2.get.time must be_==(Some(dateFormat.parse("2020/01/02")))
-        result2.get.userDate must be_==(Some(dateFormat.parse("2020/01/02")))
+        result2.date must be_==(Some(dateFormat.parse("2020/01/02")))
+        result2.formula must be_==(Some("Rts"))
+        result2.bool must be_==(Some(false))
+        result2.time must be_==(Some(dateFormat.parse("2020/01/02")))
+        result2.userDate must be_==(Some(dateFormat.parse("2020/01/02")))
 
-        val result3 = ExcelMapper.By(result).toMap
+        val result3 = CC.By(result).toMap
 
         //case class
         ExcelMapper.by[List[Etc7Option]].setDataDown(
           s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
           s"${currentDir}/src/test/resources/excel/output_template6.xlsx",
           s"${currentDir}/target/output6_1.xlsx",
-          "Sheet1" -> IndexedSeq(ExcelMapper.By(result).toMap, ExcelMapper.By(result2.get).toMap)
+          "Sheet1" -> IndexedSeq(CC.By(result).toMap, CC.By(result2).toMap)
         )
 
         //Map

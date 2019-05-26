@@ -4,14 +4,18 @@ import java.io.{File, FileInputStream, FileOutputStream}
 import java.util.Date
 
 import org.apache.poi.ss.usermodel._
-import org.apache.poi.ss.util.{CellAddress, CellReference}
+import org.apache.poi.ss.util.{CellReference}
 
 import scala.util.matching.Regex
+
+object ExcelBasic extends ExcelBasic {
+
+}
 
 trait ExcelBasic {
   val allReplaceBrace: Regex = "\\$\\{([^\\}]*)\\}".r
 
-  def getBindName(bindName: String): String = {
+  private def getBindName(bindName: String): String = {
     bindName.replaceAll("^\\$\\{", "").replaceAll("\\}$", "")
   }
 
@@ -21,7 +25,7 @@ trait ExcelBasic {
     * @param xlsPath template excel path
     * @return tuple 4
     */
-  protected def getExcelLocation(xlsPath: String): List[(String, CellAddress, Cell, List[String])] = {
+  def getExcelLocation(xlsPath: String): List[Location] = {
     val stream = new FileInputStream(xlsPath)
     getExcelLocation(stream)
   }
@@ -32,7 +36,8 @@ trait ExcelBasic {
     * @param stream template Excel file stream
     *
     */
-  protected def getExcelLocation(stream: FileInputStream): List[(String, CellAddress, Cell, List[String])] = {
+  //List[(String, CellAddress, Cell, List[String])]
+  def getExcelLocation(stream: FileInputStream): List[Location] = {
 
     val workbook = WorkbookFactory.create(stream)
 
@@ -46,7 +51,7 @@ trait ExcelBasic {
             val cell = row.getCell(columnID)
             cell match {
               case null =>
-                (null, null, null, Nil)
+                None
               case x: Cell =>
                 val all = allReplaceBrace.findAllIn(x.toString)
                 var result: List[String] = Nil
@@ -55,21 +60,21 @@ trait ExcelBasic {
                   result = d :: result
                 }
                 if (result == Nil) {
-                  (null, null, null, Nil)
+                  None
                 } else {
                   // sheet name -> cell address -> cell(value) -> List(binder)
-                  (sheet.getSheetName, cell.getAddress, cell, result.reverse)
+                  Option(Location(name=cell.getStringCellValue, positionX = cell.getColumnIndex, positionY = cell.getRowIndex, bindNames = result.reverse))
                 }
             }
           })
-            .filter(_._1 != null) //ignore null
+            .filter(_ != None) //ignore null
             .toList
         })
           .filter(_.nonEmpty)
           .toList
       }).flatten.flatten.toList
 
-      results
+      results map (_.get)
     }
     catch {
       case ex:Throwable =>
@@ -82,7 +87,7 @@ trait ExcelBasic {
   }
 
 
-  def setOneCell(target:Cell, bindMap: (String, Any), maps: Map[String, Any], x:(String, CellAddress, Cell, List[String]))={
+  def setOneCell(target:Cell, bindMap: (String, Any), maps: Map[String, Any], x:Location)={
     target.getCellTypeEnum match {
       case CellType.NUMERIC =>
         bindMap._2 match {
@@ -103,7 +108,7 @@ trait ExcelBasic {
         target.setCellValue(if (bindMap._2 == null) null.asInstanceOf[String] else bindMap._2.toString)
 
       case _ =>
-        val alt = maps.foldLeft(x._3.toString) {
+        val alt = maps.foldLeft(x.name) {
           (acc, xxx) =>
             val alt = if (xxx._2 == null) {
               ""
@@ -141,7 +146,24 @@ trait ExcelBasic {
     )
   }
 
-  /**
+  def setData(
+               dataTemplateXlsStream: FileInputStream,
+               outLayoutStream: FileInputStream,
+               outXlsPath: String,
+               bindData: (String, Map[String, Any])*
+             ): Unit = {
+    val locationMap = getExcelLocation(dataTemplateXlsStream)
+
+    setData(
+      locationMap,
+      outLayoutStream,
+      outXlsPath,
+      bindData:_*
+    )
+
+  }
+
+    /**
     * output Excel from Map
     *
     * @param dataTemplateXlsStream Excel template File stream which has ${} binderes
@@ -150,12 +172,11 @@ trait ExcelBasic {
     * @param bindData              DataBinder which consists Map of name of ${} and value
     */
   def setData(
-               dataTemplateXlsStream: FileInputStream,
+               locationMap: List[Location],
                outLayoutStream: FileInputStream,
                outXlsPath: String,
                bindData: (String, Map[String, Any])*
              ): Unit = {
-    val locationMap = getExcelLocation(dataTemplateXlsStream)
 
     val workbook = WorkbookFactory.create(outLayoutStream)
 
@@ -190,17 +211,17 @@ trait ExcelBasic {
 
                   locationMap.filter(
                     p =>
-                      p._4.contains("${" + bindMap._1 + "}")
+                      p.bindNames.contains("${" + bindMap._1 + "}")
                   ).foreach {
                     x =>
                       //iterate ${}
-                      x._4.foreach {
+                      x.bindNames.foreach {
                         xx => {
                           if (map.exists(
                             p =>
                               "${" + s"${p._1}" + "}" == xx)
                           ) {
-                            val ref = new CellReference(x._2.toString)
+                            val ref = new CellReference(x.positionY, x.positionX)
                             var row = sheet.getRow(ref.getRow)
                             if (row==null){
                               sheet.createRow(ref.getRow)
@@ -235,117 +256,137 @@ trait ExcelBasic {
     }
   }
 
-  def getOneCell(target:Cell, x:(String, CellAddress, Cell, List[String])):scala.collection.immutable.Map[String, Any]={
+  def getOneCell(target:Cell, x:Location):scala.collection.immutable.Map[String, Any]= {
 
-    x match { case (name, cellAddress, cell, expression ) =>
-
-      var results = scala.collection.immutable.Map[String, Any]()
-      target match {
-        case null =>
-          expression.foreach {
-            xx =>
-              results += (getBindName(xx) -> null)
-          }
-        case xx: Cell =>
-          xx.getCellTypeEnum match {
-            case CellType.NUMERIC =>
-              val format = ExcelNumberFormat.from(xx.getCellStyle)
-              if (DateUtil.isADateFormat(format)) {
-                expression.foreach {
-                  xxx =>
-                    results += (getBindName(xxx) -> xx.getDateCellValue)
-                }
-              } else {
-                expression.foreach {
-                  xxx =>
-                    results += (getBindName(xxx) -> xx.getNumericCellValue)
-                }
-              }
-
-            case CellType.BOOLEAN =>
-              expression.foreach {
+    var results = scala.collection.immutable.Map[String, Any]()
+    target match {
+      case null =>
+        x.bindNames.foreach {
+          xx =>
+            results += (getBindName(xx) -> null)
+        }
+      case xx: Cell =>
+        xx.getCellTypeEnum match {
+          case CellType.NUMERIC =>
+            val format = ExcelNumberFormat.from(xx.getCellStyle)
+            if (DateUtil.isADateFormat(format)) {
+              x.bindNames.foreach {
                 xxx =>
-                  results += (getBindName(xxx) -> xx.getBooleanCellValue)
+                  results += (getBindName(xxx) -> xx.getDateCellValue)
               }
-
-            case CellType.BLANK =>
-              expression.foreach {
+            } else {
+              x.bindNames.foreach {
                 xxx =>
-                  results += (getBindName(xxx) -> null)
+                  results += (getBindName(xxx) -> xx.getNumericCellValue)
               }
+            }
 
-            case CellType._NONE =>
-              expression.foreach {
-                xxx =>
-                  results += (getBindName(xxx) -> null)
+          case CellType.BOOLEAN =>
+            x.bindNames.foreach {
+              xxx =>
+                results += (getBindName(xxx) -> xx.getBooleanCellValue)
+            }
+
+          case CellType.BLANK =>
+            x.bindNames.foreach {
+              xxx =>
+                results += (getBindName(xxx) -> null)
+            }
+
+          case CellType._NONE =>
+            x.bindNames.foreach {
+              xxx =>
+                results += (getBindName(xxx) -> null)
+            }
+
+          case CellType.STRING =>
+            //construct regular expression from a template cell
+            //consider multiple binder like `${id1}-${id2}`
+            val regEx = ("(?s)" + x.bindNames.foldLeft(if (x.name == "") {
+              ""
+            } else {
+              x.name
+            }) {
+              (acc, xx) =>
+                val xxx = xx.replace("$", "\\$")
+                  .replace("{", "\\{")
+                  .replace("}", "\\}")
+                acc.replaceFirst(xxx, "(.+)")
+            }).r
+
+            val all = regEx.findFirstMatchIn(xx.getStringCellValue)
+
+            if (all.isDefined) {
+              for (i <- 0 until all.get.groupCount) {
+                results += getBindName(x.bindNames(i)) -> all.get.group(i + 1)
               }
-
-            case CellType.STRING =>
-              //construct regular expression from a template cell
-              //consider multiple binder like `${id1}-${id2}`
-              val regEx = ("(?s)" + x._4.foldLeft(if (x._3 == null) {
-                ""
-              } else {
-                cell.toString
-              }) {
-                (acc, xx) =>
-                  val xxx = xx.replace("$", "\\$")
-                    .replace("{", "\\{")
-                    .replace("}", "\\}")
-                  acc.replaceFirst(xxx, "(.+)")
-              }).r
-
-              val all = regEx.findFirstMatchIn(xx.getStringCellValue)
-
-              if (all.isDefined) {
-                for (i <- 0 until all.get.groupCount) {
-                  results += getBindName(x._4(i)) -> all.get.group(i + 1)
-                }
-              }
-              else {
-                expression.foreach {
-                  xx =>
-                    results += getBindName(xx) -> null
-                }
-              }
-
-            case CellType.FORMULA =>
-              expression.foreach {
+            }
+            else {
+              x.bindNames.foreach {
                 xx =>
-                  results += getBindName(xx) -> (
-                    target.getCachedFormulaResultTypeEnum match {
-                      case CellType.NUMERIC =>
-                        target.getNumericCellValue
-                      case CellType.STRING =>
-                        target.getStringCellValue
-                    }
-)
+                  results += getBindName(xx) -> null
               }
+            }
 
-            case _ =>
-              throw new IllegalArgumentException
+          case CellType.FORMULA =>
+            x.bindNames.foreach {
+              xx =>
+                results += getBindName(xx) -> (
+                  target.getCachedFormulaResultTypeEnum match {
+                    case CellType.NUMERIC =>
+                      target.getNumericCellValue
+                    case CellType.STRING =>
+                      target.getStringCellValue
+                    case _ =>
+                      null
+                  })
+            }
 
-          }
-      }
-      results
+          case _ =>
+            throw new IllegalArgumentException
+
+        }
     }
+    results
   }
 
   /**
-    * output Excel from Map
     *
-    * @param dataTemplateXlsStream Excel template File stream which has ${} binderes
-    * @param outLayoutStream     Output templae Excel File stream
-    * @param outXlsPath            Output Excel path
-    * @param bindData              DataBinder which consists Map of name of ${} and value
+    * @param dataTemplateXlsStream
+    * @param outLayoutStream
+    * @param outXlsPath
+    * @param bindData
     */
   def setDataDown(
                    dataTemplateXlsStream: FileInputStream,
                    outLayoutStream: FileInputStream,
                    outXlsPath: String,
                    bindData: (String, IndexedSeq[Map[String, Any]])*
-                 ): Unit = {
+                 ): Unit ={
     val locationMap = getExcelLocation(dataTemplateXlsStream)
+
+    setDataDown(
+      locationMap,
+      outLayoutStream,
+      outXlsPath,
+      bindData:_*
+    )
+
+  }
+
+  /**
+    * output Excel from Map
+    *
+    * @param outLayoutStream     Output templae Excel File stream
+    * @param outXlsPath            Output Excel path
+    * @param bindData              DataBinder which consists Map of name of ${} and value
+    */
+  def setDataDown(
+                   locationMap: List[Location],
+                   outLayoutStream: FileInputStream,
+                   outXlsPath: String,
+                   bindData: (String, IndexedSeq[Map[String, Any]])*
+                 ): Unit = {
 
     val workbook = WorkbookFactory.create(outLayoutStream)
 
@@ -383,17 +424,17 @@ trait ExcelBasic {
 
                                 locationMap.filter(
                                   p =>
-                                    p._4.contains("${" + bindMap._1 + "}")
+                                    p.bindNames.contains("${" + bindMap._1 + "}")
                                 ).foreach {
                                   x =>
                                     //iterate ${}
-                                    x._4.foreach {
+                                    x.bindNames.foreach {
                                       xx => {
                                         if (map.exists(
                                           p =>
                                             "${" + s"${p._1}" + "}" == xx)
                                         ) {
-                                          val ref = new CellReference(x._2.toString)
+                                          val ref = new CellReference(x.positionY, x.positionX)
                                           var row = sheet.getRow(ref.getRow + index)
                                           if (row==null){
                                             sheet.createRow(ref.getRow + index)
@@ -472,8 +513,21 @@ trait ExcelBasic {
 
   }
 
+  def getData(
+               dataTemplateXlsStream: FileInputStream,
+               iStream: FileInputStream,
+               ignoreSheet: List[String]
+             ): IndexedSeq[(String, Map[String, Any])] = {
+    val locations = getExcelLocation(dataTemplateXlsStream)
 
-  /**
+    getData(
+      locations,
+      iStream,
+      ignoreSheet
+    )
+  }
+
+    /**
     * get databind Map from Excel
     *
     * @param dataTemplateXlsStream template Excel file stream
@@ -481,11 +535,10 @@ trait ExcelBasic {
     * @param ignoreSheet           ignore Sheet names
     */
   def getData(
-               dataTemplateXlsStream: FileInputStream,
+               locations: List[Location],
                iStream: FileInputStream,
                ignoreSheet: List[String]
              ): IndexedSeq[(String, Map[String, Any])] = {
-    val locations = getExcelLocation(dataTemplateXlsStream)
 
     val workbook = WorkbookFactory.create(iStream)
 
@@ -504,7 +557,7 @@ trait ExcelBasic {
             x =>
               //target cell
               val target = {
-                val ref = new CellReference(x._2.toString)
+                val ref = new CellReference(x.positionY, x.positionX)
                 val row = sheet.getRow(ref.getRow)
 
                 if (ref == null || row == null) {
@@ -551,7 +604,21 @@ trait ExcelBasic {
   }
 
 
-  /**
+  def getDataDown(
+                   dataTemplateXlsStream: FileInputStream,
+                   iStream: FileInputStream,
+                   ignoreSheet: List[String]
+                 ): IndexedSeq[(String, IndexedSeq[Map[String, Any]])] = {
+    val locations = getExcelLocation(dataTemplateXlsStream)
+
+    getDataDown(
+      locations,
+      iStream,
+      ignoreSheet
+    )
+  }
+
+    /**
     * get databind list Map from Excel
     *
     * @param dataTemplateXlsStream template Excel file stream
@@ -559,11 +626,10 @@ trait ExcelBasic {
     * @param ignoreSheet           ignore Sheet names
     */
   def getDataDown(
-               dataTemplateXlsStream: FileInputStream,
-               iStream: FileInputStream,
-               ignoreSheet: List[String]
+                   locations: List[Location],
+                   iStream: FileInputStream,
+                   ignoreSheet: List[String]
              ): IndexedSeq[(String, IndexedSeq[Map[String, Any]])] = {
-    val locations = getExcelLocation(dataTemplateXlsStream)
 
     val workbook = WorkbookFactory.create(iStream)
 
@@ -575,7 +641,7 @@ trait ExcelBasic {
         if (ignoreSheet.contains(sheet.getSheetName)) {
           null
         } else {
-          val maxRowDef = locations.maxBy(_._3.getRowIndex)._3.getRowIndex
+          val maxRowDef = locations.maxBy(_.positionY).positionY
           val minRow = 0
           val maxRow = sheet.getLastRowNum() - maxRowDef
           sheet.getSheetName -> (for (i <- minRow to maxRow ) yield {
@@ -585,7 +651,7 @@ trait ExcelBasic {
               x =>
                 //target cell
                 val target = {
-                  val ref = new CellReference(x._2.toString)
+                  val ref = new CellReference(x.positionY, x.positionX)
                   val row = sheet.getRow(ref.getRow + i)
 
                   if (ref == null || row == null) {
