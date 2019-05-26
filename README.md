@@ -86,7 +86,7 @@ then, return to bind data to `target` as Data type.
   The function also needs 2 input Excel, first is Excel as same as the above, second is layout template Excel which copy to output data, asta4e does not manipulate excel layout.
 
 ```scala
-import com.axtstar.asta4e.converter.E._
+import com.axtstar.asta4e._
 ExcelMapper[Data].setData(
         "template.xlsx",
         "data_template.xlsx",
