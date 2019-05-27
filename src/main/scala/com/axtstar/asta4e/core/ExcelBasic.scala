@@ -179,10 +179,11 @@ object ExcelBasic {
     }
   }
 
-  def setOneCell(target:Cell, bindMap: (String, Any), maps: Map[String, Any], x:Location)={
+  def setOneCell(target:Cell, name: String, maps: Map[String, Any], x:Location)={
+    val bindData = maps(name)
     target.getCellTypeEnum match {
       case CellType.NUMERIC =>
-        bindMap._2 match {
+        bindData match {
           case null =>
             target.setCellType(CellType.BLANK)
           case tiny: Date =>
@@ -190,14 +191,14 @@ object ExcelBasic {
           case tiny: Integer =>
             target.setCellValue(tiny.toDouble)
           case _ =>
-            target.setCellValue(bindMap._2.asInstanceOf[Double])
+            target.setCellValue(bindData.asInstanceOf[Double])
         }
 
       case CellType.BOOLEAN =>
-        target.setCellValue(if (bindMap._2 == null) null.asInstanceOf[Boolean] else bindMap._2.asInstanceOf[Boolean])
+        target.setCellValue(if (bindData == null) null.asInstanceOf[Boolean] else bindData.asInstanceOf[Boolean])
 
       case CellType.FORMULA =>
-        target.setCellValue(if (bindMap._2 == null) null.asInstanceOf[String] else bindMap._2.toString)
+        target.setCellValue(if (bindData == null) null.asInstanceOf[String] else bindData.toString)
 
       case _ =>
         val alt = maps.foldLeft(x.name) {
@@ -219,26 +220,29 @@ class ExcelBasic {
 
   private var locationMap : List[Location] = List()
   private var ignoreSheets:List[String] = List()
+  private var layoutXls:FileInputStream = null
+  private var outputXls:FileOutputStream = null
 
-  private def copy()={
-    val target = new ExcelBasic()
-    target.locationMap = this.locationMap
-    target.ignoreSheets = this.ignoreSheets
-    target
-  }
 
   def withLocation(_locationMap:List[Location]) ={
-    val target = this.copy()
-    target.locationMap= _locationMap
-    target
+    this.locationMap= _locationMap
+    this
   }
 
   def withIgnoreSheets(_ignoreSheets:List[String])={
-    val target = this.copy()
-    target.ignoreSheets = _ignoreSheets
-    target
+    this.ignoreSheets = _ignoreSheets
+    this
   }
 
+  def withLayoutXls(_layoutXls:FileInputStream)={
+    this.layoutXls = _layoutXls
+    this
+  }
+
+  def withOutXls(_outputXls:FileOutputStream)={
+    this.outputXls = _outputXls
+    this
+  }
 
   import  com.axtstar.asta4e.core.ExcelBasic._
 
@@ -250,6 +254,7 @@ class ExcelBasic {
     * @param outXlsPath      Output Excel path
     * @param bindData        DataBinder which consists Map of name of ${} and value
     */
+  @deprecated("this method will be removed, use withXXXXX, instead", "0.0.11")
   def setData(
                dataTemplateXls: String,
                outLayout: String,
@@ -267,6 +272,7 @@ class ExcelBasic {
     )
   }
 
+  @deprecated("this method will be removed, use withXXXXX, instead", "0.0.11")
   def setData(
                dataTemplateXlsStream: FileInputStream,
                outLayoutStream: FileInputStream,
@@ -275,12 +281,13 @@ class ExcelBasic {
              ): Unit = {
     val locationMap = getExcelLocation(dataTemplateXlsStream)
 
-    setData(
-      locationMap,
-      outLayoutStream,
-      outXlsPath,
-      bindData:_*
-    )
+    this.withLocation(locationMap)
+        .withLayoutXls(outLayoutStream)
+        .withOutXls(new FileOutputStream(outXlsPath))
+        .setData(bindData:_*){
+          x =>
+            x
+        }
 
   }
 
@@ -292,6 +299,8 @@ class ExcelBasic {
     * @param outXlsPath            Output Excel path
     * @param bindData              DataBinder which consists Map of name of ${} and value
     */
+
+    @deprecated("this method will be removed, use withXXXXX, instead", "0.0.11")
   def setData(
                locationMap: List[Location],
                outLayoutStream: FileInputStream,
@@ -355,7 +364,7 @@ class ExcelBasic {
                               target = row.getCell(ref.getCol)
                             }
 
-                            setOneCell(target, bindMap, map, x)
+                            setOneCell(target, bindMap._1, map, x)
                           }
                         }
                       }
@@ -377,6 +386,84 @@ class ExcelBasic {
     }
   }
 
+  def setData(bindData: (String, Map[String, Any])*)
+             (f:Map[String, Any] => Map[String, Any])={
+    val workbook = WorkbookFactory.create(layoutXls)
+
+    try {
+
+      //check sheet names
+      val sheetNames = for (i <- 0 until workbook.getNumberOfSheets) yield {
+        (i, workbook.getSheetAt(i).getSheetName)
+      }
+
+      //Clone Sheet if not exists
+      bindData.foreach {
+        sheetMap =>
+          if (!sheetNames.exists(_._2 == sheetMap._1)) {
+            workbook.cloneSheet(0)
+            workbook.setSheetName(workbook.getNumberOfSheets - 1, sheetMap._1)
+          }
+      }
+
+      bindData.foreach {
+        bindDataASheet =>
+          bindDataASheet match {
+            case (sheetName:String, map:Map[String, Any]) =>
+
+              //determine sheet
+              val sheet = workbook.getSheet(sheetName)
+
+              map.foreach {
+                bindMap =>
+
+                  locationMap.filter(
+                    p =>
+                      p.bindNames.contains("${" + bindMap._1 + "}")
+                  ).foreach {
+                    x =>
+                      //iterate ${}
+                      x.bindNames.foreach {
+                        xx => {
+                          if (map.exists(
+                            p =>
+                              "${" + s"${p._1}" + "}" == xx)
+                          ) {
+                            val ref = new CellReference(x.positionY, x.positionX)
+                            var row = sheet.getRow(ref.getRow)
+                            if (row==null){
+                              sheet.createRow(ref.getRow)
+                              row = sheet.getRow(ref.getRow)
+                            }
+
+                            var target = row.getCell(ref.getCol)
+                            if(target==null){
+                              row.createCell(ref.getCol)
+                              target = row.getCell(ref.getCol)
+                            }
+
+                            setOneCell(target, bindMap._1, f(map), x)
+                          }
+                        }
+                      }
+                  }
+              }
+          }
+      }
+
+      workbook.write(outputXls)
+    }
+    catch{
+      case ex:Throwable =>
+        throw ex
+    }
+    finally{
+      outputXls.close()
+      workbook.close()
+      layoutXls.close()
+    }
+  }
+
   /**
     *
     * @param dataTemplateXlsStream
@@ -384,6 +471,7 @@ class ExcelBasic {
     * @param outXlsPath
     * @param bindData
     */
+  @deprecated("this method will be removed, use withXXXXX, instead", "0.0.11")
   def setDataDown(
                    dataTemplateXlsStream: FileInputStream,
                    outLayoutStream: FileInputStream,
@@ -408,6 +496,7 @@ class ExcelBasic {
     * @param outXlsPath            Output Excel path
     * @param bindData              DataBinder which consists Map of name of ${} and value
     */
+  @deprecated("this method will be removed, use withXXXXX, instead", "0.0.11")
   def setDataDown(
                    locationMap: List[Location],
                    outLayoutStream: FileInputStream,
@@ -473,7 +562,7 @@ class ExcelBasic {
                                             target = row.getCell(ref.getCol)
                                           }
 
-                                          setOneCell(target, bindMap, map, x)
+                                          setOneCell(target, bindMap._1, map, x)
                                         }
                                       }
                                     }
@@ -505,6 +594,7 @@ class ExcelBasic {
     * @param outXlsPath      Output Excel path
     * @param bindData        DataBinder which consists Map of name of ${} and value
     */
+  @deprecated("this method will be removed, use withXXXXX, instead", "0.0.11")
   def setDataDown(
                dataTemplateXls: String,
                outLayout: String,
@@ -514,15 +604,101 @@ class ExcelBasic {
     val dataTemplateXlsStream = new FileInputStream(dataTemplateXls)
     val outTemplateStream = new FileInputStream(outLayout)
 
-    setDataDown(
-      dataTemplateXlsStream,
-      outTemplateStream,
-      outXlsPath,
-      bindData: _*
-    )
+    this.withLocation(getExcelLocation((dataTemplateXls)))
+        .withLayoutXls(new FileInputStream(outLayout))
+        .withOutXls(new FileOutputStream(outXlsPath))
+        .setDataDown(bindData:_*){
+          x =>
+            x
+        }
   }
 
-  @deprecated("this method will be removed, use withXXXXX, instead", "0.0.11")
+
+  def setDataDown(bindData: (String, IndexedSeq[Map[String, Any]])*)
+             (f:Map[String, Any] => Map[String, Any])= {
+    val workbook = WorkbookFactory.create(layoutXls)
+
+    try {
+
+      //check sheet names
+      val sheetNames = for (i <- 0 until workbook.getNumberOfSheets) yield {
+        (i, workbook.getSheetAt(i).getSheetName)
+      }
+
+      //Clone Sheet if not exists
+      bindData.foreach {
+        sheetMap =>
+          if (!sheetNames.exists(_._2 == sheetMap._1)) {
+            workbook.cloneSheet(0)
+            workbook.setSheetName(workbook.getNumberOfSheets - 1, sheetMap._1)
+          }
+      }
+
+      bindData.foreach {
+        bindDataASheet =>
+          bindDataASheet match {
+            case (sheetName:String, maps:IndexedSeq[Map[String, Any]]) =>
+
+              //determine sheet
+              val sheet = workbook.getSheet(sheetName)
+              maps.zipWithIndex.foreach {
+                mapZip =>
+                  mapZip match {
+                    case (map:Map[String, Any], index:Int) =>
+                      map.foreach {
+                        bindMap =>
+
+                          locationMap.filter(
+                            p =>
+                              p.bindNames.contains("${" + bindMap._1 + "}")
+                          ).foreach {
+                            x =>
+                              //iterate ${}
+                              x.bindNames.foreach {
+                                xx => {
+                                  if (map.exists(
+                                    p =>
+                                      "${" + s"${p._1}" + "}" == xx)
+                                  ) {
+                                    val ref = new CellReference(x.positionY, x.positionX)
+                                    var row = sheet.getRow(ref.getRow + index)
+                                    if (row==null){
+                                      sheet.createRow(ref.getRow + index)
+                                      row = sheet.getRow(ref.getRow + index)
+                                    }
+                                    var target = row.getCell(ref.getCol)
+                                    if(target==null){
+                                      row.createCell(ref.getCol)
+                                      target = row.getCell(ref.getCol)
+                                    }
+
+                                    setOneCell(target, bindMap._1, f(map), x)
+                                  }
+                                }
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+      }
+
+      workbook.write(outputXls)
+    }
+    catch{
+      case ex:Throwable =>
+        throw ex
+    }
+    finally{
+      outputXls.close()
+      workbook.close()
+      layoutXls.close()
+    }
+
+  }
+
+
+    @deprecated("this method will be removed, use withXXXXX, instead", "0.0.11")
   def getData(
                dataTemplateXls: String,
                inputXlsPath: String,
