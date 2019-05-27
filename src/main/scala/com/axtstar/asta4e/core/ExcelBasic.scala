@@ -10,16 +10,8 @@ import scala.util.matching.Regex
 
 object ExcelBasic {
 
-  def apply(list:List[Location])={
-    new ExcelBasic(list)
-  }
-
-  def apply(bindXlsPath:String)={
-    new ExcelBasic(bindXlsPath)
-  }
-
-  def apply(bindXlsStream:FileInputStream)={
-    new ExcelBasic(bindXlsStream)
+  def apply()={
+    new ExcelBasic()
   }
 
   private val allReplaceBrace: Regex = "\\$\\{([^\\}]*)\\}".r
@@ -95,22 +87,96 @@ object ExcelBasic {
     }
   }
 
-}
+  def getOneCell(target:Cell, x:Location):Map[String, Any]= {
 
-class ExcelBasic(locationMap:List[Location]) {
+    target match {
+      case null =>
+        x.bindNames.map {
+          xx =>
+            (getBindName(xx) -> null)
+        }.toMap
+      case xx: Cell =>
+        xx.getCellTypeEnum match {
+          case CellType.NUMERIC =>
+            val format = ExcelNumberFormat.from(xx.getCellStyle)
+            if (DateUtil.isADateFormat(format)) {
+              x.bindNames.map {
+                xxx =>
+                  (getBindName(xxx) -> xx.getDateCellValue)
+              }.toMap
+            } else {
+              x.bindNames.map {
+                xxx =>
+                  (getBindName(xxx) -> xx.getNumericCellValue)
+              }.toMap
+            }
 
-  import  com.axtstar.asta4e.core.ExcelBasic._
+          case CellType.BOOLEAN =>
+            x.bindNames.map {
+              xxx =>
+                (getBindName(xxx) -> xx.getBooleanCellValue)
+            }.toMap
 
-  def this()={
-    this(List())
-  }
+          case CellType.BLANK =>
+            x.bindNames.map {
+              xxx =>
+                (getBindName(xxx) -> null)
+            }.toMap
 
-  def this(bindXlsPath:String)={
-    this(ExcelBasic.getExcelLocation(bindXlsPath))
-  }
+          case CellType._NONE =>
+            x.bindNames.map {
+              xxx =>
+                (getBindName(xxx) -> null)
+            }.toMap
 
-  def this(bindXlsStream:FileInputStream)={
-    this(ExcelBasic.getExcelLocation(bindXlsStream))
+          case CellType.STRING =>
+            //construct regular expression from a template cell
+            //consider multiple binder like `${id1}-${id2}`
+            val regEx = ("(?s)" + x.bindNames.foldLeft(if (x.name == "") {
+              ""
+            } else {
+              x.name
+            }) {
+              (acc, xx) =>
+                val xxx = xx.replace("$", "\\$")
+                  .replace("{", "\\{")
+                  .replace("}", "\\}")
+                acc.replaceFirst(xxx, "(.+)")
+            }).r
+
+            val all = regEx.findFirstMatchIn(xx.getStringCellValue)
+
+            if (all.isDefined) {
+              (for (i <- 0 until all.get.groupCount) yield{
+                getBindName(x.bindNames(i)) -> all.get.group(i + 1)
+              }).toMap
+            }
+            else {
+              x.bindNames.map {
+                xx =>
+                  (getBindName(xx) -> null)
+              }.toMap
+            }
+
+          case CellType.FORMULA =>
+            x.bindNames.map {
+              xx =>
+                (getBindName(xx) -> (
+                  target.getCachedFormulaResultTypeEnum match {
+                    case CellType.NUMERIC =>
+                      target.getNumericCellValue
+                    case CellType.STRING =>
+                      target.getStringCellValue
+                    case _ =>
+                      null
+                  }))
+            }.toMap
+
+          case _ =>
+            throw new IllegalArgumentException
+
+        }
+    }
   }
 
   def setOneCell(target:Cell, bindMap: (String, Any), maps: Map[String, Any], x:Location)={
@@ -146,6 +212,12 @@ class ExcelBasic(locationMap:List[Location]) {
         target.setCellValue(alt)
     }
   }
+
+}
+
+class ExcelBasic {
+
+  import  com.axtstar.asta4e.core.ExcelBasic._
 
   /**
     * output Excel from Map
@@ -279,98 +351,6 @@ class ExcelBasic(locationMap:List[Location]) {
       out.close()
       workbook.close()
       outLayoutStream.close()
-    }
-  }
-
-  def getOneCell(target:Cell, x:Location):scala.collection.immutable.Map[String, Any]= {
-
-    target match {
-      case null =>
-        x.bindNames.map {
-          xx =>
-            (getBindName(xx) -> null)
-        }.toMap
-      case xx: Cell =>
-        xx.getCellTypeEnum match {
-          case CellType.NUMERIC =>
-            val format = ExcelNumberFormat.from(xx.getCellStyle)
-            if (DateUtil.isADateFormat(format)) {
-              x.bindNames.map {
-                xxx =>
-                  (getBindName(xxx) -> xx.getDateCellValue)
-              }.toMap
-            } else {
-              x.bindNames.map {
-                xxx =>
-                  (getBindName(xxx) -> xx.getNumericCellValue)
-              }.toMap
-            }
-
-          case CellType.BOOLEAN =>
-            x.bindNames.map {
-              xxx =>
-                (getBindName(xxx) -> xx.getBooleanCellValue)
-            }.toMap
-
-          case CellType.BLANK =>
-            x.bindNames.map {
-              xxx =>
-                (getBindName(xxx) -> null)
-            }.toMap
-
-          case CellType._NONE =>
-            x.bindNames.map {
-              xxx =>
-                (getBindName(xxx) -> null)
-            }.toMap
-
-          case CellType.STRING =>
-            //construct regular expression from a template cell
-            //consider multiple binder like `${id1}-${id2}`
-            val regEx = ("(?s)" + x.bindNames.foldLeft(if (x.name == "") {
-              ""
-            } else {
-              x.name
-            }) {
-              (acc, xx) =>
-                val xxx = xx.replace("$", "\\$")
-                  .replace("{", "\\{")
-                  .replace("}", "\\}")
-                acc.replaceFirst(xxx, "(.+)")
-            }).r
-
-            val all = regEx.findFirstMatchIn(xx.getStringCellValue)
-
-            if (all.isDefined) {
-              (for (i <- 0 until all.get.groupCount) yield{
-                getBindName(x.bindNames(i)) -> all.get.group(i + 1)
-              }).toMap
-            }
-            else {
-              x.bindNames.map {
-                xx =>
-                  (getBindName(xx) -> null)
-              }.toMap
-            }
-
-          case CellType.FORMULA =>
-            x.bindNames.map {
-              xx =>
-                (getBindName(xx) -> (
-                  target.getCachedFormulaResultTypeEnum match {
-                    case CellType.NUMERIC =>
-                      target.getNumericCellValue
-                    case CellType.STRING =>
-                      target.getStringCellValue
-                    case _ =>
-                      null
-                  }))
-            }.toMap
-
-          case _ =>
-            throw new IllegalArgumentException
-
-        }
     }
   }
 

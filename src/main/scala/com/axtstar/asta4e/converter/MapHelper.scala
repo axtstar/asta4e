@@ -36,28 +36,6 @@ class MapHelper[A] {
     from(m.toMap)
   }
 
-  /*
-
-    trait Cpo[A] {
-
-    def withPrimaryKey[R <: HList, K <: HList, V <: HList, V1 <: HList](f: Seq[Symbol] => Seq[Symbol])(implicit
-      labellGeneric: LabelledGeneric.Aux[A, R],
-      keys: Keys.Aux[R, K],
-      ktl: hlist.ToList[K, Symbol],
-      values: Values.Aux[R, V],
-      mapper: hlist.Mapper.Aux[typeablePoly.type, V, V1],
-      fillWith: hlist.FillWith[nullPoly.type, V],
-      vtl: hlist.ToList[V1, String]
-    ): Cpo[A] = {
-      println(ktl(keys())) // List('i, 's)
-      println(vtl(mapper(fillWith()))) // List(Int, String)
-      ???
-    }
-  }
-
-   */
-
-
   def from[R <: HList, K <: HList, V <: HList, V1 <: HList](m: Map[String, Any])(implicit
                                             gen: LabelledGeneric.Aux[A, R],
                                             fromMap: FromMap[R],
