@@ -1,6 +1,6 @@
 package com.axtstar.asta4e
 
-import com.axtstar.asta4e.core.ExcelBasic
+import com.axtstar.asta4e.core.{ExcelBasic, Location}
 import shapeless._
 import com.axtstar.asta4e.converter.CC._
 import com.axtstar.asta4e.converter.{CC, MapHelper}
@@ -9,12 +9,17 @@ import com.axtstar.asta4e.converter.{CC, MapHelper}
 object ExcelMapper extends ExcelBasic {
 
   def apply[A]()={
-    val target = new ExcelMapper[A]
+    val target = new ExcelMapper[A](List())
+    target
+  }
+
+  def apply[A](bindXlsPath:String)={
+    val target = new ExcelMapper[A](ExcelBasic.getExcelLocation(bindXlsPath))
     target
   }
 
   def by[A]: ExcelMapper[A] = {
-    val target = new ExcelMapper[A]
+    val target = new ExcelMapper[A](List())
     target
   }
 }
@@ -23,7 +28,7 @@ object ExcelMapper extends ExcelBasic {
   *
   * @tparam A
   */
-class ExcelMapper[A] extends ExcelBasic {
+class ExcelMapper[A](locationMap:List[Location]) extends ExcelBasic(locationMap) {
 
   import ops.record._
 
@@ -42,7 +47,9 @@ class ExcelMapper[A] extends ExcelBasic {
         x._1 -> CC.By(x._2.get).toMap
     }
 
-    super.setData(
+    val target = ExcelBasic(dataTemplateXls)
+
+    target.setData(
       dataTemplateXls,
       outLayout,
       outXlsPath,
@@ -68,7 +75,9 @@ class ExcelMapper[A] extends ExcelBasic {
         })
     }
 
-    super.setDataDown(
+    val target = ExcelBasic(dataTemplateXls)
+
+    target.setDataDown(
       dataTemplateXls,
       outLayout,
       outXlsPath,
@@ -82,13 +91,16 @@ class ExcelMapper[A] extends ExcelBasic {
                            ignoreSheet: List[String]
                          )(implicit gen: LabelledGeneric.Aux[A, R]
                            , fromMap: FromMap[R]) = {
-    val target = super.getData(
+
+    val target = ExcelBasic(dataTemplateXls)
+
+    val result = target.getData(
       dataTemplateXls,
       inputXlsPath,
       ignoreSheet
     )
 
-    target.map {
+    result.map {
       m =>
 
         val target = fromMap(m._2.map { mm => mm._1 -> mm._2 }).map {
@@ -107,8 +119,11 @@ class ExcelMapper[A] extends ExcelBasic {
 
                              )(implicit gen: LabelledGeneric.Aux[A, R]
                                , fromMap: FromMap[R]) = {
-    val target = super.getDataDown(dataTemplateXls, inputXlsPath, ignoreSheet)
-    val result = target.map {
+    val target = ExcelBasic(dataTemplateXls)
+
+
+    val result = target.getDataDown(dataTemplateXls, inputXlsPath, ignoreSheet)
+    result.map {
       x =>
         x._1 -> x._2.map {
           xx =>
@@ -118,7 +133,6 @@ class ExcelMapper[A] extends ExcelBasic {
             }
         }
     }
-    result
   }
   //End ExcelMapper[A]
 }

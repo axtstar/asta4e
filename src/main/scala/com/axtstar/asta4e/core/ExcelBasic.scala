@@ -14,6 +14,13 @@ object ExcelBasic {
     new ExcelBasic(list)
   }
 
+  def apply(bindXlsPath:String)={
+    new ExcelBasic(bindXlsPath)
+  }
+
+  def apply(bindXlsStream:FileInputStream)={
+    new ExcelBasic(bindXlsStream)
+  }
 
   private val allReplaceBrace: Regex = "\\$\\{([^\\}]*)\\}".r
 
@@ -185,7 +192,7 @@ class ExcelBasic(locationMap:List[Location]) {
     /**
     * output Excel from Map
     *
-    * @param dataTemplateXlsStream Excel template File stream which has ${} binderes
+    * @param locationMap          Excel template File stream which has ${} binderes
     * @param outLayoutStream     Output templae Excel File stream
     * @param outXlsPath            Output Excel path
     * @param bindData              DataBinder which consists Map of name of ${} and value
