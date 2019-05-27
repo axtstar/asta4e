@@ -217,6 +217,29 @@ object ExcelBasic {
 
 class ExcelBasic {
 
+  private var locationMap : List[Location] = List()
+  private var ignoreSheets:List[String] = List()
+
+  private def copy()={
+    val target = new ExcelBasic()
+    target.locationMap = this.locationMap
+    target.ignoreSheets = this.ignoreSheets
+    target
+  }
+
+  def withLocation(_locationMap:List[Location]) ={
+    val target = this.copy()
+    target.locationMap= _locationMap
+    target
+  }
+
+  def withIgnoreSheets(_ignoreSheets:List[String])={
+    val target = this.copy()
+    target.ignoreSheets = _ignoreSheets
+    target
+  }
+
+
   import  com.axtstar.asta4e.core.ExcelBasic._
 
   /**
@@ -499,7 +522,7 @@ class ExcelBasic {
     )
   }
 
-
+  @deprecated("this method will be removed, use withXXXXX, instead", "0.0.11")
   def getData(
                dataTemplateXls: String,
                inputXlsPath: String,
@@ -517,6 +540,7 @@ class ExcelBasic {
 
   }
 
+  @deprecated("this method will be removed, use withXXXXX, instead", "0.0.11")
   def getData(
                dataTemplateXlsStream: FileInputStream,
                iStream: FileInputStream,
@@ -531,6 +555,43 @@ class ExcelBasic {
     )
   }
 
+  def getData[B](
+                  iStream: FileInputStream
+             )(f:Map[String, Any] => B)={
+    val workbook = WorkbookFactory.create(iStream)
+
+    try {
+
+      for (i <- 0 until workbook.getNumberOfSheets) yield {
+        val sheet = workbook.getSheetAt(i)
+        val result = locationMap.flatMap {
+          x =>
+            //target cell
+            val target = {
+              val ref = new CellReference(x.positionY, x.positionX)
+              val row = sheet.getRow(ref.getRow)
+
+              if (ref == null || row == null) {
+                null
+              }
+              else {
+                row.getCell(ref.getCol)
+              }
+            }
+            getOneCell(target, x)
+        }
+        sheet.getSheetName -> f(result.toMap)
+      }
+    } catch {
+      case ex: Throwable =>
+        throw ex
+    }
+    finally {
+      workbook.close()
+      iStream.close()
+    }
+ }
+
     /**
     * get databind Map from Excel
     *
@@ -538,58 +599,22 @@ class ExcelBasic {
     * @param iStream               input Excel
     * @param ignoreSheet           ignore Sheet names
     */
+    @deprecated("this method will be removed, use withXXXXX, instead", "0.0.11")
   def getData(
                locations: List[Location],
                iStream: FileInputStream,
                ignoreSheet: List[String]
              ): IndexedSeq[(String, Map[String, Any])] = {
 
-    val workbook = WorkbookFactory.create(iStream)
-
-    try {
-
-      val result = (for (index <- 0 until workbook.getNumberOfSheets) yield {
-        val sheet = workbook.getSheetAt(index)
-
-        if (ignoreSheet.contains(sheet.getSheetName)) {
-          null
-        } else {
-
-          var results = scala.collection.immutable.Map[String, Any]()
-
-          locations.foreach {
-            x =>
-              //target cell
-              val target = {
-                val ref = new CellReference(x.positionY, x.positionX)
-                val row = sheet.getRow(ref.getRow)
-
-                if (ref == null || row == null) {
-                  null
-                }
-                else {
-                  row.getCell(ref.getCol)
-                }
-              }
-
-              results ++= getOneCell(target, x)
-          }
-          sheet.getSheetName -> results
+      this.withLocation(locations)
+        .withIgnoreSheets(ignoreSheet)
+        .getData(iStream){
+          x =>
+            x
         }
-      }).filter(_ != null)
-
-      result
-
-    } catch {
-      case ex:Throwable =>
-        throw ex
-    }
-    finally{
-      workbook.close()
-      iStream.close()
-    }
   }
 
+  @deprecated("this method will be removed, use withXXXXX, instead", "0.0.11")
   def getDataDown(
                dataTemplateXls: String,
                inputXlsPath: String,
@@ -607,19 +632,18 @@ class ExcelBasic {
 
   }
 
-
+  @deprecated("this method will be removed, use withXXXXX, instead", "0.0.11")
   def getDataDown(
                    dataTemplateXlsStream: FileInputStream,
                    iStream: FileInputStream,
                    ignoreSheet: List[String]
                  ): IndexedSeq[(String, IndexedSeq[Map[String, Any]])] = {
     val locations = getExcelLocation(dataTemplateXlsStream)
-
-    getDataDown(
-      locations,
-      iStream,
-      ignoreSheet
-    )
+    this.withLocation(locations)
+        .withIgnoreSheets(ignoreSheet)
+        .getDataDown(iStream){
+          x => x
+        }
   }
 
     /**
@@ -629,29 +653,35 @@ class ExcelBasic {
     * @param iStream               input Excel
     * @param ignoreSheet           ignore Sheet names
     */
+  @deprecated("this method will be removed, use withXXXXX, instead", "0.0.11")
   def getDataDown(
                    locations: List[Location],
                    iStream: FileInputStream,
                    ignoreSheet: List[String]
              ): IndexedSeq[(String, IndexedSeq[Map[String, Any]])] = {
+    this.withLocation(locations)
+      .withIgnoreSheets(ignoreSheet)
+      .getDataDown(iStream){
+        x =>
+          x
+      }
+  }
 
+
+  def getDataDown[B](iStream:FileInputStream)(f:Map[String, Any] => B)={
     val workbook = WorkbookFactory.create(iStream)
-
     try {
-
-      val result = (for (index <- 0 until workbook.getNumberOfSheets) yield {
+      (for (index <- 0 until workbook.getNumberOfSheets) yield {
         val sheet = workbook.getSheetAt(index)
 
-        if (ignoreSheet.contains(sheet.getSheetName)) {
+        if (ignoreSheets.contains(sheet.getSheetName)) {
           null
         } else {
-          val maxRowDef = locations.maxBy(_.positionY).positionY
+          val maxRowDef = locationMap.maxBy(_.positionY).positionY
           val minRow = 0
           val maxRow = sheet.getLastRowNum() - maxRowDef
           sheet.getSheetName -> (for (i <- minRow to maxRow ) yield {
-            var results = scala.collection.immutable.Map[String, Any]()
-
-            locations.foreach {
+            val results = (locationMap.flatMap {
               x =>
                 //target cell
                 val target = {
@@ -665,16 +695,14 @@ class ExcelBasic {
                     row.getCell(ref.getCol)
                   }
                 }
+                val result = getOneCell(target, x)
+                result
+            }).toMap
 
-                results ++= getOneCell(target, x)
-            }
-            results
-
+            f(results)
           })
         }
       }).filter(_ != null)
-
-      result
 
     } catch {
       case ex:Throwable =>
@@ -684,7 +712,7 @@ class ExcelBasic {
       workbook.close()
       iStream.close()
     }
-  }
 
+  }
 
 }

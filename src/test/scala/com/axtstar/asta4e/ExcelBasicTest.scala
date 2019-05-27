@@ -1,12 +1,13 @@
 package com.axtstar.asta4e
 
-import java.io.File
+import java.io.{File, FileInputStream}
 import java.text.SimpleDateFormat
 import java.util.Date
 
 import com.axtstar.asta4e.converter.MapHelper
-import com.axtstar.asta4e.core.{ExcelBasic, ExcelCollection}
+import com.axtstar.asta4e.core.ExcelBasic
 import com.axtstar.asta4e.test_class.Etc7Option
+import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -37,32 +38,29 @@ class ExcelBasicTest extends Specification {
 
     "ExcelCollection" should {
       "GetData" in {
-        val locationMap = ExcelBasic.getExcelLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx")
-        val target = ExcelCollection.GetData(locationMap,s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx").map {
+        val target = ExcelBasic.apply()
+          .withLocation(ExcelBasic.getExcelLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx"))
+          .getData(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx")) {
           x =>
             x
         }
 
         target.size must be_==(1)
-        target(0)("string") must be_==("STRING")
-        target(0)("int") must be_==(11101)
+        target(0)._2("string") must be_==("STRING")
+        target(0)._2("int") must be_==(11101)
 
 
       }
 
       "GetDataDown" in {
-        val _target = ExcelCollection.GetDataDown(
-          ExcelBasic.getExcelLocation(s"${currentDir}/src/test/resources/excel/bind_template6.xlsx"),
-          s"${currentDir}/src/test/resources/excel/read_sample6.xlsx",
-          List()
-        )
+        val target = ExcelBasic.apply()
+            .withLocation(ExcelBasic.getExcelLocation(s"${currentDir}/src/test/resources/excel/bind_template6.xlsx"))
+            .getDataDown(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_sample6.xlsx")) {
+            x =>
+              x
+          }
 
-        val target = _target.map {
-          x =>
-            x
-        }
-
-        val result = MapHelper.to[Etc7Option].from(target.head._2.head.asInstanceOf[Map[String, Any]])
+        val result = MapHelper.to[Etc7Option].from(target(0)._2.head.asInstanceOf[Map[String, Any]])
 
         val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
         val timeFormat = new SimpleDateFormat("HH:mm:ss")
@@ -78,7 +76,7 @@ class ExcelBasicTest extends Specification {
         result.time must be_==(Some(dateFormat.parse("2020/01/02")))
         result.userDate must be_==(Some(dateFormat.parse("2020/01/02")))
 
-        val result2 = MapHelper.to[Etc7Option].from(target.head._2(1).asInstanceOf[Map[String, Any]])
+        val result2 = MapHelper.to[Etc7Option].from(target(0)._2(1).asInstanceOf[Map[String, Any]])
 
         result2.numeric must be_==(Some(2.0))
         result2.string must be_==(Some("漢字"))
@@ -90,6 +88,16 @@ class ExcelBasicTest extends Specification {
         result2.userDate must be_==(Some(dateFormat.parse("2020/01/02")))
 
 
+      }
+
+      "withLocation" in {
+        val target = ExcelBasic.apply()
+          .withLocation(ExcelBasic.getExcelLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx"))
+          .getData(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx")){
+            x =>
+              x
+          }
+        target.size must be_==(1)
       }
 
     }

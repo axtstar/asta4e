@@ -81,6 +81,11 @@ val target = ExcelMapper[Data].getData(
 
 then, return to bind data to `target` as Data type.
 
+```
+IndexedSeq("sheetName" -> Data)
+
+```
+
 - set bind data to Excel
 
   The function also needs 2 input Excel, first is Excel as same as the above, second is layout template Excel which copy to output data, asta4e does not manipulate excel layout.
