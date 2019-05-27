@@ -8,14 +8,16 @@ import org.apache.poi.ss.util.{CellReference}
 
 import scala.util.matching.Regex
 
-object ExcelBasic extends ExcelBasic {
+object ExcelBasic {
 
-}
+  def apply(list:List[Location])={
+    new ExcelBasic(list)
+  }
 
-trait ExcelBasic {
-  val allReplaceBrace: Regex = "\\$\\{([^\\}]*)\\}".r
 
-  private def getBindName(bindName: String): String = {
+  private val allReplaceBrace: Regex = "\\$\\{([^\\}]*)\\}".r
+
+  def getBindName(bindName: String): String = {
     bindName.replaceAll("^\\$\\{", "").replaceAll("\\}$", "")
   }
 
@@ -86,6 +88,23 @@ trait ExcelBasic {
     }
   }
 
+}
+
+class ExcelBasic(locationMap:List[Location]) {
+
+  import  com.axtstar.asta4e.core.ExcelBasic._
+
+  def this()={
+    this(List())
+  }
+
+  def this(bindXlsPath:String)={
+    this(ExcelBasic.getExcelLocation(bindXlsPath))
+  }
+
+  def this(bindXlsStream:FileInputStream)={
+    this(ExcelBasic.getExcelLocation(bindXlsStream))
+  }
 
   def setOneCell(target:Cell, bindMap: (String, Any), maps: Map[String, Any], x:Location)={
     target.getCellTypeEnum match {
