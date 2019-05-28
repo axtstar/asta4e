@@ -1,8 +1,9 @@
-package com.axtstar.asta4e
+package com.axtstar.asta4e.excel
 
 import java.io.File
 
-import com.axtstar.asta4e.test_class.{Data_HOLIZONTAL, Data_VIRTICAL}
+import com.axtstar.asta4e.ExcelMapper
+import com.axtstar.asta4e.test_class.Data_VIRTICAL
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner

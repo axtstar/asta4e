@@ -1,14 +1,14 @@
-package com.axtstar.asta4e
+package com.axtstar.asta4e.excel
 
-import java.io.File
+import java.io.{File, FileInputStream, FileOutputStream}
 import java.text.SimpleDateFormat
 
 import com.axtstar.asta4e.converter.{CC, MapHelper}
-import com.axtstar.asta4e.test_class.Etc7Option
+import com.axtstar.asta4e.test_class.{Etc7Option, VariousCell}
+import com.axtstar.asta4e.ExcelMapper
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
-import org.specs2.specification.Scope
 
 @RunWith(classOf[JUnitRunner])
 class ExcelMapperTest extends Specification {
@@ -147,6 +147,25 @@ class ExcelMapperTest extends Specification {
 
         "" must_== ("")
       }
+
+      "A to B" in {
+        val data = ExcelMapper.by[VariousCell].getData(
+          s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx",
+          s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx",
+          List()
+        )
+
+
+        ExcelMapper.by[VariousCell]
+          .withLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx")
+          .withIgnoreSheets(List())
+          .withLayoutXls(new FileInputStream(s"${currentDir}/src/test/resources/excel/output_template6.xlsx"))
+          .withOutXls(new FileOutputStream(s"${currentDir}/target/output6_3.xlsx"))
+          .setCC(data)
+
+        "" must_== ("")
+      }
+
     }
 
   }

@@ -10,10 +10,6 @@ import scala.util.matching.Regex
 
 object ExcelBasic {
 
-  def apply()={
-    new ExcelBasic()
-  }
-
   private val allReplaceBrace: Regex = "\\$\\{([^\\}]*)\\}".r
 
   def getBindName(bindName: String): String = {
@@ -216,26 +212,7 @@ object ExcelBasic {
 
 }
 
-class ExcelBasic extends DataCore[ExcelBasic] {
-
-  private var ignoreSheets:List[String] = List()
-  private var layoutXls:FileInputStream = null
-  private var outputXls:FileOutputStream = null
-
-  def withIgnoreSheets(_ignoreSheets:List[String])={
-    this.ignoreSheets = _ignoreSheets
-    this
-  }
-
-  def withLayoutXls(_layoutXls:FileInputStream)={
-    this.layoutXls = _layoutXls
-    this
-  }
-
-  def withOutXls(_outputXls:FileOutputStream)={
-    this.outputXls = _outputXls
-    this
-  }
+trait ExcelBasic extends DataCore[ExcelBasic] with InitialCore[ExcelBasic] {
 
   import  com.axtstar.asta4e.core.ExcelBasic._
 
@@ -658,7 +635,7 @@ class ExcelBasic extends DataCore[ExcelBasic] {
 
   def getData[B](
                   iStream: FileInputStream
-             )(f:Map[String, Any] => B)={
+             )(f:Map[String, Any] => B):IndexedSeq[(String,B)]={
     val workbook = WorkbookFactory.create(iStream)
 
     try {
@@ -769,7 +746,8 @@ class ExcelBasic extends DataCore[ExcelBasic] {
   }
 
 
-  def getDataDown[B](iStream:FileInputStream)(f:Map[String, Any] => B)={
+  def getDataDown[B](iStream:FileInputStream)
+                    (f:Map[String, Any] => B):IndexedSeq[(String, IndexedSeq[B])]={
     val workbook = WorkbookFactory.create(iStream)
     try {
       (for (index <- 0 until workbook.getNumberOfSheets) yield {

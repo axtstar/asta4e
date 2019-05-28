@@ -1,9 +1,12 @@
 package com.axtstar.asta4e
 
-import com.axtstar.asta4e.core.{ExcelBasic, Location}
+import java.io.{FileInputStream, FileOutputStream}
+
+import com.axtstar.asta4e.core._
 import shapeless._
 import com.axtstar.asta4e.converter.CC._
 import com.axtstar.asta4e.converter.{CC, MapHelper}
+import shapeless.LabelledGeneric.Aux
 
 
 object ExcelMapper extends ExcelBasic {
@@ -23,11 +26,62 @@ object ExcelMapper extends ExcelBasic {
   *
   * @tparam A
   */
-class ExcelMapper[A] extends ExcelBasic {
+class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
+
+  def withLocation(_locationMap: List[Location]) = {
+    super.withLocation(_locationMap).asInstanceOf[ExcelMapper[A]]
+  }
+
+  override def withLocation(_locationMapPathExcel: String) = {
+    super.withLocation(_locationMapPathExcel).asInstanceOf[ExcelMapper[A]]
+  }
+
+  override def withIgnoreSheets(_ignoreSheets: List[String]) = {
+    super.withIgnoreSheets(_ignoreSheets).asInstanceOf[ExcelMapper[A]]
+  }
+
+  override def withLayoutXls(_layoutXls: FileInputStream) = {
+    super.withLayoutXls(_layoutXls).asInstanceOf[ExcelMapper[A]]
+  }
+
+  override def withOutXls(_outputXls: FileOutputStream) = {
+    super.withOutXls(_outputXls).asInstanceOf[ExcelMapper[A]]
+  }
 
   import ops.record._
 
-  def setData[L <: HList](
+  def setCC[L <: HList](bindCC: IndexedSeq[(String, Option[A])])
+                                   (implicit gen: Aux[A, L],
+                                    tmr: ToMap[L]): Unit = {
+    val map = bindCC.map {
+      x =>
+        x._1 -> CC.By(x._2.get).toMap
+    }
+    super.setData(map:_*){
+      x =>
+        x
+    }
+
+  }
+
+  override def setCCDown[L <: HList](bindData: IndexedSeq[(String, IndexedSeq[Option[A]])])
+                                    (implicit gen: Aux[A, L], tmr: ToMap[L]): Unit = {
+    val map = bindData.map {
+      x =>
+        x._1 -> (x._2.map {
+          xx =>
+            CC.By(xx.get).toMap
+        })
+    }
+
+    super.setDataDown(map:_*){
+      x =>
+        x
+    }
+
+  }
+
+  def setData[L <: HList,B](
                            dataTemplateXls: String,
                            outLayout: String,
                            outXlsPath: String,
@@ -42,9 +96,11 @@ class ExcelMapper[A] extends ExcelBasic {
         x._1 -> CC.By(x._2.get).toMap
     }
 
-    val target = ExcelBasic()
 
-    target.setData(
+    super.withLocation(dataTemplateXls)
+      .withLayoutXls(new FileInputStream(outLayout))
+      .withOutXls(new FileOutputStream(outXlsPath))
+      .setData(
       dataTemplateXls,
       outLayout,
       outXlsPath,
@@ -52,7 +108,7 @@ class ExcelMapper[A] extends ExcelBasic {
     )
   }
 
-  def setDataDown[L <: HList](
+  def setDataDown[L <: HList,B](
                                dataTemplateXls: String,
                                outLayout: String,
                                outXlsPath: String,
@@ -70,41 +126,50 @@ class ExcelMapper[A] extends ExcelBasic {
         })
     }
 
-    val target = ExcelBasic()
-
-    target.setDataDown(
-      dataTemplateXls,
-      outLayout,
-      outXlsPath,
-      aToMap: _*
-    )
+    super.withLocation(dataTemplateXls)
+      .withLayoutXls(new FileInputStream(outLayout))
+      .withOutXls(new FileOutputStream(outXlsPath))
+      .setDataDown(aToMap: _*){
+        x =>
+          x
+      }
   }
 
-  def getData[R <: HList](
+
+  override def getCC[R <: HList](iStream:FileInputStream)
+                           (implicit gen: LabelledGeneric.Aux[A, R]
+                              , fromMap: FromMap[R])={
+    super.getData(iStream){
+      x =>
+        fromMap(x).map{
+          xx =>
+            gen.from(xx)
+        }
+    }
+  }
+
+  override def getCCDown[R <: HList](iStream: FileInputStream)
+                                    (implicit gen: Aux[A, R], fromMap: FromMap[R]): IndexedSeq[(String, IndexedSeq[Option[A]])] = {
+
+    super.getDataDown(iStream){
+      x =>
+        fromMap(x).map{
+          xx =>
+            gen.from(xx)
+        }
+    }
+
+  }
+
+  def getData[R <: HList,B](
                            dataTemplateXls: String,
                            inputXlsPath: String,
                            ignoreSheet: List[String]
                          )(implicit gen: LabelledGeneric.Aux[A, R]
                            , fromMap: FromMap[R]) = {
-
-    val target = ExcelBasic()
-
-    val result = target.getData(
-      dataTemplateXls,
-      inputXlsPath,
-      ignoreSheet
-    )
-
-    result.map {
-      m =>
-
-        val target = fromMap(m._2.map { mm => mm._1 -> mm._2 }).map {
-          x =>
-            gen.from(x)
-        }
-
-        m._1 -> target
-    }
+    this.withLocation(ExcelBasic.getExcelLocation(dataTemplateXls))
+      .withIgnoreSheets(ignoreSheet)
+      .getCC(new FileInputStream(inputXlsPath))
   }
 
   def getDataDown[R <: HList](
@@ -114,19 +179,16 @@ class ExcelMapper[A] extends ExcelBasic {
 
                              )(implicit gen: LabelledGeneric.Aux[A, R]
                                , fromMap: FromMap[R]) = {
-    val target = ExcelBasic()
+    super.withLocation(ExcelBasic.getExcelLocation(dataTemplateXls))
+      .withIgnoreSheets(ignoreSheet)
+      .getDataDown(new FileInputStream(inputXlsPath)) {
+        x =>
+          fromMap(x).map {
+            xx =>
+              gen.from(xx)
+          }
 
-    val result = target.getDataDown(dataTemplateXls, inputXlsPath, ignoreSheet)
-    result.map {
-      x =>
-        x._1 -> x._2.map {
-          xx =>
-            fromMap(xx).map {
-              xxx =>
-                gen.from(xxx)
-            }
-        }
-    }
+      }
   }
   //End ExcelMapper[A]
 }

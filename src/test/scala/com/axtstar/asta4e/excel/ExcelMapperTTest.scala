@@ -1,21 +1,23 @@
-package com.axtstar.asta4e
+package com.axtstar.asta4e.excel
 
-import java.io.File
+import java.io.{File, FileInputStream}
 import java.text.SimpleDateFormat
 import java.util.Date
 
+import com.axtstar.asta4e.ExcelMapper
 import com.axtstar.asta4e.converter._
 import com.axtstar.asta4e.test_class._
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
+
 @RunWith(classOf[JUnitRunner])
-class MapHelperTest extends Specification {
+class ExcelMapperTTest extends Specification {
 
   val currentDir = new File(".").getAbsoluteFile.getParent
 
 
-  "ExcelHelper" should {
+  "ExcelMapper as T" should {
 
     val v1 = VariousCell(string = "",
       int = 1,
@@ -38,45 +40,39 @@ class MapHelperTest extends Specification {
 
     "to" in {
       //MapHelper.to[VariousCell].by[VariousCell]()
-      MapHelper.to[VariousCell].isInstanceOf[MapHelper[VariousCell]] must be_==(true)
+      ExcelMapper.by[VariousCell].isInstanceOf[ExcelMapper[VariousCell]] must be_==(true)
     }
 
-    "from 2 to" should {
+    "getCC" in {
+      val target = ExcelMapper.by[VariousCell]
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx")
+        .withIgnoreSheets(List())
+          .getCC(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx"))
 
-      "same signature and same type" in {
-        val target = MapHelper.to[VariousCell_same].from(v1)
-        target.string must be_==(v1.string)
-        target.boolean must be_==(v1.boolean)
-        target.float must be_==(v1.float)
-      }
+      target.head._2.get.string must be_==("STRING")
+      target.head._2.get.boolean must be_==(true)
+      target.head._2.get.stringOpt must be_==(Some("STRING1"))
 
-      "same signature but different type" in {
-        val target = MapHelper.to[VariousCell_same_but_string].from(v1)
-        target.string must be_==(v1.string)
-        target.boolean must be_==(v1.boolean.toString)
-        target.float must be_==(v1.float.toString)
-
-      }
-
-      "less signature and same type" in {
-        val target = MapHelper.to[VariousCell_less].from(v1)
-        target.string must be_==(v1.string)
-        target.boolean must be_==(v1.boolean)
-      }
-
-      "less signature but different type" in {
-        val target = MapHelper.to[VariousCell_less_but_string].from(v1)
-        target.string must be_==(v1.string)
-        target.boolean must be_==(v1.boolean.toString)
-      }
-
-      "more signature" in {
-        val target = MapHelper.to[VariousCell_more].from(v1)
-        target.string must be_==(v1.string)
-        target.boolean must be_==(v1.boolean)
-      }
 
     }
+
+    "getCCDown" in {
+      val target = ExcelMapper.by[VariousCell]
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx")
+        .withIgnoreSheets(List())
+        .getCCDown(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx"))
+
+      target(0)._2(0).get.string must be_==("STRING")
+      target(0)._2(0).get.boolean must be_==(true)
+      target(0)._2(0).get.stringOpt must be_==(Some("STRING1"))
+
+      target(0)._2(1).get.string must be_==("STRING-")
+      target(0)._2(1).get.boolean must be_==(false)
+      target(0)._2(1).get.stringOpt must be_==(Some("STRING1-"))
+
+
+    }
+
 
     "map to A" in {
       case class Data(

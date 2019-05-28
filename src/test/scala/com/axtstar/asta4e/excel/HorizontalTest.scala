@@ -1,10 +1,9 @@
-package com.axtstar.asta4e
+package com.axtstar.asta4e.excel
 
 import java.io.File
-import java.text.SimpleDateFormat
 
 import com.axtstar.asta4e._
-import com.axtstar.asta4e.test_class.{Data_HOLIZONTAL, VariousCell}
+import com.axtstar.asta4e.test_class.Data_HOLIZONTAL
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner

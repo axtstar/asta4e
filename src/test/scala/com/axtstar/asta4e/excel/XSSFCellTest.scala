@@ -1,7 +1,8 @@
-package com.axtstar.asta4e
+package com.axtstar.asta4e.excel
 
 import java.io.File
 
+import com.axtstar.asta4e.ExcelMapper
 import com.axtstar.asta4e.test_class._
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification

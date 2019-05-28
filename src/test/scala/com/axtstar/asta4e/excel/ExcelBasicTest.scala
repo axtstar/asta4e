@@ -1,13 +1,12 @@
-package com.axtstar.asta4e
+package com.axtstar.asta4e.excel
 
 import java.io.{File, FileInputStream}
 import java.text.SimpleDateFormat
-import java.util.Date
 
+import com.axtstar.asta4e.ExcelMapper
 import com.axtstar.asta4e.converter.MapHelper
 import com.axtstar.asta4e.core.ExcelBasic
 import com.axtstar.asta4e.test_class.Etc7Option
-import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -38,7 +37,7 @@ class ExcelBasicTest extends Specification {
 
     "ExcelCollection" should {
       "GetData" in {
-        val target = ExcelBasic.apply()
+        val target = ExcelMapper.apply()
           .withLocation(ExcelBasic.getExcelLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx"))
           .getData(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx")) {
           x =>
@@ -53,7 +52,7 @@ class ExcelBasicTest extends Specification {
       }
 
       "GetDataDown" in {
-        val target = ExcelBasic.apply()
+        val target = ExcelMapper.apply()
             .withLocation(ExcelBasic.getExcelLocation(s"${currentDir}/src/test/resources/excel/bind_template6.xlsx"))
             .getDataDown(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_sample6.xlsx")) {
             x =>
@@ -91,7 +90,7 @@ class ExcelBasicTest extends Specification {
       }
 
       "withLocation" in {
-        val target = ExcelBasic.apply()
+        val target = ExcelMapper.apply()
           .withLocation(ExcelBasic.getExcelLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx"))
           .getData(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx")){
             x =>
