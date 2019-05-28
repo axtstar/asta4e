@@ -1,7 +1,7 @@
 package com.axtstar.asta4e.core
-import java.io.{FileInputStream, FileReader, InputStreamReader}
+import java.io.{FileInputStream, FileReader, FileWriter, InputStreamReader}
 
-import com.opencsv.{CSVParserBuilder, CSVReaderBuilder}
+import com.opencsv.{CSVParserBuilder, CSVReaderBuilder, CSVWriterBuilder}
 
 object CsvBasic {
 
@@ -81,8 +81,62 @@ trait CsvBasic extends DataCore[ExcelBasic] with InitialCore [CsvBasic] /*with D
     }
   }
 
-  override def _setData(bindData: (String, Map[String, Any])*)(f: Map[String, Any] => Map[String, Any]): Unit = ???
+  override def _setData(bindData: (String, Map[String, Any])*)(f: Map[String, Any] => Map[String, Any]): Unit = {
+    val fileWriter = new FileWriter(outputStream.getFD)
 
-  override def _setDataDown(bindData: (String, IndexedSeq[Map[String, Any]])*)(f: Map[String, Any] => Map[String, Any]): Unit = ???
+    val parser = new CSVParserBuilder().withSeparator(separator)
+      .withQuoteChar(quoteChar).build()
+
+    val writer = new CSVWriterBuilder(fileWriter)
+      .withParser(parser).build()
+
+    try{
+      bindData.map {
+        x =>
+          val map = f(x._2).map{xx=>xx._2.toString()}.toArray
+        writer.writeNext(map, false)
+      }
+
+    } catch {
+      case ex:Exception =>
+        throw ex
+    } finally {
+      writer.close()
+      fileWriter.close()
+      outputStream.close()
+    }
+
+  }
+
+  override def _setDataDown(bindData: (String, IndexedSeq[Map[String, Any]])*)(f: Map[String, Any] => Map[String, Any]): Unit = {
+    val fileWriter = new FileWriter(outputStream.getFD)
+
+    val parser = new CSVParserBuilder().withSeparator(separator)
+      .withQuoteChar(quoteChar).build()
+
+    val writer = new CSVWriterBuilder(fileWriter)
+      .withParser(parser).build()
+
+    try{
+      bindData.map {
+        b =>
+          val x = b._2
+          x.map {
+            xx =>
+            val map = f(xx).map { xxx => xxx._2.toString }.toArray
+            writer.writeNext(map)
+          }
+      }
+
+    } catch {
+      case ex:Exception =>
+        throw ex
+    } finally {
+      writer.close()
+      fileWriter.close()
+      outputStream.close()
+    }
+
+  }
 
 }

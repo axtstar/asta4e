@@ -166,7 +166,7 @@ class ExcelMapperTest extends Specification {
           .withLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx")
           .withIgnoreSheets(List())
           .withLayoutXls(new FileInputStream(s"${currentDir}/src/test/resources/excel/output_template6.xlsx"))
-          .withOutXls(new FileOutputStream(s"${currentDir}/target/output6_3.xlsx"))
+          .withOutStream(new FileOutputStream(s"${currentDir}/target/output6_3.xlsx"))
           .setCC(data)
 
         "" must_== ("")

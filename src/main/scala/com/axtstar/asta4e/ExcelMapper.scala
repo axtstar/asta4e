@@ -49,12 +49,12 @@ class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
   }
 
 
-  override def withOutXls(_outputXls: FileOutputStream) = {
-    super.withOutXls(_outputXls).asInstanceOf[ExcelMapper[A]]
+  override def withOutStream(_outputXls: FileOutputStream) = {
+    super.withOutStream(_outputXls).asInstanceOf[ExcelMapper[A]]
   }
 
   def withOutXls(_outputXlsPath: String) = {
-    super.withOutXls(new FileOutputStream(_outputXlsPath)).asInstanceOf[ExcelMapper[A]]
+    super.withOutStream(new FileOutputStream(_outputXlsPath)).asInstanceOf[ExcelMapper[A]]
   }
 
   import ops.record._
@@ -125,7 +125,7 @@ class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
 
     super.withLocation(dataTemplateXls)
       .withLayoutXls(new FileInputStream(outLayout))
-      .withOutXls(new FileOutputStream(outXlsPath))
+      .withOutStream(new FileOutputStream(outXlsPath))
       ._setDataDown(aToMap: _*){
         x =>
           x

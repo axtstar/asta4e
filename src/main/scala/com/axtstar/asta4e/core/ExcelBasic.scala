@@ -216,9 +216,29 @@ trait ExcelBasic extends DataCore[ExcelBasic] with InitialCore[ExcelBasic] {
 
   import  com.axtstar.asta4e.core.ExcelBasic._
 
+  /**
+    *  set sheet names which doesn't include at retrieving Excel
+    * @param _ignoreSheets
+    * @return ExcelBasic(this)
+    */
+  def withIgnoreSheets(_ignoreSheets:List[String])={
+    this.ignoreSheets = _ignoreSheets
+    this
+  }
+
+  /**
+    * set layout excel as FileInputStream at writing excel
+    * @param _layoutXls
+    * @return ExcelBasic(this)
+    */
+  def withLayoutXls(_layoutXls:FileInputStream)={
+    this.layoutStram = _layoutXls
+    this
+  }
+
   override def _setData(bindData: (String, Map[String, Any])*)
              (f:Map[String, Any] => Map[String, Any])={
-    val workbook = WorkbookFactory.create(layoutXls)
+    val workbook = WorkbookFactory.create(layoutStram)
 
     try {
 
@@ -281,22 +301,22 @@ trait ExcelBasic extends DataCore[ExcelBasic] with InitialCore[ExcelBasic] {
           }
       }
 
-      workbook.write(outputXls)
+      workbook.write(outputStream)
     }
     catch{
       case ex:Throwable =>
         throw ex
     }
     finally{
-      outputXls.close()
+      outputStream.close()
       workbook.close()
-      layoutXls.close()
+      layoutStram.close()
     }
   }
 
   override def _setDataDown(bindData: (String, IndexedSeq[Map[String, Any]])*)
              (f:Map[String, Any] => Map[String, Any])= {
-    val workbook = WorkbookFactory.create(layoutXls)
+    val workbook = WorkbookFactory.create(layoutStram)
 
     try {
 
@@ -363,16 +383,16 @@ trait ExcelBasic extends DataCore[ExcelBasic] with InitialCore[ExcelBasic] {
           }
       }
 
-      workbook.write(outputXls)
+      workbook.write(outputStream)
     }
     catch{
       case ex:Throwable =>
         throw ex
     }
     finally{
-      outputXls.close()
+      outputStream.close()
       workbook.close()
-      layoutXls.close()
+      layoutStram.close()
     }
 
   }
