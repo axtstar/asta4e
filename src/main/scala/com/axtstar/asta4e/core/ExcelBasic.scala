@@ -216,18 +216,11 @@ object ExcelBasic {
 
 }
 
-class ExcelBasic {
+class ExcelBasic extends DataCore[ExcelBasic] {
 
-  private var locationMap : List[Location] = List()
   private var ignoreSheets:List[String] = List()
   private var layoutXls:FileInputStream = null
   private var outputXls:FileOutputStream = null
-
-
-  def withLocation(_locationMap:List[Location]) ={
-    this.locationMap= _locationMap
-    this
-  }
 
   def withIgnoreSheets(_ignoreSheets:List[String])={
     this.ignoreSheets = _ignoreSheets
@@ -508,82 +501,14 @@ class ExcelBasic {
 
     val out = new FileOutputStream(new File(outXlsPath))
 
-    try {
-
-      //check sheet names
-      val sheetNames = for (i <- 0 until workbook.getNumberOfSheets) yield {
-        (i, workbook.getSheetAt(i).getSheetName)
+    this.withLocation(locationMap)
+      .withLayoutXls(outLayoutStream)
+      .withOutXls(out)
+      .setDataDown(bindData:_*){
+        x =>
+          x
       }
 
-      //Clone Sheet if not exists
-      bindData.foreach {
-        sheetMap =>
-          if (!sheetNames.exists(_._2 == sheetMap._1)) {
-            workbook.cloneSheet(0)
-            workbook.setSheetName(workbook.getNumberOfSheets - 1, sheetMap._1)
-          }
-      }
-
-      bindData.foreach {
-        bindDataASheet =>
-          bindDataASheet match {
-            case (sheetName:String, maps:IndexedSeq[Map[String, Any]]) =>
-
-              //determine sheet
-              val sheet = workbook.getSheet(sheetName)
-              maps.zipWithIndex.foreach {
-                    mapZip =>
-                      mapZip match {
-                        case (map:Map[String, Any], index:Int) =>
-                            map.foreach {
-                              bindMap =>
-
-                                locationMap.filter(
-                                  p =>
-                                    p.bindNames.contains("${" + bindMap._1 + "}")
-                                ).foreach {
-                                  x =>
-                                    //iterate ${}
-                                    x.bindNames.foreach {
-                                      xx => {
-                                        if (map.exists(
-                                          p =>
-                                            "${" + s"${p._1}" + "}" == xx)
-                                        ) {
-                                          val ref = new CellReference(x.positionY, x.positionX)
-                                          var row = sheet.getRow(ref.getRow + index)
-                                          if (row==null){
-                                            sheet.createRow(ref.getRow + index)
-                                            row = sheet.getRow(ref.getRow + index)
-                                          }
-                                          var target = row.getCell(ref.getCol)
-                                          if(target==null){
-                                            row.createCell(ref.getCol)
-                                            target = row.getCell(ref.getCol)
-                                          }
-
-                                          setOneCell(target, bindMap._1, map, x)
-                                        }
-                                      }
-                                    }
-                                }
-                            }
-                      }
-              }
-          }
-      }
-
-      workbook.write(out)
-    }
-    catch{
-      case ex:Throwable =>
-        throw ex
-    }
-    finally{
-      out.close()
-      workbook.close()
-      outLayoutStream.close()
-    }
   }
 
   /**
