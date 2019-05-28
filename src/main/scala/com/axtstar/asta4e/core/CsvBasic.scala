@@ -93,7 +93,9 @@ trait CsvBasic extends DataCore[ExcelBasic] with InitialCore [CsvBasic] /*with D
     try{
       bindData.map {
         x =>
-          val map = f(x._2).map{xx=>xx._2.toString()}.toArray
+          val map = f(x._2).map{xx=>
+            xx._2.toString()
+          }.toArray
         writer.writeNext(map, false)
       }
 

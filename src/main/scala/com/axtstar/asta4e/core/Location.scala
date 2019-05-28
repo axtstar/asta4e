@@ -6,4 +6,17 @@ case class Location(
   positionY:Int,
   bindNames:List[String])
 
+object Location{
+  def create(  name:String,
+               positionX:Int,
+               positionY:Int) = {
+    Location(name, positionX, positionY,bindNames = List("${" + name +"}"))
+  }
 
+  def create(  name:String,
+               positionX:Int,
+               positionY:Int,
+               bindNames:List[String]) = {
+    Location(name, positionX, positionY,bindNames)
+  }
+}
