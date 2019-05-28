@@ -1,6 +1,6 @@
 package com.axtstar.asta4e.excel
 
-import java.io.File
+import java.io.{File, FileInputStream}
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -99,11 +99,12 @@ class MapHelperTest extends Specification {
     "cast from another type" in {
 
       //toMap
-      val target = ExcelMapper.getData(
-        s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx",
-        List()
-      )
+      val target = ExcelMapper.apply()
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx")
+        ._getData(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx")){
+          x =>
+            x
+        }
 
       val m = target.head._2
       val result = MapHelper.to[VariousCell].from(m)
@@ -136,11 +137,12 @@ class MapHelperTest extends Specification {
     "cast from null" in {
 
       //toMap
-      val target = ExcelMapper.getData(
-        s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_excel_null_value.xlsx",
-        List()
-      )
+      val target = ExcelMapper.apply()
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx")
+        ._getData(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_null_value.xlsx")){
+          x =>
+            x
+        }
 
       val result = MapHelper.to[VariousCell].from(target.head._2)
 

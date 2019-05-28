@@ -73,15 +73,11 @@ class VerticalTest extends Specification {
         A33=""
       )
       val list = IndexedSeq("Sheet1" -> Option(dh0))
-      ExcelMapper.by[Data_VIRTICAL].setData(
-        /* バインド */
-        s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx",
-        /* レイアウト */
-        s"${currentDir}/src/test/resources/excel/output_white.xlsx",
-        /* 出力先 */
-        s"${currentDir}/target/output_vertical_set.xlsx",
-        list
-      )
+      ExcelMapper.by[Data_VIRTICAL]
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx")
+        .withLayoutXls(s"${currentDir}/src/test/resources/excel/output_white.xlsx")
+        .withOutXls(s"${currentDir}/target/output_vertical_set.xlsx")
+        .setCC(list)
 
       val target = ExcelMapper.by[Data_VIRTICAL].getData(
         s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx",

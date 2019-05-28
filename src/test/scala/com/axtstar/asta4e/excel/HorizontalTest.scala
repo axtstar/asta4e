@@ -1,6 +1,6 @@
 package com.axtstar.asta4e.excel
 
-import java.io.File
+import java.io.{File, FileInputStream}
 
 import com.axtstar.asta4e._
 import com.axtstar.asta4e.test_class.Data_HOLIZONTAL
@@ -73,21 +73,18 @@ class HorizontalTest extends Specification {
         AG1="1AG"
       )
       val list = IndexedSeq("Sheet1" -> Option(dh0))
-      ExcelMapper.by[Data_HOLIZONTAL].setData(
-        /* バインド */
-        s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx",
-        /* レイアウト */
-        s"${currentDir}/src/test/resources/excel/output_white.xlsx",
-        /* 出力先 */
-        s"${currentDir}/target/output_horizontal_set.xlsx",
-        list
-      )
+      ExcelMapper.by[Data_HOLIZONTAL]
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx")
+        .withLayoutXls(s"${currentDir}/src/test/resources/excel/output_white.xlsx")
+        .withOutXls(s"${currentDir}/target/output_horizontal_set.xlsx")
+        .setData(list){
+          x =>
+            x
+        }
 
-      val target = ExcelMapper.by[Data_HOLIZONTAL].getData(
-        s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx",
-        s"${currentDir}/target/output_horizontal_set.xlsx",
-        List()
-      )
+      val target = ExcelMapper.by[Data_HOLIZONTAL]
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx")
+        .getCC(new FileInputStream(s"${currentDir}/target/output_horizontal_set.xlsx"))
 
       target.size must be_==(1)
       target(0)._2.get.AG1 must be_==("1AG")

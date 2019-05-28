@@ -19,11 +19,12 @@ class ExcelMapperTest extends Specification {
 
     "primitive" should {
 
-      val target = ExcelMapper.getData(
-        s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx",
-        List()
-      )
+      val target = ExcelMapper
+          .withLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx")
+        ._getData(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx")){
+          x =>
+            x
+        }
 
       "sheets size" in {
         target.size must be_==(1)
@@ -86,11 +87,12 @@ class ExcelMapperTest extends Specification {
       }
 
       "map to A" in {
-        val target = ExcelMapper.getDataDown(
-          s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
-          s"${currentDir}/src/test/resources/excel/read_sample6.xlsx",
-          List()
-        )
+        val target = ExcelMapper
+            .withLocation(s"${currentDir}/src/test/resources/excel/bind_template6.xlsx")
+          ._getDataDown(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_sample6.xlsx")){
+            x =>
+              x
+          }
 
         val result = MapHelper.to[Etc7Option].from(target.head._2.head)
 
@@ -122,20 +124,24 @@ class ExcelMapperTest extends Specification {
         val result3 = CC.By(result).toMap
 
         //case class
-        ExcelMapper.by[List[Etc7Option]].setDataDown(
-          s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
-          s"${currentDir}/src/test/resources/excel/output_template6.xlsx",
-          s"${currentDir}/target/output6_1.xlsx",
-          "Sheet1" -> IndexedSeq(CC.By(result).toMap, CC.By(result2).toMap)
-        )
+        ExcelMapper.by[List[Etc7Option]]
+          .withLocation(s"${currentDir}/src/test/resources/excel/bind_template6.xlsx")
+          .withLayoutXls(s"${currentDir}/src/test/resources/excel/output_template6.xlsx")
+          .withOutXls(s"${currentDir}/target/output6_1.xlsx")
+          ._setDataDown("Sheet1" -> IndexedSeq(CC.By(result).toMap, CC.By(result2).toMap)){
+            x =>
+              x
+          }
 
         //Map
-        ExcelMapper.setDataDown(
-          s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
-          s"${currentDir}/src/test/resources/excel/output_template6.xlsx",
-          s"${currentDir}/target/output6_2.xlsx",
-          target: _*
-        )
+        ExcelMapper.by[String]
+          .withLocation(s"${currentDir}/src/test/resources/excel/bind_template6.xlsx")
+          .withLayoutXls(s"${currentDir}/src/test/resources/excel/output_template6.xlsx")
+          .withOutXls(s"${currentDir}/target/output6_2.xlsx")
+          ._setDataDown(target: _*){
+            x =>
+              x
+          }
 
         val result4 = ExcelMapper.by[Etc7Option].getDataDown(
           s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",

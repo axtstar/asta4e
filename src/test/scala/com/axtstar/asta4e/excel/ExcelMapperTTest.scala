@@ -94,11 +94,13 @@ class ExcelMapperTTest extends Specification {
     "cast from another type" in {
 
       //toMap
-      val target = ExcelMapper.getData(
-        s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx",
-        List()
-      )
+      val target = ExcelMapper
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx")
+        .withIgnoreSheets(List())
+        ._getData(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx")){
+          x =>
+            x
+        }
 
       val m = target.head._2
       val result = MapHelper.to[VariousCell].from(m)
@@ -131,11 +133,12 @@ class ExcelMapperTTest extends Specification {
     "cast from null" in {
 
       //toMap
-      val target = ExcelMapper.getData(
-        s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_excel_null_value.xlsx",
-        List()
-      )
+      val target = ExcelMapper
+          .withLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx")
+        ._getData(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_null_value.xlsx")){
+          x =>
+            x
+        }
 
       val result = MapHelper.to[VariousCell].from(target.head._2)
 

@@ -7,11 +7,11 @@ object CsvBasic {
 
 }
 
-trait CsvBasic extends InitialCore [CsvBasic] {
+trait CsvBasic extends DataCore[ExcelBasic] with InitialCore [CsvBasic] /*with DataCore[CsvBasic]*/ {
   protected var separator = ','
   protected var quoteChar = '"'
 
-  def getData[B](iStream: FileInputStream)
+  override def _getData[B](iStream: FileInputStream)
                          (f: Map[String, Any] => B): IndexedSeq[(String, B)] = {
     val parser = new CSVParserBuilder().withSeparator(separator)
       .withQuoteChar(quoteChar).build()
@@ -42,12 +42,10 @@ trait CsvBasic extends InitialCore [CsvBasic] {
       fileReader.close()
       iStream.close()
     }
-
-
   }
 
 
-  def getDataDown[B](iStream: FileInputStream)
+  override def _getDataDown[B](iStream: FileInputStream)
                 (f: Map[String, Any] => B): IndexedSeq[(String, IndexedSeq[B])] = {
     val parser = new CSVParserBuilder().withSeparator(separator)
       .withQuoteChar(quoteChar).build()
@@ -81,9 +79,10 @@ trait CsvBasic extends InitialCore [CsvBasic] {
       fileReader.close()
       iStream.close()
     }
-
-
   }
 
+  override def _setData(bindData: (String, Map[String, Any])*)(f: Map[String, Any] => Map[String, Any]): Unit = ???
+
+  override def _setDataDown(bindData: (String, IndexedSeq[Map[String, Any]])*)(f: Map[String, Any] => Map[String, Any]): Unit = ???
 
 }

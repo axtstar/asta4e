@@ -39,7 +39,7 @@ class ExcelBasicTest extends Specification {
       "GetData" in {
         val target = ExcelMapper.apply()
           .withLocation(ExcelBasic.getExcelLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx"))
-          .getData(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx")) {
+          ._getData(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx")) {
           x =>
             x
         }
@@ -54,7 +54,7 @@ class ExcelBasicTest extends Specification {
       "GetDataDown" in {
         val target = ExcelMapper.apply()
             .withLocation(ExcelBasic.getExcelLocation(s"${currentDir}/src/test/resources/excel/bind_template6.xlsx"))
-            .getDataDown(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_sample6.xlsx")) {
+            ._getDataDown(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_sample6.xlsx")) {
             x =>
               x
           }
@@ -92,7 +92,7 @@ class ExcelBasicTest extends Specification {
       "withLocation" in {
         val target = ExcelMapper.apply()
           .withLocation(ExcelBasic.getExcelLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx"))
-          .getData(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx")){
+          ._getData(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx")){
             x =>
               x
           }

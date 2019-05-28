@@ -3,7 +3,6 @@ package com.axtstar.asta4e.csv
 import java.io.{File, FileInputStream}
 
 import com.axtstar.asta4e.{CsvMapper, ExcelMapper}
-import com.axtstar.asta4e.test_class._
 import com.axtstar.asta4e.test_location.{CSV_Data, Location_4_CSV}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification

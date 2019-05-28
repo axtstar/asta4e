@@ -44,8 +44,17 @@ class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
     super.withLayoutXls(_layoutXls).asInstanceOf[ExcelMapper[A]]
   }
 
+  def withLayoutXls(_layoutXlsPath: String) = {
+    super.withLayoutXls(new FileInputStream(_layoutXlsPath)).asInstanceOf[ExcelMapper[A]]
+  }
+
+
   override def withOutXls(_outputXls: FileOutputStream) = {
     super.withOutXls(_outputXls).asInstanceOf[ExcelMapper[A]]
+  }
+
+  def withOutXls(_outputXlsPath: String) = {
+    super.withOutXls(new FileOutputStream(_outputXlsPath)).asInstanceOf[ExcelMapper[A]]
   }
 
   import ops.record._
@@ -57,7 +66,7 @@ class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
       x =>
         x._1 -> CC.By(x._2.get).toMap
     }
-    super.setData(map:_*){
+    super._setData(map:_*){
       x =>
         x
     }
@@ -74,19 +83,16 @@ class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
         })
     }
 
-    super.setDataDown(map:_*){
+    super._setDataDown(map:_*){
       x =>
         x
     }
 
   }
 
-  def setData[L <: HList,B](
-                           dataTemplateXls: String,
-                           outLayout: String,
-                           outXlsPath: String,
-                           a:IndexedSeq[(String,Option[A])]
-                         )(implicit
+  def setData[L <: HList,B](a:IndexedSeq[(String,Option[A])])
+                           (f: Option[A] => B)
+                           (implicit
                            gen: LabelledGeneric.Aux[A, L],
                            tmr: ToMap[L]
                          ) = {
@@ -96,16 +102,7 @@ class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
         x._1 -> CC.By(x._2.get).toMap
     }
 
-
-    super.withLocation(dataTemplateXls)
-      .withLayoutXls(new FileInputStream(outLayout))
-      .withOutXls(new FileOutputStream(outXlsPath))
-      .setData(
-      dataTemplateXls,
-      outLayout,
-      outXlsPath,
-      aToMap: _*
-    )
+    this.setCC(a)
   }
 
   def setDataDown[L <: HList,B](
@@ -129,7 +126,7 @@ class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
     super.withLocation(dataTemplateXls)
       .withLayoutXls(new FileInputStream(outLayout))
       .withOutXls(new FileOutputStream(outXlsPath))
-      .setDataDown(aToMap: _*){
+      ._setDataDown(aToMap: _*){
         x =>
           x
       }
@@ -139,7 +136,7 @@ class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
   override def getCC[R <: HList](iStream:FileInputStream)
                            (implicit gen: LabelledGeneric.Aux[A, R]
                               , fromMap: FromMap[R])={
-    super.getData(iStream){
+    super._getData(iStream){
       x =>
         fromMap(x).map{
           xx =>
@@ -151,7 +148,7 @@ class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
   override def getCCDown[R <: HList](iStream: FileInputStream)
                                     (implicit gen: Aux[A, R], fromMap: FromMap[R]): IndexedSeq[(String, IndexedSeq[Option[A]])] = {
 
-    super.getDataDown(iStream){
+    super._getDataDown(iStream){
       x =>
         fromMap(x).map{
           xx =>
@@ -181,7 +178,7 @@ class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
                                , fromMap: FromMap[R]) = {
     super.withLocation(ExcelBasic.getExcelLocation(dataTemplateXls))
       .withIgnoreSheets(ignoreSheet)
-      .getDataDown(new FileInputStream(inputXlsPath)) {
+      ._getDataDown(new FileInputStream(inputXlsPath)) {
         x =>
           fromMap(x).map {
             xx =>

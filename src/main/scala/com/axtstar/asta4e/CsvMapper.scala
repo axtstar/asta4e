@@ -40,7 +40,7 @@ class CsvMapper[A] extends CsvBasic {
   def getCC[R <: HList](iStream:FileInputStream)
                                 (implicit gen: LabelledGeneric.Aux[A, R]
                                  , fromMap: FromMap[R])={
-    super.getData(iStream){
+    super._getData(iStream){
       x =>
         fromMap(x).map{
           xx =>
@@ -52,7 +52,7 @@ class CsvMapper[A] extends CsvBasic {
   def getCCDown[R <: HList](iStream: FileInputStream)
                                     (implicit gen: Aux[A, R], fromMap: FromMap[R]): IndexedSeq[(String, IndexedSeq[Option[A]])] = {
 
-    super.getDataDown(iStream){
+    super._getDataDown(iStream){
       x =>
         fromMap(x).map{
           xx =>
