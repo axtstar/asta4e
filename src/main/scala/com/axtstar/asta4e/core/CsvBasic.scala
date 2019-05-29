@@ -105,7 +105,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
                 m(l.positionX) = map(l.name) match {
                   case null => ""
                   case mm:Date =>
-                    s"${quoteChar}${map(l.name).toString}${quoteChar}"
+                    s"${quoteChar}${mm.toString}${quoteChar}"
                   case mm:String =>
                     s"${quoteChar}${map(l.name).toString}${quoteChar}"
                   case _ =>
@@ -151,8 +151,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
                     m(l.positionX) = map(l.name) match {
                       case null => ""
                       case mm:Date =>
-                        val simpleDateFormat = new SimpleDateFormat(Config.DateWriteParse.ParserString, new Locale(Config.DateWriteParse.Locale))
-                        s"${quoteChar}${simpleDateFormat.format(map(l.name))}${quoteChar}"
+                        s"${quoteChar}${mm.toString}${quoteChar}"
                       case mm:String =>
                         s"${quoteChar}${map(l.name).toString}${quoteChar}"
                       case _ =>

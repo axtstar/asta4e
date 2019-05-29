@@ -59,42 +59,50 @@ object CC {
                     if(xx.isValidChar) {
                       xx.toChar
                     } else {
-                      0
+                      Char.MinValue
                     }
                   case xx:Int =>
                     if(xx.isValidChar) {
                       xx.toChar
                     } else {
-                      0
+                      Char.MinValue
                     }
                   case xx:Long =>
                     if(xx.isValidChar) {
                       xx.toChar
                     } else {
-                      0
+                      Char.MinValue
                     }
                   case xx:Float =>
                     if(xx.isValidChar) {
                       xx.toChar
                     } else {
-                      0
+                      Char.MinValue
                     }
                   case xx:Double =>
                     if(xx.isValidChar) {
                       xx.toChar
                     } else {
-                      0
+                      Char.MinValue
                     }
                   case xx:Byte =>
                     if(xx.isValidChar) {
                       xx.toChar
                     } else {
-                      0
+                      Char.MinValue
                     }
                   case xx:String =>
-                    new String(xx)
+                    if(xx==null){
+                      Char.MinValue
+                    } else if(xx.size >0){
+                      val target = xx.charAt(0)
+                      target
+                    }
+                    else {
+                      Char.MinValue
+                    }
                   case _ =>
-                    0
+                    Char.MinValue
                 })
               case "String" =>
                 x match {
@@ -322,7 +330,7 @@ object CC {
                   case xx:Date =>
                     xx
                   case xx:String =>
-                    Try(new SimpleDateFormat(Config.DateReadParse.ParserString, new Locale(Config.DateReadParse.Locale)).parse(xx)).getOrElse(new Date(Long.MinValue))
+                    Try(Config.DateReadParse.parse(xx)).getOrElse(new Date(Long.MinValue))
                   case _ =>
                     new Date(Long.MinValue)
                 })
