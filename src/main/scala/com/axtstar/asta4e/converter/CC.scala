@@ -321,7 +321,7 @@ object CC {
                   case xx:Date =>
                     xx
                   case xx:String =>
-                    Date.parse(xx)
+                    Try(Date.parse(xx)).getOrElse(new Date(Long.MinValue))
                   case _ =>
                     new Date(Long.MinValue)
                 })

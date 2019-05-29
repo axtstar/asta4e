@@ -48,7 +48,7 @@ class CsvTest extends Specification {
       )
 
       CsvMapper.by[VariousCell]
-        .withLocation(Location_4_CSV.ao_a1_a2_startRow_as_0)
+        .withLocation(VariousCell.getLocation())
         .withOutStream(s"${currentDir}/target/data_w_r_1.csv")
         .setCC(IndexedSeq("Sheet1" -> Option(map)))
 
@@ -80,14 +80,14 @@ class CsvTest extends Specification {
 
       CsvMapper.by[VariousCell]
         .withLocation(VariousCell.getLocation())
-        .withOutStream(s"${currentDir}/target/data_w_r_1.csv")
+        .withOutStream(s"${currentDir}/target/data_w_r_down.csv")
         .setCCDown(IndexedSeq("Sheet1" -> IndexedSeq(Option(map))))
 
 
       val target = CsvMapper.by[VariousCell]
-        .withLocation(Location_4_CSV.ao_a1_a2_startRow_as_1)
+        .withLocation(VariousCell.getLocation())
         .getCCDown(
-          new FileInputStream(s"${currentDir}/src/test/resources/csv/data.csv")
+          new FileInputStream(s"${currentDir}/target/data_w_r_down.csv")
         )
 
       target.size must be_==(1)

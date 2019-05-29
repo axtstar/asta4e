@@ -30,8 +30,8 @@ object VariousCell {
     Location.create(name="long",2,0),
     Location.create(name="date",3,0),
     Location.create(name="boolean",4,0),
-    Location.create(name="boolean",5,0),
-    Location.create(name="float",6,0),
+    Location.create(name="float",5,0),
+    Location.create(name="double",6,0),
     Location.create(name="longOpt",10,0)
     )
 }
