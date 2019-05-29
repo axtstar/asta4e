@@ -322,7 +322,7 @@ object CC {
                   case xx:Date =>
                     xx
                   case xx:String =>
-                    Try(new SimpleDateFormat(Config.dateParserString, new Locale(Config.dateParserLocale)).parse(xx)).getOrElse(new Date(Long.MinValue))
+                    Try(new SimpleDateFormat(Config.DateReadParse.ParserString, new Locale(Config.DateReadParse.Locale)).parse(xx)).getOrElse(new Date(Long.MinValue))
                   case _ =>
                     new Date(Long.MinValue)
                 })
