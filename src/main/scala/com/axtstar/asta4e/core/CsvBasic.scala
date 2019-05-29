@@ -1,5 +1,6 @@
 package com.axtstar.asta4e.core
 import java.io.{FileInputStream, FileReader, FileWriter, InputStreamReader}
+import java.util.Date
 
 import com.opencsv.{CSVParserBuilder, CSVReaderBuilder, CSVWriterBuilder}
 
@@ -85,7 +86,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
     val fileWriter = new FileWriter(outputStream.getFD)
 
     val parser = new CSVParserBuilder().withSeparator(separator)
-      .withQuoteChar(quoteChar).build()
+      .build()
 
     val writer = new CSVWriterBuilder(fileWriter)
       .withParser(parser).build()
@@ -97,10 +98,16 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
           val m: Array[String] = Array.fill[String](1 + locationMap.map { f => f.positionX }.max)("")
           locationMap.foreach {
             l =>
-              m(l.positionX) = map(l.name) match {
-                case null => ""
-                case _ =>
-                  map(l.name).toString
+              if (map.contains(l.name)) {
+                m(l.positionX) = map(l.name) match {
+                  case null => ""
+                  case mm:Date =>
+                    s"${quoteChar}${map(l.name).toString}${quoteChar}"
+                  case mm:String =>
+                    s"${quoteChar}${map(l.name).toString}${quoteChar}"
+                  case _ =>
+                    map(l.name).toString
+                }
               }
           }
           writer.writeNext(m, false)
@@ -121,7 +128,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
     val fileWriter = new FileWriter(outputStream.getFD)
 
     val parser = new CSVParserBuilder().withSeparator(separator)
-      .withQuoteChar(quoteChar).build()
+      .build()
 
     val writer = new CSVWriterBuilder(fileWriter)
       .withParser(parser).build()
@@ -136,10 +143,16 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
               val m:Array[String] = Array.fill[String](1 + locationMap.map{f => f.positionX}.max)("")
               locationMap.foreach {
                 l =>
-                  m(l.positionX) = map(l.name) match {
-                    case null => ""
-                    case _ =>
-                      map(l.name).toString
+                  if(map.contains(l.name)) {
+                    m(l.positionX) = map(l.name) match {
+                      case null => ""
+                      case mm:Date =>
+                        s"${quoteChar}${map(l.name).toString}${quoteChar}"
+                      case mm:String =>
+                        s"${quoteChar}${map(l.name).toString}${quoteChar}"
+                      case _ =>
+                        map(l.name).toString
+                    }
                   }
               }
               writer.writeNext(m, false)

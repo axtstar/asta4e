@@ -104,18 +104,55 @@ class CsvMapper[A] extends CsvBasic with TypeCore[A] {
     }
   }
 
-  def getCCDown[R <: HList](iStream: FileInputStream)
-                                    (implicit gen: Aux[A, R], fromMap: FromMap[R]): IndexedSeq[(String, IndexedSeq[Option[A]])] = {
+  def getCCDown[R <: HList, K <: HList, V <: HList, V1 <: HList](iStream: FileInputStream)
+                                    (
+                                      implicit gen: Aux[A, R],
+                                      fromMap: FromMap[R],
+                                      typeable: Typeable[A],
+                                      keys: Keys.Aux[R, K],
+                                      ktl: hlist.ToList[K, Symbol],
+                                      values: Values.Aux[R, V],
+                                      mapper: hlist.Mapper.Aux[typeablePoly.type, V, V1],
+                                      fillWith: hlist.FillWith[nullPoly.type, V],
+                                      vtl: hlist.ToList[V1, String]
+
+                                    ): IndexedSeq[(String, IndexedSeq[Option[A]])] = {
+    val columns = ktl(keys())
 
     super._getDataDown(iStream).map{
       x =>
         x._1 ->
         x._2.map {
           xx =>
-          fromMap(xx).map {
-            xxx =>
-              gen.from(xxx)
-          }
+            //Type cast
+            val m = xx
+
+            val target = fromMap( columns.map{ xxx =>
+              xxx.name -> (
+                if(m.contains(xxx.name)){
+                  m(xxx.name)
+                } else {
+                  null
+                })
+            }.toMap).map {
+              x =>
+                gen.from(x)
+            }
+
+            Option(
+              if(typeable.describe.startsWith("Option")){
+                target.get
+              } else {
+                target match {
+                  case Some(tt) =>
+                    tt
+                  case _ =>
+                    None.asInstanceOf[A]
+                }
+              }
+            )
+          //
+
         }
     }
   }
