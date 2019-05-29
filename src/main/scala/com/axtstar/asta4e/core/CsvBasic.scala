@@ -2,7 +2,7 @@ package com.axtstar.asta4e.core
 import java.io.{FileInputStream, FileReader, FileWriter, InputStreamReader}
 import java.util.Date
 
-import com.opencsv.{CSVParserBuilder, CSVReaderBuilder, CSVWriterBuilder}
+import com.opencsv.{CSVParserBuilder, CSVReaderBuilder, CSVWriterBuilder, ICSVWriter}
 
 object CsvBasic {
 
@@ -86,6 +86,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
     val fileWriter = new FileWriter(outputStream.getFD)
 
     val parser = new CSVParserBuilder().withSeparator(separator)
+      .withQuoteChar(ICSVWriter.NO_QUOTE_CHARACTER)
       .build()
 
     val writer = new CSVWriterBuilder(fileWriter)
@@ -128,6 +129,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
     val fileWriter = new FileWriter(outputStream.getFD)
 
     val parser = new CSVParserBuilder().withSeparator(separator)
+      .withQuoteChar(ICSVWriter.NO_QUOTE_CHARACTER)
       .build()
 
     val writer = new CSVWriterBuilder(fileWriter)
