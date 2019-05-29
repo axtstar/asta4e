@@ -1,7 +1,9 @@
 package com.axtstar.asta4e.core
 import java.io.{FileInputStream, FileReader, FileWriter, InputStreamReader}
-import java.util.Date
+import java.text.SimpleDateFormat
+import java.util.{Date, Locale}
 
+import com.axtstar.asta4e.converter.Config
 import com.opencsv.{CSVParserBuilder, CSVReaderBuilder, CSVWriterBuilder, ICSVWriter}
 
 object CsvBasic {
@@ -149,7 +151,8 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
                     m(l.positionX) = map(l.name) match {
                       case null => ""
                       case mm:Date =>
-                        s"${quoteChar}${map(l.name).toString}${quoteChar}"
+                        val simpleDateFormat = new SimpleDateFormat(Config.dateParserString, new Locale(Config.dateParserLocale))
+                        s"${quoteChar}${simpleDateFormat.format(map(l.name))}${quoteChar}"
                       case mm:String =>
                         s"${quoteChar}${map(l.name).toString}${quoteChar}"
                       case _ =>

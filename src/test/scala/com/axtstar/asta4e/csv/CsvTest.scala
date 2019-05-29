@@ -62,8 +62,7 @@ class CsvTest extends Specification {
       target.size must be_==(1)
       target(0)._2.get.string must be_==("1000")
       target(0)._2.get.date must be_==(dateFormat.parse("2018/7/7"))
-      target(0)._2.get.formula must be_==("=B2")
-
+      target(0)._2.get.formula must be_==("") //Location設定なし
     }
 
     "SetDownCC -> GetDown 1 row" in {
@@ -93,8 +92,7 @@ class CsvTest extends Specification {
       target.size must be_==(1)
       target(0)._2(0).get.string must be_==("1000")
       target(0)._2(0).get.date must be_==(dateFormat.parse("2018/7/7"))
-      target(0)._2(0).get.formula must be_==("=B2")
-
+      target(0)._2(0).get.formula must be_==("") //Location設定なし
     }
 
 

@@ -1,6 +1,7 @@
 package com.axtstar.asta4e.converter
 
-import java.util.Date
+import java.text.{DateFormat, SimpleDateFormat}
+import java.util.{Date, Locale}
 
 import shapeless.PolyDefns.Case
 import shapeless.{::, HList, HNil, LabelledGeneric, Lazy, Poly0, Poly1, Typeable, Witness, ops}
@@ -321,7 +322,7 @@ object CC {
                   case xx:Date =>
                     xx
                   case xx:String =>
-                    Try(Date.parse(xx)).getOrElse(new Date(Long.MinValue))
+                    Try(new SimpleDateFormat(Config.dateParserString, new Locale(Config.dateParserLocale)).parse(xx)).getOrElse(new Date(Long.MinValue))
                   case _ =>
                     new Date(Long.MinValue)
                 })
