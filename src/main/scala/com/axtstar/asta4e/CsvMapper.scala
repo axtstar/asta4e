@@ -7,7 +7,8 @@ import com.axtstar.asta4e.converter.CC._
 import com.axtstar.asta4e.core._
 import shapeless.LabelledGeneric.Aux
 import shapeless._
-import shapeless.ops.record.ToMap
+import shapeless.ops.hlist
+import shapeless.ops.record.{Keys, ToMap, Values}
 
 
 object CsvMapper extends CsvBasic {
@@ -56,26 +57,65 @@ class CsvMapper[A] extends CsvBasic with TypeCore[A] {
   }
 
 
-  def getCC[R <: HList](iStream:FileInputStream)
-                                (implicit gen: LabelledGeneric.Aux[A, R]
-                                 , fromMap: FromMap[R])={
-    super._getData(iStream){
+  override def getCC[R <: HList, K <: HList, V <: HList, V1 <: HList](iStream:FileInputStream)
+                                                                     (implicit gen: LabelledGeneric.Aux[A, R],
+                                                                      fromMap: FromMap[R],
+                                                                      typeable: Typeable[A],
+                                                                      keys: Keys.Aux[R, K],
+                                                                      ktl: hlist.ToList[K, Symbol],
+                                                                      values: Values.Aux[R, V],
+                                                                      mapper: hlist.Mapper.Aux[typeablePoly.type, V, V1],
+                                                                      fillWith: hlist.FillWith[nullPoly.type, V],
+                                                                      vtl: hlist.ToList[V1, String]
+
+                                                                     )={
+    val columns = ktl(keys())
+
+    super._getData(iStream).map {
       x =>
-        fromMap(x).map{
-          xx =>
-            gen.from(xx)
+        //Type cast
+        val m = x._2
+
+        val target = fromMap( columns.map{ x =>
+          x.name -> (
+            if(m.contains(x.name)){
+              m(x.name)
+            } else {
+              null
+            })
+        }.toMap).map {
+          x =>
+            gen.from(x)
         }
+
+        x._1 -> Option(
+          if(typeable.describe.startsWith("Option")){
+            target.get
+          } else {
+            target match {
+              case Some(tt) =>
+                tt
+              case _ =>
+                None.asInstanceOf[A]
+            }
+          }
+        )
+      //
     }
   }
 
   def getCCDown[R <: HList](iStream: FileInputStream)
                                     (implicit gen: Aux[A, R], fromMap: FromMap[R]): IndexedSeq[(String, IndexedSeq[Option[A]])] = {
 
-    super._getDataDown(iStream){
+    super._getDataDown(iStream).map{
       x =>
-        fromMap(x).map{
+        x._1 ->
+        x._2.map {
           xx =>
-            gen.from(xx)
+          fromMap(xx).map {
+            xxx =>
+              gen.from(xxx)
+          }
         }
     }
   }
@@ -90,10 +130,7 @@ class CsvMapper[A] extends CsvBasic with TypeCore[A] {
           (x._2.get)
         ).toMap
     }
-    super._setData(map:_*){
-      x =>
-        x
-    }
+    super._setData(map:_*)
   }
 
   override def setCCDown[L <: HList](bindData: IndexedSeq[(String, IndexedSeq[Option[A]])])
@@ -106,10 +143,7 @@ class CsvMapper[A] extends CsvBasic with TypeCore[A] {
         })
     }
 
-    super._setDataDown(map:_*){
-      x =>
-        x
-    }
+    super._setDataDown(map:_*)
 
   }
 

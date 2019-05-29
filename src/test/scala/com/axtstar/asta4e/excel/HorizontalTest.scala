@@ -3,6 +3,7 @@ package com.axtstar.asta4e.excel
 import java.io.{File, FileInputStream}
 
 import com.axtstar.asta4e._
+import com.axtstar.asta4e.converter.{CC, MapHelper}
 import com.axtstar.asta4e.test_class.Data_HOLIZONTAL
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
@@ -14,11 +15,10 @@ class HorizontalTest extends Specification {
 
   "Horizontal" should {
     "Get" in {
-      val target = ExcelMapper.by[Data_HOLIZONTAL].getData(
-        s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_horizontal.xlsx",
-        List()
-      )
+      val target = ExcelMapper.by[Data_HOLIZONTAL]
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx")
+        .getCC(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_horizontal.xlsx"))
+
       target.size must be_==(1)
       target(0)._2.get.A1 must be_==("A1")
       target(0)._2.get.Z1 must be_==("Z1")
@@ -26,11 +26,10 @@ class HorizontalTest extends Specification {
     }
 
     "GetDown" in {
-      val target = ExcelMapper.by[Data_HOLIZONTAL].getDataDown(
-        s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_horizontal.xlsx",
-        List()
-      )
+      val target = ExcelMapper.by[Data_HOLIZONTAL]
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx")
+        .getCCDown(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_horizontal.xlsx"))
+
       target.size must be_==(1)
       target(0)._2(0).get.A1 must be_==("A1")
       target(0)._2(4).get.Z1 must be_==("Z5")
@@ -199,22 +198,20 @@ class HorizontalTest extends Specification {
       )
 
 
-      val list = IndexedSeq("Sheet1" -> IndexedSeq(Option(dh0),Option(dh1),Option(dh2)))
-      ExcelMapper.by[Data_HOLIZONTAL].setDataDown(
-        s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx",
-        s"${currentDir}/src/test/resources/excel/output_white.xlsx",
-        s"${currentDir}/target/output_horizontal_set.xlsx",
-        list
-      )
+      val list = ("Sheet1" -> IndexedSeq(CC.By(dh0).toMap,CC.By(dh1).toMap,CC.By(dh2).toMap))
+      ExcelMapper.by[Data_HOLIZONTAL]
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx")
+        .withLayoutXls(s"${currentDir}/src/test/resources/excel/output_white.xlsx")
+        .withOutStream(s"${currentDir}/target/output_horizontal_set.xlsx")
+        ._setDataDown(list)
 
-      val target = ExcelMapper.by[Data_HOLIZONTAL].getDataDown(
-        s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx",
-        s"${currentDir}/target/output_horizontal_set.xlsx",
-        List()
-      )
+      val target = ExcelMapper.by[Data_HOLIZONTAL]
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx")
+        ._getDataDown(new FileInputStream(s"${currentDir}/target/output_horizontal_set.xlsx"))
 
       target.size must be_==(1)
-      target(0)._2(0).get.AG1 must be_==("1AG")
+      val target2 = MapHelper.to[Data_HOLIZONTAL].from(target.head._2.head)
+      target2.AG1 must be_==("1AG")
 
     }
 

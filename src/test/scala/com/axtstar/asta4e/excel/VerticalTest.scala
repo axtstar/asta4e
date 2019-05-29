@@ -1,6 +1,6 @@
 package com.axtstar.asta4e.excel
 
-import java.io.File
+import java.io.{File, FileInputStream, FileOutputStream}
 
 import com.axtstar.asta4e.ExcelMapper
 import com.axtstar.asta4e.test_class.Data_VIRTICAL
@@ -14,11 +14,9 @@ class VerticalTest extends Specification {
 
   "Vertical" should {
     "Get" in {
-      val target = ExcelMapper.by[Data_VIRTICAL].getData(
-        s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_vertical.xlsx",
-        List()
-      )
+      val target = ExcelMapper.by[Data_VIRTICAL]
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx")
+        .getCC(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_vertical.xlsx"))
       target.size must be_==(1)
       target(0)._2.get.A1 must be_==("${A1}")
       target(0)._2.get.A26 must be_==("${A26}")
@@ -26,11 +24,10 @@ class VerticalTest extends Specification {
     }
 
     "GetDown" in {
-      val target = ExcelMapper.by[Data_VIRTICAL].getDataDown(
-        s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_vertical.xlsx",
-        List()
-      )
+      val target = ExcelMapper.by[Data_VIRTICAL]
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx")
+        .getCCDown(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_vertical.xlsx"))
+
       target.size must be_==(1)
       target(0)._2(0).get.A1 must be_==("${A1}")
       target(0)._2(0).get.A26 must be_==("${A26}")
@@ -79,11 +76,9 @@ class VerticalTest extends Specification {
         .withOutXls(s"${currentDir}/target/output_vertical_set.xlsx")
         .setCC(list)
 
-      val target = ExcelMapper.by[Data_VIRTICAL].getData(
-        s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx",
-        s"${currentDir}/target/output_vertical_set.xlsx",
-        List()
-      )
+      val target = ExcelMapper.by[Data_VIRTICAL]
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx")
+        .getCC(new FileInputStream(s"${currentDir}/target/output_vertical_set.xlsx"))
 
       target.size must be_==(1)
       target(0)._2.get.A32 must be_==("23A")
@@ -202,18 +197,15 @@ class VerticalTest extends Specification {
 
 
       val list = IndexedSeq("Sheet1" -> IndexedSeq(Option(dh0),Option(dh1),Option(dh2)))
-      ExcelMapper.by[Data_VIRTICAL].setDataDown(
-        s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx",
-        s"${currentDir}/src/test/resources/excel/output_white.xlsx",
-        s"${currentDir}/target/output_vertical_setdown.xlsx",
-        list
-      )
+      ExcelMapper.by[Data_VIRTICAL]
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx")
+        .withLayoutXls(s"${currentDir}/src/test/resources/excel/output_white.xlsx")
+        .withOutStream(new FileOutputStream(s"${currentDir}/target/output_vertical_setdown.xlsx"))
+        .setCCDown(list)
 
-      val target = ExcelMapper.by[Data_VIRTICAL].getDataDown(
-        s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx",
-        s"${currentDir}/target/output_vertical_setdown.xlsx",
-        List()
-      )
+      val target = ExcelMapper.by[Data_VIRTICAL]
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx")
+        .getCCDown(new FileInputStream(s"${currentDir}/target/output_vertical_setdown.xlsx"))
 
       target.size must be_==(1)
       target(0)._2(0).get.A1 must be_==("A1_0")

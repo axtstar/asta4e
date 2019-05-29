@@ -1,6 +1,6 @@
 package com.axtstar.asta4e.excel
 
-import java.io.File
+import java.io.{File, FileInputStream}
 
 import com.axtstar.asta4e.ExcelMapper
 import com.axtstar.asta4e.test_class._
@@ -14,11 +14,10 @@ class XSSFCellTest extends Specification {
 
   "XSSFCell" should {
     "Get" in {
-      val target = ExcelMapper.by[ExcelCell].getData(
-        s"${currentDir}/src/test/resources/excel/bind_excel_cell.xlsx",
-        s"${currentDir}/src/test/resources/excel/read_excel_cell.xlsx",
-        List()
-      )
+      val target = ExcelMapper.by[ExcelCell]
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_excel_cell.xlsx")
+        ._getData(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_cell.xlsx"))
+
       target.size must be_==(1)
 
     }

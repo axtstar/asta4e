@@ -7,12 +7,11 @@ object CsvBasic {
 
 }
 
-trait CsvBasic extends DataCore[ExcelBasic] with InitialCore [CsvBasic] /*with DataCore[CsvBasic]*/ {
+trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvBasic]*/ {
   protected var separator = ','
   protected var quoteChar = '"'
 
-  override def _getData[B](iStream: FileInputStream)
-                         (f: Map[String, Any] => B): IndexedSeq[(String, B)] = {
+  override def _getData(iStream: FileInputStream): IndexedSeq[(String, Map[String, Any])] = {
     val parser = new CSVParserBuilder().withSeparator(separator)
       .withQuoteChar(quoteChar).build()
     val fileReader = new FileReader(iStream.getFD)
@@ -33,7 +32,9 @@ trait CsvBasic extends DataCore[ExcelBasic] with InitialCore [CsvBasic] /*with D
           x.name -> target
       }).toMap
       //TODO : "" as FileName
-      IndexedSeq("" -> f(map))
+      IndexedSeq("" ->
+        map
+      )
     } catch {
       case ex:Exception =>
         throw ex
@@ -45,8 +46,7 @@ trait CsvBasic extends DataCore[ExcelBasic] with InitialCore [CsvBasic] /*with D
   }
 
 
-  override def _getDataDown[B](iStream: FileInputStream)
-                (f: Map[String, Any] => B): IndexedSeq[(String, IndexedSeq[B])] = {
+  override def _getDataDown(iStream: FileInputStream): IndexedSeq[(String, IndexedSeq[Map[String, Any]])] = {
     val parser = new CSVParserBuilder().withSeparator(separator)
       .withQuoteChar(quoteChar).build()
     val fileReader = new FileReader(iStream.getFD)
@@ -69,7 +69,7 @@ trait CsvBasic extends DataCore[ExcelBasic] with InitialCore [CsvBasic] /*with D
             val target = oneLine(x.positionX)
             x.name -> target
         }).toMap
-        f(map)
+        map
       }))
     } catch {
       case ex:Exception =>
@@ -81,7 +81,7 @@ trait CsvBasic extends DataCore[ExcelBasic] with InitialCore [CsvBasic] /*with D
     }
   }
 
-  override def _setData(bindData: (String, Map[String, Any])*)(f: Map[String, Any] => Map[String, Any]): Unit = {
+  override def _setData(bindData: (String, Map[String, Any])*): Unit = {
     val fileWriter = new FileWriter(outputStream.getFD)
 
     val parser = new CSVParserBuilder().withSeparator(separator)
@@ -93,10 +93,17 @@ trait CsvBasic extends DataCore[ExcelBasic] with InitialCore [CsvBasic] /*with D
     try{
       bindData.map {
         x =>
-          val map = f(x._2).map{xx=>
-            xx._2.toString()
-          }.toArray
-        writer.writeNext(map, false)
+          val map = x._2
+          val m: Array[String] = Array.fill[String](1 + locationMap.map { f => f.positionX }.max)("")
+          locationMap.foreach {
+            l =>
+              m(l.positionX) = map(l.name) match {
+                case null => ""
+                case _ =>
+                  map(l.name).toString
+              }
+          }
+          writer.writeNext(m, false)
       }
 
     } catch {
@@ -110,7 +117,7 @@ trait CsvBasic extends DataCore[ExcelBasic] with InitialCore [CsvBasic] /*with D
 
   }
 
-  override def _setDataDown(bindData: (String, IndexedSeq[Map[String, Any]])*)(f: Map[String, Any] => Map[String, Any]): Unit = {
+  override def _setDataDown(bindData: (String, IndexedSeq[Map[String, Any]])*): Unit = {
     val fileWriter = new FileWriter(outputStream.getFD)
 
     val parser = new CSVParserBuilder().withSeparator(separator)
@@ -125,8 +132,17 @@ trait CsvBasic extends DataCore[ExcelBasic] with InitialCore [CsvBasic] /*with D
           val x = b._2
           x.map {
             xx =>
-            val map = f(xx).map { xxx => xxx._2.toString }.toArray
-            writer.writeNext(map)
+              val map = xx
+              val m:Array[String] = Array.fill[String](1 + locationMap.map{f => f.positionX}.max)("")
+              locationMap.foreach {
+                l =>
+                  m(l.positionX) = map(l.name) match {
+                    case null => ""
+                    case _ =>
+                      map(l.name).toString
+                  }
+              }
+              writer.writeNext(m, false)
           }
       }
 

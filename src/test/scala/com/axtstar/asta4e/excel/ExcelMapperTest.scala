@@ -21,10 +21,7 @@ class ExcelMapperTest extends Specification {
 
       val target = ExcelMapper
           .withLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx")
-        ._getData(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx")){
-          x =>
-            x
-        }
+        ._getData(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx"))
 
       "sheets size" in {
         target.size must be_==(1)
@@ -89,10 +86,7 @@ class ExcelMapperTest extends Specification {
       "map to A" in {
         val target = ExcelMapper
             .withLocation(s"${currentDir}/src/test/resources/excel/bind_template6.xlsx")
-          ._getDataDown(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_sample6.xlsx")){
-            x =>
-              x
-          }
+          ._getDataDown(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_sample6.xlsx"))
 
         val result = MapHelper.to[Etc7Option].from(target.head._2.head)
 
@@ -128,26 +122,18 @@ class ExcelMapperTest extends Specification {
           .withLocation(s"${currentDir}/src/test/resources/excel/bind_template6.xlsx")
           .withLayoutXls(s"${currentDir}/src/test/resources/excel/output_template6.xlsx")
           .withOutXls(s"${currentDir}/target/output6_1.xlsx")
-          ._setDataDown("Sheet1" -> IndexedSeq(CC.By(result).toMap, CC.By(result2).toMap)){
-            x =>
-              x
-          }
+          ._setDataDown("Sheet1" -> IndexedSeq(CC.By(result).toMap, CC.By(result2).toMap))
 
         //Map
         ExcelMapper.by[String]
           .withLocation(s"${currentDir}/src/test/resources/excel/bind_template6.xlsx")
           .withLayoutXls(s"${currentDir}/src/test/resources/excel/output_template6.xlsx")
           .withOutXls(s"${currentDir}/target/output6_2.xlsx")
-          ._setDataDown(target: _*){
-            x =>
-              x
-          }
+          ._setDataDown(target: _*)
 
-        val result4 = ExcelMapper.by[Etc7Option].getDataDown(
-          s"${currentDir}/src/test/resources/excel/bind_template6.xlsx",
-          s"${currentDir}/src/test/resources/excel/read_sample6.xlsx",
-          List()
-        )
+        val result4 = ExcelMapper.by[Etc7Option]
+          .withLocation(s"${currentDir}/src/test/resources/excel/bind_template6.xlsx")
+          ._getDataDown(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_sample6.xlsx"))
 
         result4.size must be_==(1) // 1 sheet
 
@@ -155,11 +141,9 @@ class ExcelMapperTest extends Specification {
       }
 
       "A to B" in {
-        val data = ExcelMapper.by[VariousCell].getData(
-          s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx",
-          s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx",
-          List()
-        )
+        val data = ExcelMapper.by[VariousCell]
+          .withLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx")
+          .getCC(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx"))
 
 
         ExcelMapper.by[VariousCell]

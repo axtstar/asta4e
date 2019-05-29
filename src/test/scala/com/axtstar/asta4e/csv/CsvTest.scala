@@ -139,10 +139,7 @@ class CsvTest extends Specification {
                 "time" -> timeFormat.parse("23:32:42") &
                 "userDate" -> dateFormatFull.parse("2018/11/24 18:52:56")
               )):_*
-        ){
-        x =>
-            x
-      }
+        )
 
       "" must be_==("")
 

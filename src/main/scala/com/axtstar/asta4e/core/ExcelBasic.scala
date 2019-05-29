@@ -212,7 +212,7 @@ object ExcelBasic {
 
 }
 
-trait ExcelBasic extends DataCore[ExcelBasic] with InitialCore[ExcelBasic] {
+trait ExcelBasic extends DataCore with InitialCore[ExcelBasic] {
 
   import  com.axtstar.asta4e.core.ExcelBasic._
 
@@ -236,8 +236,7 @@ trait ExcelBasic extends DataCore[ExcelBasic] with InitialCore[ExcelBasic] {
     this
   }
 
-  override def _setData(bindData: (String, Map[String, Any])*)
-             (f:Map[String, Any] => Map[String, Any])={
+  override def _setData(bindData: (String, Map[String, Any])*) ={
     val workbook = WorkbookFactory.create(layoutStram)
 
     try {
@@ -292,7 +291,7 @@ trait ExcelBasic extends DataCore[ExcelBasic] with InitialCore[ExcelBasic] {
                               target = row.getCell(ref.getCol)
                             }
 
-                            setOneCell(target, bindMap._1, f(map), x)
+                            setOneCell(target, bindMap._1, map, x)
                           }
                         }
                       }
@@ -314,8 +313,7 @@ trait ExcelBasic extends DataCore[ExcelBasic] with InitialCore[ExcelBasic] {
     }
   }
 
-  override def _setDataDown(bindData: (String, IndexedSeq[Map[String, Any]])*)
-             (f:Map[String, Any] => Map[String, Any])= {
+  override def _setDataDown(bindData: (String, IndexedSeq[Map[String, Any]])*) = {
     val workbook = WorkbookFactory.create(layoutStram)
 
     try {
@@ -372,7 +370,7 @@ trait ExcelBasic extends DataCore[ExcelBasic] with InitialCore[ExcelBasic] {
                                       target = row.getCell(ref.getCol)
                                     }
 
-                                    setOneCell(target, bindMap._1, f(map), x)
+                                    setOneCell(target, bindMap._1, map, x)
                                   }
                                 }
                               }
@@ -397,9 +395,7 @@ trait ExcelBasic extends DataCore[ExcelBasic] with InitialCore[ExcelBasic] {
 
   }
 
-  override def _getData[B](
-                  iStream: FileInputStream
-             )(f:Map[String, Any] => B):IndexedSeq[(String,B)]={
+  override def _getData(iStream: FileInputStream):IndexedSeq[(String,Map[String,Any])]={
     val workbook = WorkbookFactory.create(iStream)
 
     try {
@@ -422,7 +418,7 @@ trait ExcelBasic extends DataCore[ExcelBasic] with InitialCore[ExcelBasic] {
             }
             getOneCell(target, x)
         }
-        sheet.getSheetName -> f(result.toMap)
+        sheet.getSheetName -> result.toMap
       }
     } catch {
       case ex: Throwable =>
@@ -434,8 +430,7 @@ trait ExcelBasic extends DataCore[ExcelBasic] with InitialCore[ExcelBasic] {
     }
  }
 
-  override def _getDataDown[B](iStream:FileInputStream)
-                    (f:Map[String, Any] => B):IndexedSeq[(String, IndexedSeq[B])]={
+  override def _getDataDown(iStream:FileInputStream):IndexedSeq[(String, IndexedSeq[Map[String, Any]])]={
     val workbook = WorkbookFactory.create(iStream)
     try {
       (for (index <- 0 until workbook.getNumberOfSheets) yield {
@@ -466,7 +461,7 @@ trait ExcelBasic extends DataCore[ExcelBasic] with InitialCore[ExcelBasic] {
                 result
             }).toMap
 
-            f(results)
+            results
           })
         }
       }).filter(_ != null)
