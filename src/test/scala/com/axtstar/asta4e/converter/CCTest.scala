@@ -4,10 +4,6 @@ import java.io.{File, FileInputStream}
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import com.axtstar.asta4e.CsvMapper
-import com.axtstar.asta4e.converter.MapHelper
-import com.axtstar.asta4e.test_class.VariousCell
-import com.axtstar.asta4e.test_location.{CSV_Data, Location_4_CSV}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner

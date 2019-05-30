@@ -1,5 +1,5 @@
 package com.axtstar.asta4e.core
-import java.io.{FileInputStream, FileReader, FileWriter, InputStreamReader}
+import java.io.{FileInputStream, InputStreamReader, OutputStreamWriter}
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
 
@@ -13,13 +13,17 @@ object CsvBasic {
 trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvBasic]*/ {
   protected var separator = ','
   protected var quoteChar = '"'
+  protected var encoding = "UTF-8"
 
   override def _getData(iStream: FileInputStream): IndexedSeq[(String, Map[String, Any])] = {
-    val parser = new CSVParserBuilder().withSeparator(separator)
-      .withQuoteChar(quoteChar).build()
-    val fileReader = new FileReader(iStream.getFD)
-    val reader = new CSVReaderBuilder(fileReader)
-      .withCSVParser(parser).build()
+    val parser = new CSVParserBuilder()
+      .withSeparator(separator)
+      .withQuoteChar(quoteChar)
+      .build()
+    val inputStreamReader = new InputStreamReader(iStream, encoding)
+    val reader = new CSVReaderBuilder(inputStreamReader)
+      .withCSVParser(parser)
+      .build()
 
     val minRow = locationMap.map(_.positionY).min
     val maxRow = locationMap.map(_.positionY).max
@@ -43,18 +47,22 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
         throw ex
     } finally {
       reader.close()
-      fileReader.close()
+      inputStreamReader.close()
       iStream.close()
     }
   }
 
 
   override def _getDataDown(iStream: FileInputStream): IndexedSeq[(String, IndexedSeq[Map[String, Any]])] = {
-    val parser = new CSVParserBuilder().withSeparator(separator)
-      .withQuoteChar(quoteChar).build()
-    val fileReader = new FileReader(iStream.getFD)
-    val reader = new CSVReaderBuilder(fileReader)
-      .withCSVParser(parser).build()
+    val parser = new CSVParserBuilder()
+      .withSeparator(separator)
+      .withQuoteChar(quoteChar)
+      .build()
+
+    val inputStreamReader = new InputStreamReader(iStream, encoding)
+    val reader = new CSVReaderBuilder(inputStreamReader)
+      .withCSVParser(parser)
+      .build()
 
     val minRow = locationMap.map(_.positionY).min
     val maxRow = locationMap.map(_.positionY).max
@@ -79,26 +87,30 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
         throw ex
     } finally {
       reader.close()
-      fileReader.close()
+      inputStreamReader.close()
       iStream.close()
     }
   }
 
   override def _setData(bindData: (String, Map[String, Any])*): Unit = {
-    val fileWriter = new FileWriter(outputStream.getFD)
 
-    val parser = new CSVParserBuilder().withSeparator(separator)
+    val parser = new CSVParserBuilder()
+      .withSeparator(separator)
       .withQuoteChar(ICSVWriter.NO_QUOTE_CHARACTER)
       .build()
 
-    val writer = new CSVWriterBuilder(fileWriter)
-      .withParser(parser).build()
+    val outputStreamWriter = new OutputStreamWriter(outputStream, encoding)
+    val writer = new CSVWriterBuilder(outputStreamWriter)
+      .withParser(parser)
+      .build()
 
     try{
       bindData.map {
         x =>
           val map = x._2
-          val m: Array[String] = Array.fill[String](1 + locationMap.map { f => f.positionX }.max)("")
+          val m: Array[String] = Array.fill[String](
+            1 + locationMap.map { f => f.positionX }.max
+          )(""/*initial value*/)
           locationMap.foreach {
             l =>
               if (map.contains(l.name)) {
@@ -121,20 +133,20 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
         throw ex
     } finally {
       writer.close()
-      fileWriter.close()
+      outputStreamWriter.close()
       outputStream.close()
     }
 
   }
 
   override def _setDataDown(bindData: (String, IndexedSeq[Map[String, Any]])*): Unit = {
-    val fileWriter = new FileWriter(outputStream.getFD)
 
     val parser = new CSVParserBuilder().withSeparator(separator)
       .withQuoteChar(ICSVWriter.NO_QUOTE_CHARACTER)
       .build()
 
-    val writer = new CSVWriterBuilder(fileWriter)
+    val outputStreamWriter = new OutputStreamWriter(outputStream, encoding)
+    val writer = new CSVWriterBuilder(outputStreamWriter)
       .withParser(parser).build()
 
     try{
@@ -168,7 +180,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
         throw ex
     } finally {
       writer.close()
-      fileWriter.close()
+      outputStreamWriter.close()
       outputStream.close()
     }
 

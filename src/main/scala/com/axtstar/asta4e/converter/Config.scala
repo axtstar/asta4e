@@ -8,5 +8,5 @@ import com.axtstar.asta4e.core.{ExcelBasic, Location}
 
 object Config {
 
-  var DateReadParse = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", new Locale("JPZ"))
+  var DateReadParse = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", new Locale("GMT"))
 }
