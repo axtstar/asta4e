@@ -73,13 +73,12 @@ ${another}
 - get bind data from Excel
 
 ```scala
-val target = ExcelMapper[Data].getData(
-        "template.xlsx",
-        "data.xlsx",
-        List("ignoreSheetName"))
+val target = ExcelMapper.by[Data]
+        .withLocation("template.xlsx")
+        .getCC(new FileInputStream("data.xlsx"))
 ```
 
-then, return to bind data to `target` as Data type.
+then, return to bind data to `target` as Data type along side with sheetName.
 
 ```
 IndexedSeq("sheetName" -> Data)
