@@ -91,12 +91,11 @@ IndexedSeq("sheetName" -> Data)
 
 ```scala
 import com.axtstar.asta4e._
-ExcelMapper[Data].setData(
-        "template.xlsx",
-        "data_template.xlsx",
-        "output.xlsx",
-        data
-)
+val target = ExcelMapper[Data]
+        .withLocation("template.xlsx")
+          .withLayoutXls("layout.xlsx")
+            .withOutStream("output.path")
+      .setCC(data)
 ```
 
 then, you get output.xlsx as output excel.
