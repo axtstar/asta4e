@@ -56,6 +56,11 @@ class CsvMapper[A] extends CsvBasic with TypeCore[A] {
     this
   }
 
+  def withEncoding(_encoding:String)={
+    this.encoding = _encoding
+    this
+  }
+
 
   override def getCC[R <: HList, K <: HList, V <: HList, V1 <: HList](iStream:FileInputStream)
                                                                      (implicit gen: LabelledGeneric.Aux[A, R],
