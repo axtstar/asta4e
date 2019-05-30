@@ -78,10 +78,10 @@ val target = ExcelMapper.by[Data]
         .getCC(new FileInputStream("data.xlsx"))
 ```
 
-then, return to bind data to `target` as Data type along side with sheetName.
+then, return to bind data to `target` as option of Data type along side with sheetName.
 
 ```
-IndexedSeq("sheetName" -> Data)
+IndexedSeq("sheetName" -> Option[Data])
 
 ```
 
@@ -91,11 +91,11 @@ IndexedSeq("sheetName" -> Data)
 
 ```scala
 import com.axtstar.asta4e._
-val target = ExcelMapper[Data]
+      ExcelMapper[Data]
         .withLocation("template.xlsx")
           .withLayoutXls("layout.xlsx")
-            .withOutStream("output.path")
-      .setCC(data)
+          .withOutStream("output.path")
+          .setCC(data)
 ```
 
 then, you get output.xlsx as output excel.
