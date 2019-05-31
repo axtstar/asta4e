@@ -26,44 +26,47 @@ object ExcelMapper extends ExcelBasic {
 
 /**
   *
-  * @tparam A
+  * @tparam A1
   */
-class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
+class ExcelMapper[A1] extends ExcelBasic with TypeCore[A1] {
 
   def withLocation(_locationMap: List[Location]) = {
-    super.withLocation(_locationMap).asInstanceOf[ExcelMapper[A]]
+    super.withLocation(_locationMap).asInstanceOf[ExcelMapper[A1]]
   }
 
   override def withLocation(_locationMapPathExcel: String) = {
-    super.withLocation(_locationMapPathExcel).asInstanceOf[ExcelMapper[A]]
+    super.withLocation(_locationMapPathExcel).asInstanceOf[ExcelMapper[A1]]
   }
 
   override def withIgnoreSheets(_ignoreSheets: List[String]) = {
-    super.withIgnoreSheets(_ignoreSheets).asInstanceOf[ExcelMapper[A]]
+    super.withIgnoreSheets(_ignoreSheets).asInstanceOf[ExcelMapper[A1]]
   }
 
   override def withLayoutXls(_layoutXls: FileInputStream) = {
-    super.withLayoutXls(_layoutXls).asInstanceOf[ExcelMapper[A]]
+    super.withLayoutXls(_layoutXls).asInstanceOf[ExcelMapper[A1]]
   }
 
   def withLayoutXls(_layoutXlsPath: String) = {
-    super.withLayoutXls(new FileInputStream(_layoutXlsPath)).asInstanceOf[ExcelMapper[A]]
+    super.withLayoutXls(new FileInputStream(_layoutXlsPath)).asInstanceOf[ExcelMapper[A1]]
   }
 
 
   override def withOutStream(_outputXls: FileOutputStream) = {
-    super.withOutStream(_outputXls).asInstanceOf[ExcelMapper[A]]
+    super.withOutStream(_outputXls).asInstanceOf[ExcelMapper[A1]]
   }
 
   def withOutXls(_outputXlsPath: String) = {
-    super.withOutStream(new FileOutputStream(_outputXlsPath)).asInstanceOf[ExcelMapper[A]]
+    super.withOutStream(new FileOutputStream(_outputXlsPath)).asInstanceOf[ExcelMapper[A1]]
   }
 
   import ops.record._
 
-  def setCC[L <: HList](bindCC: IndexedSeq[(String, Option[A])])
-                                   (implicit gen: Aux[A, L],
-                                    tmr: ToMap[L]): Unit = {
+  override def setCC[RA1 <: HList](bindCC: IndexedSeq[(String, Option[A1])])
+                                   (implicit
+                                    gen: Aux[A1, RA1],
+                                    tmr: ToMap[RA1]
+
+                                   ): Unit = {
     val map = bindCC.map {
       x =>
         x._1 -> CC.By(x._2.get).toMap
@@ -72,8 +75,12 @@ class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
 
   }
 
-  override def setCCDown[L <: HList](bindData: IndexedSeq[(String, IndexedSeq[Option[A]])])
-                                    (implicit gen: Aux[A, L], tmr: ToMap[L]): Unit = {
+  override def setCCDown[RA1 <: HList](bindData: IndexedSeq[(String, IndexedSeq[Option[A1]])])
+                                    (implicit
+                                     gen: Aux[A1, RA1],
+                                     tmr: ToMap[RA1]
+
+                                    ): Unit = {
     val map = bindData.map {
       x =>
         x._1 -> (x._2.map {
@@ -86,31 +93,16 @@ class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
 
   }
 
-  def setData[L <: HList,B](a:IndexedSeq[(String,Option[A])])
-                           (f: Option[A] => B)
-                           (implicit
-                           gen: LabelledGeneric.Aux[A, L],
-                           tmr: ToMap[L]
-                         ) = {
-
-    val aToMap = a.map {
-      x =>
-        x._1 -> CC.By(x._2.get).toMap
-    }
-
-    this.setCC(a)
-  }
-
-  override def getCC[R <: HList, K <: HList, V <: HList, V1 <: HList](iStream:FileInputStream)
-                           (implicit gen: LabelledGeneric.Aux[A, R],
-                              fromMap: FromMap[R],
-                              typeable: Typeable[A],
-                              keys: Keys.Aux[R, K],
-                              ktl: hlist.ToList[K, Symbol],
-                              values: Values.Aux[R, V],
-                              mapper: hlist.Mapper.Aux[typeablePoly.type, V, V1],
-                              fillWith: hlist.FillWith[nullPoly.type, V],
-                              vtl: hlist.ToList[V1, String]
+  override def getCC[RA1 <: HList, KA1 <: HList, VA1 <: HList, MA1 <: HList](iStream:FileInputStream)
+                           (implicit gen: LabelledGeneric.Aux[A1, RA1],
+                              fromMap: FromMap[RA1],
+                              typeable: Typeable[A1],
+                              keys: Keys.Aux[RA1, KA1],
+                              ktl: hlist.ToList[KA1, Symbol],
+                              values: Values.Aux[RA1, VA1],
+                              mapper: hlist.Mapper.Aux[typeablePoly.type, VA1, MA1],
+                              fillWith: hlist.FillWith[nullPoly.type, VA1],
+                              vtl: hlist.ToList[MA1, String]
 
                            )={
 
@@ -142,7 +134,7 @@ class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
             case Some(tt) =>
               tt
             case _ =>
-              None.asInstanceOf[A]
+              None.asInstanceOf[A1]
           }
         }
       )
@@ -150,19 +142,19 @@ class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
     }
   }
 
-  override def getCCDown[R <: HList, K <: HList, V <: HList, V1 <: HList](iStream: FileInputStream)
+  override def getCCDown[RA1 <: HList, KA1 <: HList, VA1 <: HList, MA1 <: HList](iStream: FileInputStream)
                                     (implicit
-                                     gen: Aux[A, R],
-                                     fromMap: FromMap[R],
-                                     typeable: Typeable[A],
-                                     keys: Keys.Aux[R, K],
-                                     ktl: hlist.ToList[K, Symbol],
-                                     values: Values.Aux[R, V],
-                                     mapper: hlist.Mapper.Aux[typeablePoly.type, V, V1],
-                                     fillWith: hlist.FillWith[nullPoly.type, V],
-                                     vtl: hlist.ToList[V1, String]
+                                     gen: Aux[A1, RA1],
+                                     fromMap: FromMap[RA1],
+                                     typeable: Typeable[A1],
+                                     keys: Keys.Aux[RA1, KA1],
+                                     ktl: hlist.ToList[KA1, Symbol],
+                                     values: Values.Aux[RA1, VA1],
+                                     mapper: hlist.Mapper.Aux[typeablePoly.type, VA1, MA1],
+                                     fillWith: hlist.FillWith[nullPoly.type, VA1],
+                                     vtl: hlist.ToList[MA1, String]
 
-                                    ): IndexedSeq[(String, IndexedSeq[Option[A]])] = {
+                                    ): IndexedSeq[(String, IndexedSeq[Option[A1]])] = {
 
     val columns = ktl(keys())
 
@@ -194,7 +186,7 @@ class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
                     case Some(tt) =>
                       tt
                     case _ =>
-                      None.asInstanceOf[A]
+                      None.asInstanceOf[A1]
                   }
                 }
               )
@@ -203,5 +195,5 @@ class ExcelMapper[A] extends ExcelBasic with TypeCore[A] {
           }
     }
   }
-  //End ExcelMapper[A]
+  //End ExcelMapper[A1]
 }

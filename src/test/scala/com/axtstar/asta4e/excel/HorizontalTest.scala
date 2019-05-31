@@ -76,10 +76,7 @@ class HorizontalTest extends Specification {
         .withLocation(s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx")
         .withLayoutXls(s"${currentDir}/src/test/resources/excel/output_white.xlsx")
         .withOutXls(s"${currentDir}/target/output_horizontal_set.xlsx")
-        .setData(list){
-          x =>
-            x
-        }
+        .setCC(list)
 
       val target = ExcelMapper.by[Data_HOLIZONTAL]
         .withLocation(s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx")

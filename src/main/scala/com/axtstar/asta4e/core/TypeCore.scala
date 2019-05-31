@@ -7,43 +7,43 @@ import shapeless.ops.hlist
 import shapeless.{HList, LabelledGeneric, Typeable}
 import shapeless.ops.record.{Keys, ToMap, Values}
 
-trait TypeCore[A] {
+trait TypeCore[A1] {
 
-  def setCC[L <: HList](bindCC:IndexedSeq[(String,Option[A])])
+  def setCC[RA1 <: HList](bindCC:IndexedSeq[(String,Option[A1])])
                          (implicit
-               gen: LabelledGeneric.Aux[A, L],
-               tmr: ToMap[L]):Unit
+               gen: LabelledGeneric.Aux[A1, RA1],
+               tmr: ToMap[RA1]):Unit
 
-  def setCCDown[L <: HList](bindData: IndexedSeq[(String,IndexedSeq[Option[A]])])
+  def setCCDown[RA1 <: HList](bindData: IndexedSeq[(String,IndexedSeq[Option[A1]])])
                            (implicit
-                            gen: LabelledGeneric.Aux[A, L],
-                            tmr: ToMap[L]):Unit
+                            gen: LabelledGeneric.Aux[A1, RA1],
+                            tmr: ToMap[RA1]):Unit
 
-  def getCC[R <: HList, K <: HList, V <: HList, V1 <: HList](
+  def getCC[RA1 <: HList, KA1 <: HList, VA1 <: HList, MA1 <: HList](
                   iStream: FileInputStream
-                )(implicit gen: LabelledGeneric.Aux[A, R],
-                  fromMap: FromMap[R],
-                  typeable: Typeable[A],
-                  keys: Keys.Aux[R, K],
-                  ktl: hlist.ToList[K, Symbol],
-                  values: Values.Aux[R, V],
-                  mapper: hlist.Mapper.Aux[typeablePoly.type, V, V1],
-                  fillWith: hlist.FillWith[nullPoly.type, V],
-                  vtl: hlist.ToList[V1, String]
+                )(implicit gen: LabelledGeneric.Aux[A1, RA1],
+                  fromMap: FromMap[RA1],
+                  typeable: Typeable[A1],
+                  keys: Keys.Aux[RA1, KA1],
+                  ktl: hlist.ToList[KA1, Symbol],
+                  values: Values.Aux[RA1, VA1],
+                  mapper: hlist.Mapper.Aux[typeablePoly.type, VA1, MA1],
+                  fillWith: hlist.FillWith[nullPoly.type, VA1],
+                  vtl: hlist.ToList[MA1, String]
 
-  ):IndexedSeq[(String,Option[A])]
+  ):IndexedSeq[(String,Option[A1])]
 
-  def getCCDown[R <: HList, K <: HList, V <: HList, V1 <: HList](iStream:FileInputStream)
-                    (implicit gen: LabelledGeneric.Aux[A, R],
-                     fromMap: FromMap[R],
-                     typeable: Typeable[A],
-                     keys: Keys.Aux[R, K],
-                     ktl: hlist.ToList[K, Symbol],
-                     values: Values.Aux[R, V],
-                     mapper: hlist.Mapper.Aux[typeablePoly.type, V, V1],
-                     fillWith: hlist.FillWith[nullPoly.type, V],
-                     vtl: hlist.ToList[V1, String]
+  def getCCDown[RA1 <: HList, KA1 <: HList, VA1 <: HList, MA1 <: HList](iStream:FileInputStream)
+                    (implicit gen: LabelledGeneric.Aux[A1, RA1],
+                     fromMap: FromMap[RA1],
+                     typeable: Typeable[A1],
+                     keys: Keys.Aux[RA1, KA1],
+                     ktl: hlist.ToList[KA1, Symbol],
+                     values: Values.Aux[RA1, VA1],
+                     mapper: hlist.Mapper.Aux[typeablePoly.type, VA1, MA1],
+                     fillWith: hlist.FillWith[nullPoly.type, VA1],
+                     vtl: hlist.ToList[MA1, String]
 
-                    ):IndexedSeq[(String, IndexedSeq[Option[A]])]
+                    ):IndexedSeq[(String, IndexedSeq[Option[A1]])]
 
 }

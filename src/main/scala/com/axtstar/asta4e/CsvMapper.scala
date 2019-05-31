@@ -27,9 +27,9 @@ object CsvMapper extends CsvBasic {
 
 /**
   *
-  * @tparam A
+  * @tparam A1
   */
-class CsvMapper[A] extends CsvBasic with TypeCore[A] {
+class CsvMapper[A1] extends CsvBasic with TypeCore[A1] {
   def withLocation(_locationMap: List[Location]) = {
     super.withLocation(_locationMap)
     this
@@ -62,13 +62,13 @@ class CsvMapper[A] extends CsvBasic with TypeCore[A] {
   }
 
 
-  override def getCC[R <: HList, K <: HList, V <: HList, V1 <: HList](iStream:FileInputStream)
-                                                                     (implicit gen: LabelledGeneric.Aux[A, R],
-                                                                      fromMap: FromMap[R],
-                                                                      typeable: Typeable[A],
-                                                                      keys: Keys.Aux[R, K],
+  override def getCC[RA1 <: HList, K <: HList, V <: HList, V1 <: HList](iStream:FileInputStream)
+                                                                     (implicit gen: LabelledGeneric.Aux[A1, RA1],
+                                                                      fromMap: FromMap[RA1],
+                                                                      typeable: Typeable[A1],
+                                                                      keys: Keys.Aux[RA1, K],
                                                                       ktl: hlist.ToList[K, Symbol],
-                                                                      values: Values.Aux[R, V],
+                                                                      values: Values.Aux[RA1, V],
                                                                       mapper: hlist.Mapper.Aux[typeablePoly.type, V, V1],
                                                                       fillWith: hlist.FillWith[nullPoly.type, V],
                                                                       vtl: hlist.ToList[V1, String]
@@ -101,7 +101,7 @@ class CsvMapper[A] extends CsvBasic with TypeCore[A] {
               case Some(tt) =>
                 tt
               case _ =>
-                None.asInstanceOf[A]
+                None.asInstanceOf[A1]
             }
           }
         )
@@ -111,9 +111,9 @@ class CsvMapper[A] extends CsvBasic with TypeCore[A] {
 
   def getCCDown[R <: HList, K <: HList, V <: HList, V1 <: HList](iStream: FileInputStream)
                                     (
-                                      implicit gen: Aux[A, R],
+                                      implicit gen: Aux[A1, R],
                                       fromMap: FromMap[R],
-                                      typeable: Typeable[A],
+                                      typeable: Typeable[A1],
                                       keys: Keys.Aux[R, K],
                                       ktl: hlist.ToList[K, Symbol],
                                       values: Values.Aux[R, V],
@@ -121,7 +121,7 @@ class CsvMapper[A] extends CsvBasic with TypeCore[A] {
                                       fillWith: hlist.FillWith[nullPoly.type, V],
                                       vtl: hlist.ToList[V1, String]
 
-                                    ): IndexedSeq[(String, IndexedSeq[Option[A]])] = {
+                                    ): IndexedSeq[(String, IndexedSeq[Option[A1]])] = {
     val columns = ktl(keys())
 
     super._getDataDown(iStream).map{
@@ -152,7 +152,7 @@ class CsvMapper[A] extends CsvBasic with TypeCore[A] {
                   case Some(tt) =>
                     tt
                   case _ =>
-                    None.asInstanceOf[A]
+                    None.asInstanceOf[A1]
                 }
               }
             )
@@ -163,8 +163,8 @@ class CsvMapper[A] extends CsvBasic with TypeCore[A] {
   }
 
 
-  override def setCC[L <: HList](bindCC: IndexedSeq[(String, Option[A])])
-                                (implicit gen: Aux[A, L], tmr: ToMap[L]): Unit = {
+  override def setCC[L <: HList](bindCC: IndexedSeq[(String, Option[A1])])
+                                (implicit gen: Aux[A1, L], tmr: ToMap[L]): Unit = {
 
     val map = bindCC.map {
       x =>
@@ -175,8 +175,8 @@ class CsvMapper[A] extends CsvBasic with TypeCore[A] {
     super._setData(map:_*)
   }
 
-  override def setCCDown[L <: HList](bindData: IndexedSeq[(String, IndexedSeq[Option[A]])])
-                                    (implicit gen: Aux[A, L], tmr: ToMap[L]): Unit = {
+  override def setCCDown[L <: HList](bindData: IndexedSeq[(String, IndexedSeq[Option[A1]])])
+                                    (implicit gen: Aux[A1, L], tmr: ToMap[L]): Unit = {
     val map = bindData.map {
       x =>
         x._1 -> (x._2.map {
