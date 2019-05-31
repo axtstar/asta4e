@@ -1,10 +1,11 @@
-package com.axtstar.asta4e.core
+package com.axtstar.asta4e.basic
 
-import java.io.{File, FileInputStream, FileOutputStream}
+import java.io.FileInputStream
 import java.util.Date
 
+import com.axtstar.asta4e.core.{DataCore, InitialCore, Location}
 import org.apache.poi.ss.usermodel._
-import org.apache.poi.ss.util.{CellReference}
+import org.apache.poi.ss.util.CellReference
 
 import scala.util.matching.Regex
 
@@ -214,7 +215,7 @@ object ExcelBasic {
 
 trait ExcelBasic extends DataCore with InitialCore[ExcelBasic] {
 
-  import  com.axtstar.asta4e.core.ExcelBasic._
+  import ExcelBasic._
 
   /**
     *  set sheet names which doesn't include at retrieving Excel

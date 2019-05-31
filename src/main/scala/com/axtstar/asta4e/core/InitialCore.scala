@@ -2,6 +2,8 @@ package com.axtstar.asta4e.core
 
 import java.io.{FileInputStream, FileOutputStream}
 
+import com.axtstar.asta4e.basic.ExcelBasic
+
 trait InitialCore[A] {
   protected var ignoreSheets:List[String] = List()
   protected var layoutStram:FileInputStream = null

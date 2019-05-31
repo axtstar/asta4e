@@ -2,6 +2,7 @@ package com.axtstar.asta4e
 
 import java.io.{FileInputStream, FileOutputStream}
 
+import com.axtstar.asta4e.basic.CsvBasic
 import com.axtstar.asta4e.converter.CC
 import com.axtstar.asta4e.converter.CC._
 import com.axtstar.asta4e.core._

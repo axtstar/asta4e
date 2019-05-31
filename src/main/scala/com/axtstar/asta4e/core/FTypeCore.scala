@@ -4,14 +4,15 @@ import java.io.FileInputStream
 
 import com.axtstar.asta4e.converter.CC.{FromMap, nullPoly, typeablePoly}
 import shapeless.ops.hlist
-import shapeless.{HList, LabelledGeneric, Typeable}
 import shapeless.ops.record.{Keys, ToMap, Values}
+import shapeless.{HList, LabelledGeneric, Typeable}
 
-trait TypeCore[A1] {
+trait FTypeCore[A1] {
 
-  def getCC[RA1 <: HList, KA1 <: HList, VA1 <: HList, MA1 <: HList](
-                  iStream: FileInputStream
-                )(implicit gen: LabelledGeneric.Aux[A1, RA1],
+  def getFCC[RA1 <: HList, KA1 <: HList, VA1 <: HList, MA1 <: HList,A2]
+                (iStream: FileInputStream)
+                (f:Option[A2] => Option[A1])
+                (implicit gen: LabelledGeneric.Aux[A1, RA1],
                   fromMap: FromMap[RA1],
                   typeable: Typeable[A1],
                   keys: Keys.Aux[RA1, KA1],
@@ -21,10 +22,12 @@ trait TypeCore[A1] {
                   fillWith: hlist.FillWith[nullPoly.type, VA1],
                   vtl: hlist.ToList[MA1, String]
 
-  ):IndexedSeq[(String,Option[A1])]
+  ):IndexedSeq[(String,Option[A2])]
 
-  def getCCDown[RA1 <: HList, KA1 <: HList, VA1 <: HList, MA1 <: HList](iStream:FileInputStream)
-                    (implicit gen: LabelledGeneric.Aux[A1, RA1],
+  def getFCCDown[RA1 <: HList, KA1 <: HList, VA1 <: HList, MA1 <: HList,A2]
+                (iStream:FileInputStream)
+                (f:Option[A2] => Option[A1])
+                (implicit gen: LabelledGeneric.Aux[A1, RA1],
                      fromMap: FromMap[RA1],
                      typeable: Typeable[A1],
                      keys: Keys.Aux[RA1, KA1],
@@ -36,14 +39,16 @@ trait TypeCore[A1] {
 
                     ):IndexedSeq[(String, IndexedSeq[Option[A1]])]
 
-  def setCC[RA1 <: HList](bindCC:IndexedSeq[(String,Option[A1])])
-                         (implicit
-                          gen: LabelledGeneric.Aux[A1, RA1],
+  def setFCC[RA1 <: HList,A2]
+                (bindCC:IndexedSeq[(String,Option[A1])])
+                (f:Option[A2] => Option[A1])
+                (implicit gen: LabelledGeneric.Aux[A1, RA1],
                           tmr: ToMap[RA1]):Unit
 
-  def setCCDown[RA1 <: HList](bindData: IndexedSeq[(String,IndexedSeq[Option[A1]])])
-                             (implicit
-                              gen: LabelledGeneric.Aux[A1, RA1],
-                              tmr: ToMap[RA1]):Unit
+  def setFCCDown[RA1 <: HList,A2]
+                (bindData: IndexedSeq[(String,IndexedSeq[Option[A1]])])
+                (f:Option[A2] => Option[A1])
+                (implicit gen: LabelledGeneric.Aux[A1, RA1],
+                          tmr: ToMap[RA1]):Unit
 
 }

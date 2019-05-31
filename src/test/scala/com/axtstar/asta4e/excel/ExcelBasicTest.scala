@@ -4,8 +4,8 @@ import java.io.{File, FileInputStream}
 import java.text.SimpleDateFormat
 
 import com.axtstar.asta4e.ExcelMapper
+import com.axtstar.asta4e.basic.ExcelBasic
 import com.axtstar.asta4e.converter.MapHelper
-import com.axtstar.asta4e.core.ExcelBasic
 import com.axtstar.asta4e.test_class.Etc7Option
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification

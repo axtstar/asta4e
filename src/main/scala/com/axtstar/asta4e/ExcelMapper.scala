@@ -2,12 +2,14 @@ package com.axtstar.asta4e
 
 import java.io.{FileInputStream, FileOutputStream}
 
+import com.axtstar.asta4e.basic.ExcelBasic
 import com.axtstar.asta4e.core._
 import shapeless._
 import com.axtstar.asta4e.converter.CC._
 import com.axtstar.asta4e.converter.{CC, MapHelper}
 import shapeless.LabelledGeneric.Aux
 import shapeless.ops.hlist
+import shapeless.ops.hlist.{Mapper, ToList}
 import shapeless.syntax.typeable
 
 
@@ -28,7 +30,7 @@ object ExcelMapper extends ExcelBasic {
   *
   * @tparam A1
   */
-class ExcelMapper[A1] extends ExcelBasic with TypeCore[A1] {
+class ExcelMapper[A1] extends ExcelBasic with TypeCore[A1] /*with FTypeCore[A1]*/ {
 
   def withLocation(_locationMap: List[Location]) = {
     super.withLocation(_locationMap).asInstanceOf[ExcelMapper[A1]]
@@ -60,38 +62,6 @@ class ExcelMapper[A1] extends ExcelBasic with TypeCore[A1] {
   }
 
   import ops.record._
-
-  override def setCC[RA1 <: HList](bindCC: IndexedSeq[(String, Option[A1])])
-                                   (implicit
-                                    gen: Aux[A1, RA1],
-                                    tmr: ToMap[RA1]
-
-                                   ): Unit = {
-    val map = bindCC.map {
-      x =>
-        x._1 -> CC.By(x._2.get).toMap
-    }
-    super._setData(map:_*)
-
-  }
-
-  override def setCCDown[RA1 <: HList](bindData: IndexedSeq[(String, IndexedSeq[Option[A1]])])
-                                    (implicit
-                                     gen: Aux[A1, RA1],
-                                     tmr: ToMap[RA1]
-
-                                    ): Unit = {
-    val map = bindData.map {
-      x =>
-        x._1 -> (x._2.map {
-          xx =>
-            CC.By(xx.get).toMap
-        })
-    }
-
-    super._setDataDown(map:_*)
-
-  }
 
   override def getCC[RA1 <: HList, KA1 <: HList, VA1 <: HList, MA1 <: HList](iStream:FileInputStream)
                            (implicit gen: LabelledGeneric.Aux[A1, RA1],
@@ -195,5 +165,38 @@ class ExcelMapper[A1] extends ExcelBasic with TypeCore[A1] {
           }
     }
   }
+
+  override def setCC[RA1 <: HList](bindCC: IndexedSeq[(String, Option[A1])])
+                                  (implicit
+                                   gen: Aux[A1, RA1],
+                                   tmr: ToMap[RA1]
+
+                                  ): Unit = {
+    val map = bindCC.map {
+      x =>
+        x._1 -> CC.By(x._2.get).toMap
+    }
+    super._setData(map:_*)
+
+  }
+
+  override def setCCDown[RA1 <: HList](bindData: IndexedSeq[(String, IndexedSeq[Option[A1]])])
+                                      (implicit
+                                       gen: Aux[A1, RA1],
+                                       tmr: ToMap[RA1]
+
+                                      ): Unit = {
+    val map = bindData.map {
+      x =>
+        x._1 -> (x._2.map {
+          xx =>
+            CC.By(xx.get).toMap
+        })
+    }
+
+    super._setDataDown(map:_*)
+
+  }
+
   //End ExcelMapper[A1]
 }

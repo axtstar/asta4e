@@ -4,7 +4,7 @@ import java.io.{FileInputStream, FileOutputStream}
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-import com.axtstar.asta4e.core.{ExcelBasic, Location}
+import com.axtstar.asta4e.core.Location
 
 object Config {
 
