@@ -45,7 +45,34 @@ object CC {
                                                            fromMapT: Lazy[FromMap[T]]
                                                           ): FromMap[FieldType[K, V] :: T] = new FromMap[FieldType[K, V] :: T] {
 
-      private def primitiveConverter(m:Map[String, Any],name:String, typename:String)={
+
+      private def isValidShort(data:Any)={
+        data match{
+          case x:Short =>
+            true
+          case x:Int =>
+            if(x.isValidShort)x.toShort else 0
+          case x:Long =>
+            if(x.isValidShort)x.toShort else 0
+          case x:Float =>
+            if(x.isValidShort)x.toShort else 0
+          case x:Double =>
+            if(x.isValidShort)x.toShort else 0
+          case x:Byte =>
+            if(x.isValidShort)x.toShort else 0
+          case x:BigInt =>
+            if(x.isValidShort)x.toShort else 0
+          case x:BigDecimal =>
+            if(x.isValidShort)x.toShort else 0
+
+        }
+
+      }
+
+      private def primitiveConverter[TV](m:Map[String, Any],name:String, typename:String)
+                                        (implicit
+                                         evidenceV: TV <:< AnyVal = null
+                                        ) ={
         m.get(name) match {
           case Some(x) =>
             //if not determine from data, asta4e convert them to wrapped primitive value
@@ -56,41 +83,21 @@ object CC {
                   case xx:Char =>
                     xx
                   case xx:Short =>
-                    if(xx.isValidChar) {
-                      xx.toChar
-                    } else {
-                      Char.MinValue
-                    }
+                    if(xx.isValidChar)xx.toChar else Char.MinValue
                   case xx:Int =>
-                    if(xx.isValidChar) {
-                      xx.toChar
-                    } else {
-                      Char.MinValue
-                    }
+                    if(xx.isValidChar)xx.toChar else Char.MinValue
                   case xx:Long =>
-                    if(xx.isValidChar) {
-                      xx.toChar
-                    } else {
-                      Char.MinValue
-                    }
+                    if(xx.isValidChar)xx.toChar else Char.MinValue
                   case xx:Float =>
-                    if(xx.isValidChar) {
-                      xx.toChar
-                    } else {
-                      Char.MinValue
-                    }
+                    if(xx.isValidChar)xx.toChar else Char.MinValue
                   case xx:Double =>
-                    if(xx.isValidChar) {
-                      xx.toChar
-                    } else {
-                      Char.MinValue
-                    }
+                    if(xx.isValidChar)xx.toChar else Char.MinValue
+                  case xx:BigInt =>
+                    if(xx.isValidChar)xx.toChar else Char.MinValue
+                  case xx:BigDecimal =>
+                    if(xx.isValidChar)xx.toChar else Char.MinValue
                   case xx:Byte =>
-                    if(xx.isValidChar) {
-                      xx.toChar
-                    } else {
-                      Char.MinValue
-                    }
+                    if(xx.isValidChar)xx.toChar else Char.MinValue
                   case xx:String =>
                     if(xx==null){
                       Char.MinValue
@@ -116,41 +123,21 @@ object CC {
                   case xx:Short =>
                     xx
                   case xx:Int =>
-                    if(xx.isValidShort) {
-                      xx.toShort
-                    } else {
-                      0
-                    }
+                    if(xx.isValidShort)xx.toShort else 0
                   case xx:Long =>
-                    if(xx.isValidShort) {
-                      xx.toShort
-                    } else {
-                      0
-                    }
+                    if(xx.isValidShort)xx.toShort else 0
                   case xx:Float =>
-                    if(xx.isValidShort) {
-                      xx.toShort
-                    } else {
-                      0
-                    }
+                    if(xx.isValidShort)xx.toShort else 0
                   case xx:Double =>
-                    if(xx.isValidShort) {
-                      xx.toShort
-                    } else {
-                      0
-                    }
+                    if(xx.isValidShort)xx.toShort else 0
+                  case xx:BigInt =>
+                    if(xx.isValidShort)xx.toShort else 0
+                  case xx:BigDecimal =>
+                    if(xx.isValidShort)xx.toShort else 0
                   case xx:Byte =>
-                    if(xx.isValidShort) {
-                      xx.toShort
-                    } else {
-                      0
-                    }
+                    if(xx.isValidShort)xx.toShort else 0
                   case xx:Char =>
-                    if(xx.isValidShort) {
-                      xx.toShort
-                    } else {
-                      0
-                    }
+                    if(xx.isValidShort)xx.toShort else 0
                   case xx:String =>
                     Try(xx.toShort).getOrElse(0)
                   case _ =>
@@ -161,41 +148,21 @@ object CC {
                   case xx:Int =>
                       xx
                   case xx:Short =>
-                    if(xx.isValidInt) {
-                      xx.toInt
-                    } else {
-                      0
-                    }
+                    if(xx.isValidInt)xx.toInt else 0
                   case xx:Long =>
-                    if(xx.isValidInt) {
-                      xx.toInt
-                    } else {
-                      0
-                    }
+                    if(xx.isValidInt)xx.toInt else 0
                   case xx:Float =>
-                    if(xx.isValidInt) {
-                      xx.toInt
-                    } else {
-                      0
-                    }
+                    if(xx.isValidInt)xx.toInt else 0
                   case xx:Double =>
-                    if(xx.isValidInt) {
-                      xx.toInt
-                    } else {
-                      0
-                    }
+                    if(xx.isValidInt)xx.toInt else 0
+                  case xx:BigInt =>
+                    if(xx.isValidInt)xx.toInt else 0
+                  case xx:BigDecimal =>
+                    if(xx.isValidInt)xx.toInt else 0
                   case xx:Byte =>
-                    if(xx.isValidInt) {
-                      xx.toInt
-                    } else {
-                      0
-                    }
+                    if(xx.isValidInt)xx.toInt else 0
                   case xx:Char =>
-                    if(xx.isValidInt) {
-                      xx.toInt
-                    } else {
-                      0
-                    }
+                    if(xx.isValidInt)xx.toInt else 0
                   case xx:String =>
                     Try(xx.toInt).getOrElse(0)
                   case _ =>
@@ -203,20 +170,24 @@ object CC {
                 })
               case "Long" =>
                 Some(x match {
+                  case xx:Short =>
+                    if(xx.isValidLong)xx.toLong else 0
+                  case xx:Int =>
+                    if(xx.isValidLong)xx.toLong else 0
                   case xx:Long =>
                     xx
-                  case xx:Int =>
-                    xx.toLong
-                  case xx:Short =>
-                    xx.toLong
-                  case xx:Double =>
-                    Try(xx.toLong).getOrElse(0L)
                   case xx:Float =>
                     Try(xx.toLong).getOrElse(0L)
+                  case xx:Double =>
+                    Try(xx.toLong).getOrElse(0L)
+                  case xx:BigInt =>
+                    Try(xx.toLong).getOrElse(0L)
+                  case xx:BigDecimal =>
+                    Try(xx.toLong).getOrElse(0L)
                   case xx:Byte =>
-                    xx.toLong
+                    if(xx.isValidLong)xx.toLong else 0
                   case xx:Char =>
-                    xx.toLong
+                    if(xx.isValidLong)xx.toLong else 0
                   case xx:String =>
                     Try(xx.toLong).getOrElse(0L)
                   case _ =>
@@ -224,16 +195,20 @@ object CC {
                 })
               case "Float" =>
                 Some(x match {
-                  case xx:Float =>
-                    xx
-                  case xx:Double =>
-                    xx.toFloat
                   case xx:Short =>
                     xx.toFloat
                   case xx:Int =>
                     xx.toFloat
                   case xx:Long =>
                     xx.toFloat
+                  case xx:Float =>
+                    xx
+                  case xx:Double =>
+                    xx.toFloat
+                  case xx:BigInt =>
+                    if(xx.isValidFloat) xx.toFloat else 0
+                  case xx:BigDecimal =>
+                    if(xx.isExactFloat) xx.toFloat else 0
                   case xx:Byte =>
                     xx.toFloat
                   case xx:Char =>
@@ -253,6 +228,10 @@ object CC {
                     xx.toDouble
                   case xx:Long =>
                     xx.toDouble
+                  case xx:BigInt =>
+                    if(xx.isValidDouble) xx.toDouble else 0
+                  case xx:BigDecimal =>
+                    if(xx.isExactDouble) xx.toDouble else 0
                   case xx:Byte =>
                     xx.toDouble
                   case xx:Char =>
@@ -265,47 +244,23 @@ object CC {
                   case xx:Byte =>
                     xx
                   case xx:Short =>
-                    if(xx.isValidByte) {
-                      xx.toByte
-                    } else {
-                      0
-                    }
+                    if(xx.isValidByte)xx.toByte else 0
                   case xx:Int =>
-                    if(xx.isValidByte) {
-                      xx.toByte
-                    } else {
-                      0
-                    }
+                    if(xx.isValidByte)xx.toByte else 0
                   case xx:Long =>
-                    if(xx.isValidByte) {
-                      xx.toByte
-                    } else {
-                      0
-                    }
+                    if(xx.isValidByte)xx.toByte else 0
                   case xx:Float =>
-                    if(xx.isValidByte) {
-                      xx.toByte
-                    } else {
-                      0
-                    }
+                    if(xx.isValidByte)xx.toByte else 0
                   case xx:Double =>
-                    if(xx.isValidByte) {
-                      xx.toByte
-                    } else {
-                      0
-                    }
+                    if(xx.isValidByte)xx.toByte else 0
+                  case xx:BigInt =>
+                    if(xx.isValidByte) xx.toByte else 0
+                  case xx:BigDecimal =>
+                    if(xx.isValidByte) xx.toByte else 0
                   case xx:Date =>
-                    if(xx.getTime.isValidByte) {
-                      xx.getTime.toByte
-                    } else {
-                      0
-                    }
+                    if(xx.getTime.isValidByte)xx.getTime.toByte else 0
                   case xx:Char =>
-                    if(xx.isValidByte) {
-                      xx.toByte
-                    } else {
-                      0
-                    }
+                    if(xx.isValidByte)xx.toByte else 0
                   case xx:String =>
                     Try(xx.toByte).getOrElse(0)
                   case _ =>
@@ -349,6 +304,10 @@ object CC {
                     xx==0F
                   case xx:Double =>
                     xx==0D
+                  case xx:BigInt =>
+                    xx==(0:BigInt)
+                  case xx:BigDecimal =>
+                    xx==(0:BigDecimal)
                   case xx:Char =>
                     x==0
                   case xx:Byte =>
@@ -358,8 +317,10 @@ object CC {
                   case _ =>
                     false
                 })
+              case _ if (evidenceV!=null) =>
+                Some(x)
               case _ =>
-                Some(None)
+                Some(x)
             }
           case mm =>
             mm
