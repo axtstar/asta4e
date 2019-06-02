@@ -20,6 +20,8 @@ class CCTest extends Specification {
 
   "CC" should {
     "Streight convert" in {
+      case class Complex_Number(r:Double, i:BigDecimal)
+
       case class Data_string(a:String,b:Int,c:Short,d:Long,e:Byte,f:Char,g:Float,h:Double,i:BigInt,j: BigDecimal)
       case class Data_short(a:Short)
       case class Data_int(a:Int)
@@ -31,19 +33,21 @@ class CCTest extends Specification {
       case class Data_double(a:Double)
       case class Data_bigint(i:BigInt)
       case class Data_bigdecimal(j:BigDecimal)
+      case class Data_complex_number(k:Complex_Number)
 
       import com.axtstar.asta4e.converter.E._
       val data = (
         "a" -> "9" &
           "b" -> 9 &
           "c" -> (9:Short) &
-          "d" -> (9L) &
+          "d" -> 9L &
           "e" -> (9:Byte) &
-          "f" -> ('9') &
-          "g" -> (9f) &
-          "h" -> (9d) &
+          "f" -> '9' &
+          "g" -> 9f &
+          "h" -> 9d &
           "i" -> (9:BigInt) &
           "j" -> (9:BigDecimal) &
+          "k" -> (Complex_Number(9d,9d)) &
 
           "sample" -> "sample")
 
@@ -77,6 +81,9 @@ class CCTest extends Specification {
 
       val target_decimal = MapHelper.to[Data_bigdecimal].from(data)
       target_decimal.j must be_==(9:BigDecimal)
+
+      val target_complex_number = MapHelper.to[Data_complex_number].from(data)
+      target_complex_number.k must be_==(Complex_Number(9d, 9d))
 
     }
 
