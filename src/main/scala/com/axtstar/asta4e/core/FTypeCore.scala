@@ -63,20 +63,20 @@ trait FTypeCore[A1] {
 
                 ):IndexedSeq[(String, IndexedSeq[Option[A1]])]
 
-  def setFCC[RA1 <: HList,A2]
-                (bindCC:IndexedSeq[(String,Option[A1])])
+  def setFCC[RA1 <: HList, A2, RA2 <: HList]
+                (bindCC:IndexedSeq[(String,Option[A2])])
                 (f:Option[A2] => Option[A1])
                 (implicit
                  gen: LabelledGeneric.Aux[A1, RA1],
                  tmr: ToMap[RA1],
 
-                 gen2: LabelledGeneric.Aux[A1, RA1],
-                 tmr2: ToMap[RA1]
+                 gen2: LabelledGeneric.Aux[A2, RA2],
+                 tmr2: ToMap[RA2]
 
                 ):Unit
 
   def setFCCDown[RA1 <: HList,A2, RA2 <:HList]
-                (bindData: IndexedSeq[(String,IndexedSeq[Option[A1]])])
+                (bindData: IndexedSeq[(String,IndexedSeq[Option[A2]])])
                 (f:Option[A2] => Option[A1])
                 (implicit
                   gen: LabelledGeneric.Aux[A1, RA1],

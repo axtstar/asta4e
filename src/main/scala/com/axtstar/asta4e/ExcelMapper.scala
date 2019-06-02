@@ -328,20 +328,27 @@ class ExcelMapper[A1] extends ExcelBasic with TypeCore[A1] with FTypeCore[A1] {
 
   }
 
-  override def setFCC[RA1 <: HList, A2]
-  (bindCC: IndexedSeq[(String, Option[A1])])
+  override def setFCC[RA1 <: HList, A2 , RA2 <: HList]
+  (bindCC: IndexedSeq[(String, Option[A2])])
   (f: Option[A2] => Option[A1])
   (implicit
    gen: LabelledGeneric.Aux[A1, RA1],
    tmr: ToMap[RA1],
 
-   gen2: LabelledGeneric.Aux[A1, RA1],
-   tmr2: ToMap[RA1]
+   gen2: LabelledGeneric.Aux[A2, RA2],
+   tmr2: ToMap[RA2]
 
-  ): Unit = { }
+  ): Unit = {
+    val map = bindCC.map {
+      x =>
+        x._1 -> CC.By(f(x._2).get).toMap
+    }
+    super._setData(map: _*)
+
+  }
 
   override def setFCCDown[RA1 <: HList, A2, RA2 <: HList]
-  (bindData: IndexedSeq[(String, IndexedSeq[Option[A1]])])
+  (bindData: IndexedSeq[(String, IndexedSeq[Option[A2]])])
   (f: Option[A2] => Option[A1])
   (implicit
    gen: LabelledGeneric.Aux[A1, RA1],
