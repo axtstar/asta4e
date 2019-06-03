@@ -1,6 +1,8 @@
 package com.axtstar.asta4e.csv
 
-import java.io.{File, FileInputStream}
+import java.io.{File, FileInputStream, FileOutputStream}
+import java.nio.file.Files
+import java.nio.file.attribute.FileAttribute
 import java.text.SimpleDateFormat
 
 import com.axtstar.asta4e.converter.MapHelper
@@ -78,16 +80,18 @@ class CsvTest extends Specification {
         "userDate" -> dateFormatFull.parse("2018/11/23 18:52:56")
       )
 
+      val ff = java.io.File.createTempFile(s"${currentDir}/target/","data_w_r_down.csv")
+
       CsvMapper.by[VariousCell]
         .withLocation(VariousCell.getLocation())
-        .withOutStream(s"${currentDir}/target/data_w_r_down.csv")
+        .withOutStream(new FileOutputStream(ff.getAbsolutePath))
         .setCCDown(IndexedSeq("Sheet1" -> IndexedSeq(Option(map))))
 
 
       val target = CsvMapper.by[VariousCell]
         .withLocation(VariousCell.getLocation())
         .getCCDown(
-          new FileInputStream(s"${currentDir}/target/data_w_r_down.csv")
+          new FileInputStream(ff.getAbsolutePath)
         )
 
       target.size must be_==(1)
@@ -116,9 +120,11 @@ class CsvTest extends Specification {
     "Set 1 row" in {
       import com.axtstar.asta4e.converter.E._
 
+      val ff = java.io.File.createTempFile(s"${currentDir}/target/","data_out_1.csv")
+
       val target = CsvMapper.by[CSV_Data]
         .withLocation(Location_4_CSV.ao_a1_a2_startRow_as_1)
-        .withOutStream(s"${currentDir}/target/data_out_1.csv")
+        .withOutStream(new FileOutputStream(ff.getAbsolutePath))
         ._setData(
           ("Sheet1" -> (
             "numeric" -> 1001 &

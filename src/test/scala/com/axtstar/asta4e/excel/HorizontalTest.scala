@@ -1,6 +1,6 @@
 package com.axtstar.asta4e.excel
 
-import java.io.{File, FileInputStream}
+import java.io.{File, FileInputStream, FileOutputStream}
 
 import com.axtstar.asta4e._
 import com.axtstar.asta4e.converter.{CC, MapHelper}
@@ -71,16 +71,19 @@ class HorizontalTest extends Specification {
         AF1="",
         AG1="1AG"
       )
+
+      val ff = java.io.File.createTempFile(s"${currentDir}/target/","output_horizontal_set.csv")
+
       val list = IndexedSeq("Sheet1" -> Option(dh0))
       ExcelMapper.by[Data_HOLIZONTAL]
         .withLocation(s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx")
         .withLayoutXls(s"${currentDir}/src/test/resources/excel/output_white.xlsx")
-        .withOutXls(s"${currentDir}/target/output_horizontal_set.xlsx")
+        .withOutXls(ff.getAbsolutePath)
         .setCC(list)
 
       val target = ExcelMapper.by[Data_HOLIZONTAL]
         .withLocation(s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx")
-        .getCC(new FileInputStream(s"${currentDir}/target/output_horizontal_set.xlsx"))
+        .getCC(new FileInputStream(ff.getAbsolutePath))
 
       target.size must be_==(1)
       target(0)._2.get.AG1 must be_==("1AG")
@@ -194,17 +197,18 @@ class HorizontalTest extends Specification {
         AG1="1AG"
       )
 
+      val ff = java.io.File.createTempFile(s"${currentDir}/target/","output_horizontal_set.csv")
 
       val list = ("Sheet1" -> IndexedSeq(CC.By(dh0).toMap,CC.By(dh1).toMap,CC.By(dh2).toMap))
       ExcelMapper.by[Data_HOLIZONTAL]
         .withLocation(s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx")
         .withLayoutXls(s"${currentDir}/src/test/resources/excel/output_white.xlsx")
-        .withOutStream(s"${currentDir}/target/output_horizontal_set.xlsx")
+        .withOutStream(new FileOutputStream(ff.getAbsolutePath))
         ._setDataDown(list)
 
       val target = ExcelMapper.by[Data_HOLIZONTAL]
         .withLocation(s"${currentDir}/src/test/resources/excel/bind_horizontal.xlsx")
-        ._getDataDown(new FileInputStream(s"${currentDir}/target/output_horizontal_set.xlsx"))
+        ._getDataDown(new FileInputStream(ff.getAbsolutePath))
 
       target.size must be_==(1)
       val target2 = MapHelper.to[Data_HOLIZONTAL].from(target.head._2.head)
