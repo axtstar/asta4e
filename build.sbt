@@ -14,7 +14,7 @@ name := "asta4e"
 version := "0.0.14-SNAPSHOT"
 
 scalaVersion := "2.11.12"
-crossScalaVersions := Seq("2.11.12", "2.12.8" ,"2.13.0-RC2")
+crossScalaVersions := Seq("2.11.12", "2.12.8")
 
 scalacOptions ++= Seq(
   "-encoding", "utf8", // Option and arguments on same line
