@@ -27,8 +27,8 @@ assemblyJarName in assembly := { s"${name.value}-${version.value}.jar" }
 
 libraryDependencies ++= Seq(
   // https://mvnrepository.com/artifact/org.apache.poi/poi
-  "org.apache.poi" % "poi" % "3.17",
-  "org.apache.poi" % "poi-ooxml" % "3.17",
+  "org.apache.poi" % "poi" % "4.1.0",
+  "org.apache.poi" % "poi-ooxml" % "4.1.0",
   "com.opencsv" % "opencsv" % "4.6",
   "com.chuusai" %% s"shapeless" % "2.3.3",
 
