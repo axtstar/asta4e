@@ -93,7 +93,7 @@ object ExcelBasic {
             (getBindName(xx) -> null)
         }.toMap
       case xx: Cell =>
-        xx.getCellTypeEnum match {
+        xx.getCellType match {
           case CellType.NUMERIC =>
             val format = ExcelNumberFormat.from(xx.getCellStyle)
             if (DateUtil.isADateFormat(format)) {
@@ -159,7 +159,7 @@ object ExcelBasic {
             x.bindNames.map {
               xx =>
                 (getBindName(xx) -> (
-                  target.getCachedFormulaResultTypeEnum match {
+                  target.getCachedFormulaResultType match {
                     case CellType.NUMERIC =>
                       target.getNumericCellValue
                     case CellType.STRING =>
@@ -178,11 +178,11 @@ object ExcelBasic {
 
   def setOneCell(target:Cell, name: String, maps: Map[String, Any], x:Location)={
     val bindData = maps(name)
-    target.getCellTypeEnum match {
+    target.getCellType match {
       case CellType.NUMERIC =>
         bindData match {
           case null =>
-            target.setCellType(CellType.BLANK)
+            target.setBlank()
           case tiny: Date =>
             target.setCellValue(tiny)
           case tiny: Integer =>

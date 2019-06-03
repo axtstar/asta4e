@@ -27,17 +27,18 @@ assemblyJarName in assembly := { s"${name.value}-${version.value}.jar" }
 
 libraryDependencies ++= Seq(
   // https://mvnrepository.com/artifact/org.apache.poi/poi
+  "com.chuusai" %%  s"shapeless" % "2.3.3",
   "org.apache.poi" % "poi" % "4.1.0",
   "org.apache.poi" % "poi-ooxml" % "4.1.0",
   "com.opencsv" % "opencsv" % "4.6",
+  "org.junit.jupiter" % "junit-jupiter-api" % "5.2.0" % Test
 
-  "org.junit.jupiter" % "junit-jupiter-api" % "5.2.0" % Test,
+) ++ (if(scalaVersion.toString().startsWith("2.13.")) {Seq(
   "org.specs2" %% "specs2-core" % "4.3.0" % Test,
   "org.specs2" %% "specs2-junit" % "4.3.0" % Test
-) ++ (if(scalaVersion == "2.13.0-RC2") {Seq(
-  "com.chuusai" %%  s"shapeless" % "2.3.3"
 )} else {Seq(
-  "com.chuusai" %% s"shapeless" % "2.3.3"
+  "org.specs2" %% "specs2-core" % "4.3.0" % Test,
+  "org.specs2" %% "specs2-junit" % "4.3.0" % Test
 )})
 
 publishTo := {
