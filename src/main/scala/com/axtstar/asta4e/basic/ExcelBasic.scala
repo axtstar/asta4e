@@ -308,6 +308,7 @@ trait ExcelBasic extends DataCore with InitialCore[ExcelBasic] {
         throw ex
     }
     finally{
+      outputStream.flush()
       outputStream.close()
       workbook.close()
       layoutStram.close()
@@ -389,6 +390,7 @@ trait ExcelBasic extends DataCore with InitialCore[ExcelBasic] {
         throw ex
     }
     finally{
+      outputStream.flush()
       outputStream.close()
       workbook.close()
       layoutStram.close()
