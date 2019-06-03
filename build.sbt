@@ -14,7 +14,7 @@ name := "asta4e"
 version := "0.0.14-SNAPSHOT"
 
 scalaVersion := "2.11.12"
-crossScalaVersions := Seq("2.11.12", "2.12.8")
+crossScalaVersions := Seq("2.11.12", "2.12.8" ,"2.13.0-RC2")
 
 scalacOptions ++= Seq(
   "-encoding", "utf8", // Option and arguments on same line
@@ -30,12 +30,15 @@ libraryDependencies ++= Seq(
   "org.apache.poi" % "poi" % "4.1.0",
   "org.apache.poi" % "poi-ooxml" % "4.1.0",
   "com.opencsv" % "opencsv" % "4.6",
-  "com.chuusai" %% s"shapeless" % "2.3.3",
 
   "org.junit.jupiter" % "junit-jupiter-api" % "5.2.0" % Test,
   "org.specs2" %% "specs2-core" % "4.3.0" % Test,
   "org.specs2" %% "specs2-junit" % "4.3.0" % Test
-)
+) ++ (if(scalaVersion == "2.13.0-RC2") {Seq(
+  "com.chuusai" %%  s"shapeless" % "2.3.3"
+)} else {Seq(
+  "com.chuusai" %% s"shapeless" % "2.3.3"
+)})
 
 publishTo := {
   if (isSnapshot.value)
