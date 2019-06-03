@@ -6,6 +6,7 @@ import java.util.Date
 import com.axtstar.asta4e.core.{DataCore, InitialCore, Location}
 import org.apache.poi.ss.usermodel._
 import org.apache.poi.ss.util.CellReference
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
 import scala.util.matching.Regex
 
@@ -79,7 +80,6 @@ object ExcelBasic {
         throw ex
     }
     finally{
-      workbook.close()
       stream.close()
     }
   }
@@ -310,7 +310,6 @@ trait ExcelBasic extends DataCore with InitialCore[ExcelBasic] {
     finally{
       outputStream.flush()
       outputStream.close()
-      workbook.close()
       layoutStram.close()
     }
   }
@@ -392,7 +391,6 @@ trait ExcelBasic extends DataCore with InitialCore[ExcelBasic] {
     finally{
       outputStream.flush()
       outputStream.close()
-      workbook.close()
       layoutStram.close()
     }
 
@@ -428,7 +426,6 @@ trait ExcelBasic extends DataCore with InitialCore[ExcelBasic] {
         throw ex
     }
     finally {
-      workbook.close()
       iStream.close()
     }
  }
@@ -474,7 +471,6 @@ trait ExcelBasic extends DataCore with InitialCore[ExcelBasic] {
         throw ex
     }
     finally{
-      workbook.close()
       iStream.close()
     }
 
