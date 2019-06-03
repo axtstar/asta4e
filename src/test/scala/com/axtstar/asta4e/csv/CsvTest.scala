@@ -82,18 +82,23 @@ class CsvTest extends Specification {
         "userDate" -> dateFormatFull.parse("2018/11/23 18:52:56")
       )
 
-      val ff = java.io.File.createTempFile(s"${currentDir}/target/","data_w_r_down.csv")
+      val ff = java.io.File.createTempFile(s"${currentDir}/target/","data_w_r_down.csv").getAbsolutePath
 
       CsvMapper.by[VariousCell]
         .withLocation(VariousCell.getLocation())
-        .withOutStream(new FileOutputStream(ff.getAbsolutePath))
+        .withOutStream(new FileOutputStream(ff))
         .setCCDown(IndexedSeq("Sheet1" -> IndexedSeq(Option(map))))
 
+      val s = scala.io.Source.fromFile(ff)
+      for (line <- s.getLines) {
+        println(line)
+      }
+      s.close()
 
       val target = CsvMapper.by[VariousCell]
         .withLocation(VariousCell.getLocation())
         .getCCDown(
-          new FileInputStream(ff.getAbsolutePath)
+          new FileInputStream(ff)
         )
 
       target.size must be_==(1)
