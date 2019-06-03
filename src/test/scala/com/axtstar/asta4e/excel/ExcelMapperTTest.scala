@@ -56,6 +56,24 @@ class ExcelMapperTTest extends Specification {
 
     }
 
+    "getFCC" in {
+      val target = ExcelMapper.by[VariousCell_less]
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx")
+        .withIgnoreSheets(List())
+        .getFCC(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx")){
+          x:Option[VariousCell] =>
+            val result = MapHelper.to[VariousCell_less].from(x.get)
+            Option(result)
+        }
+
+      target.head._2.get.string must be_==("STRING")
+      target.head._2.get.boolean must be_==(true)
+      target.head._2.get.stringOpt must be_==(Some("STRING1"))
+
+
+    }
+
+
     "getCCDown" in {
       val target = ExcelMapper.by[VariousCell]
         .withLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx")
@@ -73,6 +91,27 @@ class ExcelMapperTTest extends Specification {
 
     }
 
+    "getFCCDown" in {
+      val target = ExcelMapper.by[VariousCell_less]
+        .withLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx")
+        .withIgnoreSheets(List())
+        .getFCCDown(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx")) {
+        x:Option[VariousCell] => {
+          val result = MapHelper.to[VariousCell_less].from(x.get)
+          Option(result)
+        }
+      }
+
+      target(0)._2(0).get.string must be_==("STRING")
+      target(0)._2(0).get.boolean must be_==(true)
+      target(0)._2(0).get.stringOpt must be_==(Some("STRING1"))
+
+      target(0)._2(1).get.string must be_==("STRING-")
+      target(0)._2(1).get.boolean must be_==(false)
+      target(0)._2(1).get.stringOpt must be_==(Some("STRING1-"))
+
+
+    }
 
     "map to A" in {
       case class Data(
