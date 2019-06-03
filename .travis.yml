@@ -10,6 +10,7 @@ jdk:
 scala:
    - 2.11.12
    - 2.12.8
+   - 2.13.0-RC2
 script:
    - sbt ++$TRAVIS_SCALA_VERSION clean
    - sbt ++$TRAVIS_SCALA_VERSION coverage test -J-Xss8M
