@@ -49,16 +49,18 @@ class CsvTest extends Specification {
         "userDate" -> dateFormatFull.parse("2018/11/23 18:52:56")
       )
 
+      val ff = java.io.File.createTempFile(s"${currentDir}/target/","data_w_r_1.csv")
+
       CsvMapper.by[VariousCell]
         .withLocation(VariousCell.getLocation())
-        .withOutStream(s"${currentDir}/target/data_w_r_1.csv")
+        .withOutStream(ff.getAbsolutePath)
         .setCC(IndexedSeq("Sheet1" -> Option(map)))
 
 
       val target = CsvMapper.by[VariousCell]
         .withLocation(VariousCell.getLocation())
         .getCC(
-          new FileInputStream(s"${currentDir}/target/data_w_r_1.csv")
+          new FileInputStream(ff.getAbsolutePath)
         )
 
       target.size must be_==(1)

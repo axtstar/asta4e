@@ -117,18 +117,23 @@ class ExcelMapperTest extends Specification {
 
         val result3 = CC.By(result).toMap
 
+        val ff_1 = java.io.File.createTempFile(s"${currentDir}/target/","output6_1.csv")
+
         //case class
         ExcelMapper.by[List[Etc7Option]]
           .withLocation(s"${currentDir}/src/test/resources/excel/bind_template6.xlsx")
           .withLayoutXls(s"${currentDir}/src/test/resources/excel/output_template6.xlsx")
-          .withOutXls(s"${currentDir}/target/output6_1.xlsx")
+          .withOutXls(ff_1.getAbsolutePath)
           ._setDataDown("Sheet1" -> IndexedSeq(CC.By(result).toMap, CC.By(result2).toMap))
+
+
+        val ff_2 = java.io.File.createTempFile(s"${currentDir}/target/","output6_1.csv")
 
         //Map
         ExcelMapper.by[String]
           .withLocation(s"${currentDir}/src/test/resources/excel/bind_template6.xlsx")
           .withLayoutXls(s"${currentDir}/src/test/resources/excel/output_template6.xlsx")
-          .withOutXls(s"${currentDir}/target/output6_2.xlsx")
+          .withOutXls(ff_2.getAbsolutePath)
           ._setDataDown(target: _*)
 
         val result4 = ExcelMapper.by[Etc7Option]
@@ -145,12 +150,13 @@ class ExcelMapperTest extends Specification {
           .withLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx")
           .getCC(new FileInputStream(s"${currentDir}/src/test/resources/excel/read_excel_mapper.xlsx"))
 
+        val ff_3 = java.io.File.createTempFile(s"${currentDir}/target/","output6_3.csv")
 
         ExcelMapper.by[VariousCell]
           .withLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx")
           .withIgnoreSheets(List())
           .withLayoutXls(new FileInputStream(s"${currentDir}/src/test/resources/excel/output_template6.xlsx"))
-          .withOutStream(new FileOutputStream(s"${currentDir}/target/output6_3.xlsx"))
+          .withOutStream(new FileOutputStream(ff_3.getAbsolutePath))
           .setCC(data)
 
         "" must_== ("")

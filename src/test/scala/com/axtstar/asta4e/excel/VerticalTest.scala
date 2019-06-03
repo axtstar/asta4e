@@ -69,16 +69,19 @@ class VerticalTest extends Specification {
         A32="23A",
         A33=""
       )
+
+      val ff_v = java.io.File.createTempFile(s"${currentDir}/target/","output_vertical_set.csv")
+
       val list = IndexedSeq("Sheet1" -> Option(dh0))
       ExcelMapper.by[Data_VIRTICAL]
         .withLocation(s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx")
         .withLayoutXls(s"${currentDir}/src/test/resources/excel/output_white.xlsx")
-        .withOutXls(s"${currentDir}/target/output_vertical_set.xlsx")
+        .withOutXls(ff_v.getAbsolutePath)
         .setCC(list)
 
       val target = ExcelMapper.by[Data_VIRTICAL]
         .withLocation(s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx")
-        .getCC(new FileInputStream(s"${currentDir}/target/output_vertical_set.xlsx"))
+        .getCC(new FileInputStream(ff_v.getAbsolutePath))
 
       target.size must be_==(1)
       target(0)._2.get.A32 must be_==("23A")
@@ -120,11 +123,13 @@ class VerticalTest extends Specification {
         A32="23A",
         A33=""
       )
+      val ff_v = java.io.File.createTempFile(s"${currentDir}/target/","output_vertical_set.csv")
+
       val list = IndexedSeq("Sheet1" -> Option(dh0))
       ExcelMapper.by[Data_VIRTICAL]
         .withLocation(s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx")
         .withLayoutXls(s"${currentDir}/src/test/resources/excel/output_white.xlsx")
-        .withOutXls(s"${currentDir}/target/output_vertical_set.xlsx")
+        .withOutXls(ff_v.getAbsolutePath)
         .setFCC(list){
           x:Option[Data_VIRTICAL] =>
              Option(x.get)
@@ -133,7 +138,7 @@ class VerticalTest extends Specification {
 
       val target = ExcelMapper.by[Data_VIRTICAL]
         .withLocation(s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx")
-        .getCC(new FileInputStream(s"${currentDir}/target/output_vertical_set.xlsx"))
+        .getCC(new FileInputStream(ff_v.getAbsolutePath))
 
       target.size must be_==(1)
       target(0)._2.get.A32 must be_==("23A")
@@ -249,17 +254,18 @@ class VerticalTest extends Specification {
         A33="A33_2"
       )
 
+      val ff_vd = java.io.File.createTempFile(s"${currentDir}/target/","output_vertical_setdown.csv")
 
       val list = IndexedSeq("Sheet1" -> IndexedSeq(Option(dh0),Option(dh1),Option(dh2)))
       ExcelMapper.by[Data_VIRTICAL]
         .withLocation(s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx")
         .withLayoutXls(s"${currentDir}/src/test/resources/excel/output_white.xlsx")
-        .withOutStream(new FileOutputStream(s"${currentDir}/target/output_vertical_setdown.xlsx"))
+        .withOutStream(new FileOutputStream(ff_vd.getAbsolutePath))
         .setCCDown(list)
 
       val target = ExcelMapper.by[Data_VIRTICAL]
         .withLocation(s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx")
-        .getCCDown(new FileInputStream(s"${currentDir}/target/output_vertical_setdown.xlsx"))
+        .getCCDown(new FileInputStream(ff_vd.getAbsolutePath))
 
       target.size must be_==(1)
       target(0)._2(0).get.A1 must be_==("A1_0")
@@ -376,12 +382,13 @@ class VerticalTest extends Specification {
         A33="A33_2"
       )
 
+      val ff_vd = java.io.File.createTempFile(s"${currentDir}/target/","output_vertical_setdown.csv")
 
       val list = IndexedSeq("Sheet1" -> IndexedSeq(Option(dh0),Option(dh1),Option(dh2)))
       ExcelMapper.by[Data_VIRTICAL]
         .withLocation(s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx")
         .withLayoutXls(s"${currentDir}/src/test/resources/excel/output_white.xlsx")
-        .withOutStream(new FileOutputStream(s"${currentDir}/target/output_vertical_setdown.xlsx"))
+        .withOutStream(new FileOutputStream(ff_vd.getAbsolutePath))
         .setFCCDown(list){
           x:Option[Data_VIRTICAL] =>
             Option(x.get)
@@ -389,7 +396,7 @@ class VerticalTest extends Specification {
 
       val target = ExcelMapper.by[Data_VIRTICAL]
         .withLocation(s"${currentDir}/src/test/resources/excel/bind_vertical.xlsx")
-        .getCCDown(new FileInputStream(s"${currentDir}/target/output_vertical_setdown.xlsx"))
+        .getCCDown(new FileInputStream(ff_vd.getAbsolutePath))
 
       target.size must be_==(1)
       target(0)._2(0).get.A1 must be_==("A1_0")
