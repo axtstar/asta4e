@@ -144,6 +144,7 @@ class CsvTest extends Specification {
           new FileInputStream(ff)
         )
 
+      println(target(0)._2(0).get.date)
       target.size must be_==(1)
       target(0)._2(0).get.string must be_==("1000")
       target(0)._2(0).get.date must be_==(dateFormat.parse("2018/7/7"))

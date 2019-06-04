@@ -30,7 +30,7 @@ add dependency like the below.
 
 ```sbt
 libraryDependencies ++= Seq(
-      "com.axtstar" %% "asta4e" % "0.0.12"
+      "com.axtstar" %% "asta4e" % "0.0.14"
 )
 ```
 
@@ -109,7 +109,7 @@ sbt new axtstar/asta4e-sample.g8
 # LICENSE
 
 ```
-Copyright 2018 axt
+Copyright 2019 axt
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
