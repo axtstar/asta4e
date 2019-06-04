@@ -4,6 +4,7 @@ import java.io.{File, FileInputStream, FileOutputStream}
 import java.nio.file.Files
 import java.nio.file.attribute.FileAttribute
 import java.text.SimpleDateFormat
+import java.util.Date
 
 import com.axtstar.asta4e.converter.MapHelper
 import com.axtstar.asta4e.test_class.{VariousCell, VariousCell_less}
@@ -69,6 +70,48 @@ class CsvTest extends Specification {
       target(0)._2.get.date must be_==(dateFormat.parse("2018/7/7"))
       target(0)._2.get.formula must be_==("") //Location設定なし
     }
+
+    "SetFCC -> FCC 1 row" in {
+      import com.axtstar.asta4e.converter.E._
+
+      val map = MapHelper.to[VariousCell].from("numeric" -> 1001 &
+        "string" -> "1000" &
+        "date" -> dateFormat.parse("2018/7/7") &
+        "formula" -> "=B2" &
+        "bool" -> true &
+        "time" -> timeFormat.parse("23:32:41") &
+        "userDate" -> dateFormatFull.parse("2018/11/23 18:52:56")
+      )
+
+      val ff = java.io.File.createTempFile(s"${currentDir}/target/","data_w_r_1.csv")
+
+      CsvMapper.by[VariousCell_less]
+        .withLocation(VariousCell.getLocation())
+        .withOutStream(ff.getAbsolutePath)
+        .setFCC(IndexedSeq("Sheet1" -> Option(map))){
+          x:Option[VariousCell] =>
+            val result = MapHelper.to[VariousCell_less].from(x.get)
+            Option(result)
+        }
+
+
+      val target = CsvMapper.by[VariousCell]
+        .withLocation(VariousCell.getLocation())
+        .getFCC(
+          new FileInputStream(ff.getAbsolutePath)
+        ){
+          x:Option[VariousCell_less] =>
+            val result = MapHelper.to[VariousCell].from(x.get)
+            Option(result)
+        }
+
+      target.size must be_==(1)
+      target(0)._2.get.string must be_==("1000")
+      //removed date due to case class not define "date"
+      target(0)._2.get.date must be_==(new Date(Long.MinValue))
+      target(0)._2.get.formula must be_==("")
+    }
+
 
     "SetDownCC -> GetDown 1 row" in {
       import com.axtstar.asta4e.converter.E._
