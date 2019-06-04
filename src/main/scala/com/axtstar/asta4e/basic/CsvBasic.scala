@@ -1,8 +1,10 @@
 package com.axtstar.asta4e.basic
 
 import java.io.{FileInputStream, InputStreamReader, OutputStreamWriter}
+import java.time.{LocalDateTime, ZoneId}
 import java.util.Date
 
+import com.axtstar.asta4e.converter.Config
 import com.axtstar.asta4e.core.{DataCore, InitialCore}
 import com.opencsv.{CSVParserBuilder, CSVReaderBuilder, CSVWriterBuilder, ICSVWriter}
 
@@ -117,7 +119,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
                 m(l.positionX) = map(l.name) match {
                   case null => ""
                   case mm:Date =>
-                    s"${quoteChar}${mm.toString}${quoteChar}"
+                    s"${quoteChar}${LocalDateTime.ofInstant(mm.toInstant, ZoneId.systemDefault()).format(Config.DateReadParse)}${quoteChar}"
                   case mm:String =>
                     s"${quoteChar}${map(l.name).toString}${quoteChar}"
                   case _ =>
@@ -163,7 +165,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
                     m(l.positionX) = map(l.name) match {
                       case null => ""
                       case mm:Date =>
-                        s"${quoteChar}${mm.toString}${quoteChar}"
+                        s"${quoteChar}${LocalDateTime.ofInstant(mm.toInstant, ZoneId.systemDefault()).format(Config.DateReadParse)}${quoteChar}"
                       case mm:String =>
                         s"${quoteChar}${map(l.name).toString}${quoteChar}"
                       case _ =>
