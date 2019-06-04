@@ -46,6 +46,7 @@ class CsvTest extends Specification {
       )
 
       val ff = java.io.File.createTempFile(s"${currentDir}/target/","data_w_r_1.csv")
+      println(ff.getAbsolutePath)
 
       CsvMapper.by[VariousCell]
         .withLocation(VariousCell.getLocation())
