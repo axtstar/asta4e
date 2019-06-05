@@ -19,6 +19,36 @@ class CsvTest extends Specification {
   val currentDir = new File(".").getAbsoluteFile().getParent()
 
   "CSV" should {
+    "Not Found" in {
+      def a = {
+        val target = CsvMapper.by[CSV_Data]
+          .withLocation(Location_4_CSV.ao_a1_a2_startRow_as_0)
+          .getCC(
+            new FileInputStream(s"${currentDir}/src/test/resources/csv/notfound")
+          )
+      }
+      a must throwA[java.io.IOException]
+
+      def b = {
+        val target = CsvMapper.by[CSV_Data]
+          .withLocation(Location_4_CSV.ao_a1_a2_startRow_as_0)
+          .getCCDown(
+            new FileInputStream(s"${currentDir}/src/test/resources/csv/notfound")
+          )
+      }
+      b must throwA[java.io.IOException]
+
+      def c = {
+        CsvMapper.by[VariousCell]
+          .withLocation(VariousCell.getLocation())
+          .withOutStream(new FileOutputStream(s"${currentDir}/target///notfound"))
+          .setCC(IndexedSeq("Sheet1" -> Option(null.asInstanceOf[VariousCell]))) // Error
+      }
+      c must throwA[java.util.NoSuchElementException]
+
+    }
+
+
     "Get 0 row" in {
       val target = CsvMapper.by[CSV_Data]
         .withLocation(Location_4_CSV.ao_a1_a2_startRow_as_0)

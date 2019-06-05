@@ -12,7 +12,7 @@ object CsvBasic {
 
 }
 
-trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvBasic]*/ {
+trait CsvBasic extends DataCore with InitialCore [CsvBasic] {
   protected var separator = ','
   protected var quoteChar = '"'
   protected var encoding = "UTF-8"
@@ -45,7 +45,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
         map
       )
     } catch {
-      case ex:Exception =>
+      case ex:Throwable =>
         throw ex
     } finally {
       reader.close()
@@ -85,7 +85,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
         map
       }))
     } catch {
-      case ex:Exception =>
+      case ex:Throwable =>
         throw ex
     } finally {
       reader.close()
@@ -131,7 +131,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
       }
 
     } catch {
-      case ex:Exception =>
+      case ex:Throwable =>
         throw ex
     } finally {
       writer.close()
@@ -178,7 +178,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] /*with DataCore[CsvB
       }
 
     } catch {
-      case ex:Exception =>
+      case ex:Throwable =>
         throw ex
     } finally {
       writer.close()
