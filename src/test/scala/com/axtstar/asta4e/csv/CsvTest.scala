@@ -18,12 +18,37 @@ import org.specs2.runner.JUnitRunner
 class CsvTest extends Specification {
   val currentDir = new File(".").getAbsoluteFile().getParent()
 
-  val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
-  val timeFormat = new SimpleDateFormat("HH:mm:ss")
-
-  val dateFormatFull = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
-
   "CSV" should {
+    "Not Found" in {
+      def a = {
+        val target = CsvMapper.by[CSV_Data]
+          .withLocation(Location_4_CSV.ao_a1_a2_startRow_as_0)
+          .getCC(
+            new FileInputStream(s"${currentDir}/src/test/resources/csv/notfound")
+          )
+      }
+      a must throwA[java.io.IOException]
+
+      def b = {
+        val target = CsvMapper.by[CSV_Data]
+          .withLocation(Location_4_CSV.ao_a1_a2_startRow_as_0)
+          .getCCDown(
+            new FileInputStream(s"${currentDir}/src/test/resources/csv/notfound")
+          )
+      }
+      b must throwA[java.io.IOException]
+
+      def c = {
+        CsvMapper.by[VariousCell]
+          .withLocation(VariousCell.getLocation())
+          .withOutStream(new FileOutputStream(s"${currentDir}/target///notfound"))
+          .setCC(IndexedSeq("Sheet1" -> Option(null.asInstanceOf[VariousCell]))) // Error
+      }
+      c must throwA[java.util.NoSuchElementException]
+
+    }
+
+
     "Get 0 row" in {
       val target = CsvMapper.by[CSV_Data]
         .withLocation(Location_4_CSV.ao_a1_a2_startRow_as_0)
@@ -43,14 +68,15 @@ class CsvTest extends Specification {
 
       val map = MapHelper.to[VariousCell].from("numeric" -> 1001 &
         "string" -> "1000" &
-        "date" -> dateFormat.parse("2018/7/7") &
+        "date" -> new SimpleDateFormat("yyyy/MM/dd").parse("2018/7/7") &
         "formula" -> "=B2" &
         "bool" -> true &
-        "time" -> timeFormat.parse("23:32:41") &
-        "userDate" -> dateFormatFull.parse("2018/11/23 18:52:56")
+        "time" -> new SimpleDateFormat("HH:mm:ss").parse("23:32:41") &
+        "userDate" -> new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse("2018/11/23 18:52:56")
       )
 
       val ff = java.io.File.createTempFile(s"${currentDir}/target/","data_w_r_1.csv")
+      println(ff.getAbsolutePath)
 
       CsvMapper.by[VariousCell]
         .withLocation(VariousCell.getLocation())
@@ -67,7 +93,7 @@ class CsvTest extends Specification {
       target.size must be_==(1)
       target(0)._2.get.string must be_==("1000")
       //println(target(0)._2.get.date)
-      target(0)._2.get.date must be_==(dateFormat.parse("2018/7/7"))
+      target(0)._2.get.date must be_==(new SimpleDateFormat("yyyy/MM/dd").parse("2018/7/7"))
       target(0)._2.get.formula must be_==("") //Location設定なし
     }
 
@@ -76,11 +102,11 @@ class CsvTest extends Specification {
 
       val map = MapHelper.to[VariousCell].from("numeric" -> 1001 &
         "string" -> "1000" &
-        "date" -> dateFormat.parse("2018/7/7") &
+        "date" -> new SimpleDateFormat("yyyy/MM/dd").parse("2018/7/7") &
         "formula" -> "=B2" &
         "bool" -> true &
-        "time" -> timeFormat.parse("23:32:41") &
-        "userDate" -> dateFormatFull.parse("2018/11/23 18:52:56")
+        "time" -> new SimpleDateFormat("HH:mm:ss").parse("23:32:41") &
+        "userDate" -> new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse("2018/11/23 18:52:56")
       )
 
       val ff = java.io.File.createTempFile(s"${currentDir}/target/","data_w_r_1.csv")
@@ -118,11 +144,11 @@ class CsvTest extends Specification {
 
       val map = MapHelper.to[VariousCell].from("numeric" -> 1001 &
         "string" -> "1000" &
-        "date" -> dateFormat.parse("2018/7/7") &
+        "date" -> new SimpleDateFormat("yyyy/MM/dd").parse("2018/7/7") &
         "formula" -> "=B2" &
         "bool" -> true &
-        "time" -> timeFormat.parse("23:32:41") &
-        "userDate" -> dateFormatFull.parse("2018/11/23 18:52:56")
+        "time" -> new SimpleDateFormat("HH:mm:ss").parse("23:32:41") &
+        "userDate" -> new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse("2018/11/23 18:52:56")
       )
 
       val ff = java.io.File.createTempFile(s"${currentDir}/target/","data_w_r_down.csv").getAbsolutePath
@@ -147,7 +173,7 @@ class CsvTest extends Specification {
       println(target(0)._2(0).get.date)
       target.size must be_==(1)
       target(0)._2(0).get.string must be_==("1000")
-      target(0)._2(0).get.date must be_==(dateFormat.parse("2018/7/7"))
+      target(0)._2(0).get.date must be_==(new SimpleDateFormat("yyyy/MM/dd").parse("2018/7/7"))
       target(0)._2(0).get.formula must be_==("") //Location設定なし
     }
 
@@ -180,20 +206,20 @@ class CsvTest extends Specification {
           ("Sheet1" -> (
             "numeric" -> 1001 &
               "string" -> "1000" &
-              "date" -> dateFormat.parse("2018/7/7") &
+              "date" -> new SimpleDateFormat("yyyy/MM/dd").parse("2018/7/7") &
               "formula" -> "=B2" &
               "bool" -> true &
-              "time" -> timeFormat.parse("23:32:41") &
-              "userDate" -> dateFormatFull.parse("2018/11/23 18:52:56")
+              "time" -> new SimpleDateFormat("HH:mm:ss").parse("23:32:41") &
+              "userDate" -> new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse("2018/11/23 18:52:56")
             ) &
             "Sheet2" -> (
               "numeric" -> 1002 &
                 "string" -> "1001" &
-                "date" -> dateFormat.parse("2018/7/8") &
+                "date" -> new SimpleDateFormat("yyyy/MM/dd").parse("2018/7/8") &
                 "formula" -> "=B3" &
                 "bool" -> false &
-                "time" -> timeFormat.parse("23:32:42") &
-                "userDate" -> dateFormatFull.parse("2018/11/24 18:52:56")
+                "time" -> new SimpleDateFormat("HH:mm:ss").parse("23:32:42") &
+                "userDate" -> new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse("2018/11/24 18:52:56")
               )):_*
         )
 
