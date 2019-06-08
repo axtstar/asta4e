@@ -32,7 +32,7 @@ object ExcelMapper extends ExcelBasic {
   */
 class ExcelMapper[A1] extends ExcelBasic with TypeCore[A1] with FTypeCore[A1] {
 
-  def withLocation(_locationMap: List[Location]) = {
+  def withLocation(_locationMap: List[com.axtstar.asta4e.etc.Location]) = {
     super.withLocation(_locationMap).asInstanceOf[ExcelMapper[A1]]
   }
 

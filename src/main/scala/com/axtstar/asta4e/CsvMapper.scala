@@ -31,7 +31,8 @@ object CsvMapper extends CsvBasic {
   * @tparam A1
   */
 class CsvMapper[A1] extends CsvBasic with TypeCore[A1] with FTypeCore[A1] {
-  def withLocation(_locationMap: List[Location]) = {
+
+  def withLocation(_locationMap: List[com.axtstar.asta4e.etc.Location]) = {
     super.withLocation(_locationMap)
     this
   }
@@ -57,7 +58,7 @@ class CsvMapper[A1] extends CsvBasic with TypeCore[A1] with FTypeCore[A1] {
     this
   }
 
-  def withEncoding(_encoding:String)={
+  override def withEncoding(_encoding:String)={
     this.encoding = _encoding
     this
   }

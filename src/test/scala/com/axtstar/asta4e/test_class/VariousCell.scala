@@ -2,7 +2,7 @@ package com.axtstar.asta4e.test_class
 
 import java.util.Date
 
-import com.axtstar.asta4e.core.Location
+import com.axtstar.asta4e.etc.Location
 
 case class VariousCell(
               string:String,// 0
