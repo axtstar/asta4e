@@ -17,6 +17,11 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] {
   protected var quoteChar = '"'
   protected var encoding = "UTF-8"
 
+  def withEncoding(_encoding:String)={
+    this.encoding = _encoding
+    this
+  }
+
   override def _getData(iStream: FileInputStream): IndexedSeq[(String, Map[String, Any])] = {
     val parser = new CSVParserBuilder()
       .withSeparator(separator)

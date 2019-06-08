@@ -3,11 +3,13 @@ package com.axtstar.asta4e.basic
 import java.io.FileInputStream
 import java.util.Date
 
-import com.axtstar.asta4e.core.{DataCore, InitialCore, Location}
+import com.axtstar.asta4e.core.{DataCore, InitialCore}
+import com.axtstar.asta4e.etc.Location
 import org.apache.poi.ss.usermodel._
 import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
+import scala.util.Try
 import scala.util.matching.Regex
 
 object ExcelBasic {
@@ -53,16 +55,40 @@ object ExcelBasic {
                 None
               case x: Cell =>
                 val all = allReplaceBrace.findAllIn(x.toString)
-                var result: List[String] = Nil
+                //Origin Name
+                var result: List[(String,String)] = Nil
                 while (all.hasNext) {
                   val d = all.next()
-                  result = d :: result
+
+                  val origin = d
+                  val name = getBindName(d)
+
+                  result = (name, origin) :: result
                 }
                 if (result == Nil) {
                   None
                 } else {
-                  // sheet name -> cell address -> cell(value) -> List(binder)
-                  Option(Location(name=cell.getStringCellValue, positionX = cell.getColumnIndex, positionY = cell.getRowIndex, bindNames = result.reverse))
+                  //
+                  val regEx = Try(
+                    Option(
+                    ("(?s)" + result.foldLeft(x.getStringCellValue) {
+                    (acc,
+                     xx) =>
+                      val xxx = xx._2.replace("$", "\\$")
+                        .replace("{", "\\{")
+                        .replace("}", "\\}")
+                      acc.replaceFirst(xxx, "(.+)")
+                  }).r)
+                  ).getOrElse(None)
+
+                  Option(Location(
+                    name=result(0)._1,
+                    original=cell.getStringCellValue,
+                    positionX = cell.getColumnIndex,
+                    positionY = cell.getRowIndex,
+                    expression = regEx,
+                    bindNames = result.reverse.map(_._1)
+                  ))
                 }
             }
           })
@@ -88,58 +114,30 @@ object ExcelBasic {
 
     target match {
       case null =>
-        x.bindNames.map {
-          xx =>
-            (getBindName(xx) -> null)
-        }.toMap
+          Map(x.name -> null)
       case xx: Cell =>
         xx.getCellType match {
           case CellType.NUMERIC =>
             val format = ExcelNumberFormat.from(xx.getCellStyle)
             if (DateUtil.isADateFormat(format)) {
-              x.bindNames.map {
-                xxx =>
-                  (getBindName(xxx) -> xx.getDateCellValue)
-              }.toMap
+                  Map(x.name -> xx.getDateCellValue)
             } else {
-              x.bindNames.map {
-                xxx =>
-                  (getBindName(xxx) -> xx.getNumericCellValue)
-              }.toMap
+                  Map(x.name -> xx.getNumericCellValue)
             }
 
           case CellType.BOOLEAN =>
-            x.bindNames.map {
-              xxx =>
-                (getBindName(xxx) -> xx.getBooleanCellValue)
-            }.toMap
+                Map(x.name -> xx.getBooleanCellValue)
 
           case CellType.BLANK =>
-            x.bindNames.map {
-              xxx =>
-                (getBindName(xxx) -> null)
-            }.toMap
+                Map(x.name -> null)
 
           case CellType._NONE =>
-            x.bindNames.map {
-              xxx =>
-                (getBindName(xxx) -> null)
-            }.toMap
+                Map(x.name -> null)
 
           case CellType.STRING =>
             //construct regular expression from a template cell
             //consider multiple binder like `${id1}-${id2}`
-            val regEx = ("(?s)" + x.bindNames.foldLeft(if (x.name == "") {
-              ""
-            } else {
-              x.name
-            }) {
-              (acc, xx) =>
-                val xxx = xx.replace("$", "\\$")
-                  .replace("{", "\\{")
-                  .replace("}", "\\}")
-                acc.replaceFirst(xxx, "(.+)")
-            }).r
+            val regEx = x.expression.get
 
             val all = regEx.findFirstMatchIn(xx.getStringCellValue)
 
@@ -156,9 +154,7 @@ object ExcelBasic {
             }
 
           case CellType.FORMULA =>
-            x.bindNames.map {
-              xx =>
-                (getBindName(xx) -> (
+                Map(x.name -> (
                   target.getCachedFormulaResultType match {
                     case CellType.NUMERIC =>
                       target.getNumericCellValue
@@ -167,7 +163,6 @@ object ExcelBasic {
                     case _ =>
                       null
                   }))
-            }.toMap
 
           case _ =>
             throw new IllegalArgumentException
@@ -176,8 +171,8 @@ object ExcelBasic {
     }
   }
 
-  def setOneCell(target:Cell, name: String, maps: Map[String, Any], x:Location)={
-    val bindData = maps(name)
+  def setOneCell(target:Cell, maps: Map[String, Any], x:Location)={
+    val bindData = maps(x.name)
     target.getCellType match {
       case CellType.NUMERIC =>
         bindData match {
@@ -198,14 +193,10 @@ object ExcelBasic {
         target.setCellValue(if (bindData == null) null.asInstanceOf[String] else bindData.toString)
 
       case _ =>
-        val alt = maps.foldLeft(x.name) {
-          (acc, xxx) =>
-            val alt = if (xxx._2 == null) {
-              ""
-            } else {
-              xxx._2.toString
-            }
-            acc.replaceAll("\\$\\{" + s"${xxx._1}" + "\\}", alt)
+        val alt = x.bindNames.foldLeft(x.original) {
+          (acc, x) =>
+            val bindName = getBindName(x)
+            acc.replaceAll("\\$\\{" + s"${bindName}" + "\\}", maps(bindName).toString)
         }
         target.setCellValue(alt)
     }
@@ -238,7 +229,13 @@ trait ExcelBasic extends DataCore with InitialCore[ExcelBasic] {
   }
 
   override def _setData(bindData: (String, Map[String, Any])*) ={
-    val workbook = WorkbookFactory.create(layoutStram)
+    val workbook = if(layoutStram==null){
+      val target = new XSSFWorkbook()
+      target.createSheet()
+      target
+    } else {
+      WorkbookFactory.create(layoutStram)
+    }
 
     try {
 
@@ -269,7 +266,7 @@ trait ExcelBasic extends DataCore with InitialCore[ExcelBasic] {
 
                   locationMap.filter(
                     p =>
-                      p.bindNames.contains("${" + bindMap._1 + "}")
+                      p.bindNames.contains(bindMap._1)
                   ).foreach {
                     x =>
                       //iterate ${}
@@ -277,7 +274,7 @@ trait ExcelBasic extends DataCore with InitialCore[ExcelBasic] {
                         xx => {
                           if (map.exists(
                             p =>
-                              "${" + s"${p._1}" + "}" == xx)
+                              p._1 == xx)
                           ) {
                             val ref = new CellReference(x.positionY, x.positionX)
                             var row = sheet.getRow(ref.getRow)
@@ -292,7 +289,7 @@ trait ExcelBasic extends DataCore with InitialCore[ExcelBasic] {
                               target = row.getCell(ref.getCol)
                             }
 
-                            setOneCell(target, bindMap._1, map, x)
+                            setOneCell(target, map, x)
                           }
                         }
                       }
@@ -310,7 +307,9 @@ trait ExcelBasic extends DataCore with InitialCore[ExcelBasic] {
     finally{
       outputStream.flush()
       outputStream.close()
-      layoutStram.close()
+      if(layoutStram!=null){
+        layoutStram.close()
+      }
     }
   }
 
@@ -349,7 +348,7 @@ trait ExcelBasic extends DataCore with InitialCore[ExcelBasic] {
 
                           locationMap.filter(
                             p =>
-                              p.bindNames.contains("${" + bindMap._1 + "}")
+                              p.bindNames.contains(bindMap._1)
                           ).foreach {
                             x =>
                               //iterate ${}
@@ -357,7 +356,7 @@ trait ExcelBasic extends DataCore with InitialCore[ExcelBasic] {
                                 xx => {
                                   if (map.exists(
                                     p =>
-                                      "${" + s"${p._1}" + "}" == xx)
+                                      p._1 == xx)
                                   ) {
                                     val ref = new CellReference(x.positionY, x.positionX)
                                     var row = sheet.getRow(ref.getRow + index)
@@ -371,7 +370,7 @@ trait ExcelBasic extends DataCore with InitialCore[ExcelBasic] {
                                       target = row.getCell(ref.getCol)
                                     }
 
-                                    setOneCell(target, bindMap._1, map, x)
+                                    setOneCell(target, map, x)
                                   }
                                 }
                               }
