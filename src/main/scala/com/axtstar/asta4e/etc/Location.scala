@@ -41,13 +41,24 @@ object Location{
   def create(  name:String,
                positionX:Int,
                positionY:Int) = {
-    Location(name, positionX, positionY, original = "", expression = None, bindNames = List("${" + name +"}"))
+    Location(
+      name,
+      positionX,
+      positionY,
+      original = "",
+      expression = None,
+      bindNames = List("${" + name +"}"))
   }
 
   def create(  name:String,
                positionX:Int,
                positionY:Int,
                bindNames:List[String]) = {
-    Location(name, positionX, positionY,original = "", expression = None, bindNames)
+    Location(
+      name,
+      positionX,
+      positionY,
+      original = "",
+      expression = None, bindNames)
   }
 }
