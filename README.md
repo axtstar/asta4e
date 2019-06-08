@@ -30,7 +30,7 @@ add dependency like the below.
 
 ```sbt
 libraryDependencies ++= Seq(
-      "com.axtstar" %% "asta4e" % "0.0.14"
+      "com.axtstar" %% "asta4e" % "0.0.16"
 )
 ```
 
