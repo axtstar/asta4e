@@ -22,6 +22,31 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] {
     this
   }
 
+  def getColumnSize(iStream: FileInputStream)={
+    val parser = new CSVParserBuilder()
+      .withSeparator(separator)
+      .withQuoteChar(quoteChar)
+      .build()
+    val inputStreamReader = new InputStreamReader(iStream, encoding)
+    val reader = new CSVReaderBuilder(inputStreamReader)
+      .withCSVParser(parser)
+      .build()
+    try {
+
+      val oneLine = reader.readNext()
+      oneLine.size
+    } catch {
+      case ex:Throwable =>
+        throw ex
+    }
+    finally {
+      reader.close()
+      inputStreamReader.close()
+      iStream.close()
+    }
+
+  }
+
   override def _getData(iStream: FileInputStream): IndexedSeq[(String, Map[String, Any])] = {
     val parser = new CSVParserBuilder()
       .withSeparator(separator)

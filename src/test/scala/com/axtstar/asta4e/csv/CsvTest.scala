@@ -229,8 +229,14 @@ class CsvTest extends Specification {
 
     }
 
+    "size" in {
+      val target = CsvMapper
+        .getColumnSize(
+          new FileInputStream(s"${currentDir}/src/test/resources/csv/data.csv")
+        )
 
-
+      target must be_==(3)
+    }
 
   }
 
