@@ -229,7 +229,23 @@ class CsvTest extends Specification {
 
     }
 
+    "column size" in {
+      val target = CsvMapper
+        .getColumnSize(
+          new FileInputStream(s"${currentDir}/src/test/resources/csv/data.csv")
+        )
 
+      target must be_==(3)
+    }
+
+    "row size" in {
+      val target = CsvMapper
+        .getRowSize(
+          new FileInputStream(s"${currentDir}/src/test/resources/csv/data.csv")
+        )
+
+      target must be_==(2)
+    }
 
 
   }
