@@ -1,6 +1,6 @@
 package com.axtstar.asta4e.basic
 
-import java.io.FileInputStream
+import java.io.{File, FileInputStream}
 import java.util.Date
 
 import com.axtstar.asta4e.core.{DataCore, InitialCore}
@@ -109,6 +109,104 @@ object ExcelBasic {
       stream.close()
     }
   }
+
+  def generateExcel2Location(path: String):String = {
+    val f = new File(path)
+    val stream = new FileInputStream(f.getAbsolutePath)
+
+    try {
+      s"""import com.axtstar.asta4e.etc.Location
+         |
+         |val ${f.getName.split('.')(0)} = ${generateExcel2Location(stream)}""".stripMargin
+    }
+    catch {
+      case ex: Throwable =>
+        throw ex
+    }
+    finally {
+      stream.close()
+    }
+  }
+
+  def generateExcel2Location(stream: FileInputStream):String = {
+    val workbook = WorkbookFactory.create(stream)
+
+    try {
+
+      val results = (for (i <- 0 until workbook.getNumberOfSheets) yield {
+        val sheet = workbook.getSheetAt(i)
+        (for (rowID <- 0 to sheet.getLastRowNum) yield {
+          val row = sheet.getRow(rowID)
+          (for (columnID <- 0 to row.getLastCellNum) yield {
+            val cell = row.getCell(columnID)
+            cell match {
+              case null =>
+                None
+              case x: Cell =>
+                val all = allReplaceBrace.findAllIn(x.toString)
+                //Origin Name
+                var result: List[(String, String)] = Nil
+                while (all.hasNext) {
+                  val d = all.next()
+
+                  val origin = d
+                  val name = getBindName(d)
+
+                  result = (name, origin) :: result
+                }
+                if (result == Nil) {
+                  None
+                } else {
+                  //
+                  val regEx = Try(
+                    Option(
+                      ("(?s)" + result.foldLeft(x.getStringCellValue) {
+                        (acc,
+                         xx) =>
+                          val xxx = xx._2.replace("$", "\\$")
+                            .replace("{", "\\{")
+                            .replace("}", "\\}")
+                          acc.replaceFirst(xxx, "(.+)")
+                      }).r)
+                  ).getOrElse(None)
+
+                  Option(
+                    s"""|  Location(
+                        |    name = "${result(0)._1}",
+                        |    original = "${cell.getStringCellValue}",
+                        |    positionX = ${cell.getColumnIndex},
+                        |    positionY = ${cell.getRowIndex},
+                        |    expression = ${
+                      regEx match {
+                        case None =>
+                          "None"
+                        case Some(x) =>
+                          s"""Some("${x.pattern}".r)"""
+                      }
+                    },
+                        |    bindNames = ${result.reverse.map("\"" + _._1 + "\"")}
+                        |  )""".stripMargin)
+                }
+            }
+          })
+            .filter(_ != None) //ignore null
+            .toList
+        })
+          .filter(_.nonEmpty)
+          .toList
+      }).flatten.flatten.toList
+
+      s"List(\n${results.map(_.get).mkString(",\n")}\n)"
+    }
+    catch {
+      case ex: Throwable =>
+        throw ex
+    }
+    finally {
+      stream.close()
+    }
+  }
+
 
   def getOneCell(target:Cell, x:Location):Map[String, Any]= {
 
