@@ -35,7 +35,28 @@ class ExcelBasicTest extends Specification {
       }
     }
 
-    "ExcelCollection" should {
+    "generateExcel2Location" in {
+      val target = ExcelBasic.generateExcel2Location(s"${currentDir}/src/test/resources/excel/bind_excel_a_cell.xlsx")
+
+      //import java.io.PrintWriter
+      //new PrintWriter("src/main/scala/filename.scala") { write(target); close }
+
+      target must be_==(
+        """|import com.axtstar.asta4e.etc.Location
+           |
+           |val bind_excel_a_cell = List(
+           |  Location(
+           |    name = "A1",
+           |    original = "${A1}",
+           |    positionX = 0,
+           |    positionY = 1,
+           |    expression = Some("(?s)(.+)".r),
+           |    bindNames = List("A1")
+           |  )
+           |)""".stripMargin)
+    }
+
+      "ExcelCollection" should {
       "GetData" in {
         val target = ExcelMapper.apply()
           .withLocation(ExcelBasic.getExcelLocation(s"${currentDir}/src/test/resources/excel/bind_excel_mapper.xlsx"))

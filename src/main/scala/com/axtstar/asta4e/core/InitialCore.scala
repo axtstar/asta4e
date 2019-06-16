@@ -3,16 +3,15 @@ package com.axtstar.asta4e.core
 import java.io.{FileInputStream, FileOutputStream}
 
 import com.axtstar.asta4e.basic.ExcelBasic
+import com.axtstar.asta4e.etc.Location
 
 trait InitialCore[A] {
 
   protected var ignoreSheets:List[String] = List()
   protected var layoutStram:FileInputStream = null
   protected var outputStream:FileOutputStream = null
-  //TODO : need refactor after deletion of com.axtstar.asta4e.core.Location
-  protected var locationMap : List[com.axtstar.asta4e.etc.Location] = List()
-  //TODO : need refactor after deletion of com.axtstar.asta4e.core.Location
-  def withLocation(_locationMap:List[com.axtstar.asta4e.etc.Location])
+  protected var locationMap : List[Location] = List()
+  def withLocation(_locationMap:List[Location])
                   (implicit ev:A  <:< InitialCore[A]) ={
     this.locationMap= _locationMap
     this.asInstanceOf[A]
