@@ -135,7 +135,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] {
         val oneLine = oneLines.get(i)
         val map = (locationMap.map {
           x =>
-            val target = oneLine(x.positionX)
+            val target = if (oneLine.size > x.positionX ) {oneLine(x.positionX)} else {null}
             x.name -> target
         }).toMap
         map
