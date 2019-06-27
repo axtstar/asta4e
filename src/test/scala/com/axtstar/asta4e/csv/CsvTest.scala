@@ -16,7 +16,7 @@ import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class CsvTest extends Specification {
-  val currentDir = new File(".").getAbsoluteFile().getParent()
+  val currentDir:String = new File(".").getAbsoluteFile.getParent
 
   "CSV" should {
     "Not Found" in {
@@ -49,7 +49,7 @@ class CsvTest extends Specification {
     }
 
 
-    "Get 0 row" in {
+    "GetCC 0 row" in {
       val target = CsvMapper.by[CSV_Data]
         .withLocation(Location_4_CSV.ao_a1_a2_startRow_as_0)
         .getCC(
@@ -60,6 +60,24 @@ class CsvTest extends Specification {
       target(0)._2.get.a0 must be_==("10")
       target(0)._2.get.a1 must be_==("20")
       target(0)._2.get.a2 must be_==("30")
+
+    }
+
+    "GetDown 0 Quote in quote" in {
+      val target = CsvMapper.by[CSV_Data]
+        .withLocation(Location_4_CSV.ao_a1_a2_startRow_as_0)
+        .getCCDown(
+          new FileInputStream(s"${currentDir}/src/test/resources/csv/quoteinquote.csv")
+        )
+
+      target.size must be_==(1)
+      target(0)._2(0).get.a0 must be_==("10")
+      target(0)._2(0).get.a1 must be_==("20")
+      target(0)._2(0).get.a2 must be_==("30")
+
+      target(0)._2(1).get.a0 must be_==("""A"BC""")
+      target(0)._2(1).get.a1 must be_==("B")
+      target(0)._2(1).get.a2 must be_==("C")
 
     }
 
@@ -244,7 +262,7 @@ class CsvTest extends Specification {
           new FileInputStream(s"${currentDir}/src/test/resources/csv/data.csv")
         )
 
-      target must be_==(2)
+      target must be_==(3)
     }
 
 

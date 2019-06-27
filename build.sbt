@@ -11,7 +11,7 @@ licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 publishMavenStyle := true
 
 name := "asta4e"
-version := "0.0.19"
+version := "0.0.20-SNAPSHOT"
 
 scalaVersion := "2.11.12"
 crossScalaVersions := Seq("2.11.12", "2.12.8" /*, "2.13.0"*/)
@@ -30,7 +30,8 @@ libraryDependencies ++= Seq(
   "com.chuusai" %%  s"shapeless" % "2.3.3",
   "org.apache.poi" % "poi" % "4.1.0",
   "org.apache.poi" % "poi-ooxml" % "4.1.0",
-  "com.opencsv" % "opencsv" % "4.6",
+  "org.apache.commons" % "commons-csv" % "1.7",
+  
   "org.junit.jupiter" % "junit-jupiter-api" % "5.2.0" % Test
 
 ) ++ (if(scalaVersion.toString().startsWith("2.13.")) {Seq(
