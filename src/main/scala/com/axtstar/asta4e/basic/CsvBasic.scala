@@ -7,8 +7,7 @@ import java.util.Date
 
 import com.axtstar.asta4e.converter.Config
 import com.axtstar.asta4e.core.{DataCore, InitialCore}
-
-import org.apache.commons.csv.CSVFormat
+import org.apache.commons.csv.{CSVFormat, QuoteMode}
 
 
 object CsvBasic {
@@ -16,9 +15,35 @@ object CsvBasic {
 }
 
 trait CsvBasic extends DataCore with InitialCore [CsvBasic] {
-  protected var separator = ','
+  protected var delimiter = ','
+  protected var separator = '\n'
   protected var quoteChar = '"'
   protected var encoding = "UTF-8"
+  protected var quoteMode:QuoteMode = QuoteMode.ALL
+
+  private def getFormatter:CSVFormat= {
+    CSVFormat.DEFAULT
+      .withDelimiter(delimiter)
+      .withRecordSeparator(separator)
+      .withEscape('\\')
+      .withQuote(quoteChar)
+      .withQuoteMode(quoteMode)
+  }
+
+  def withDelimiter(_delimiter:Char):CsvBasic={
+    this.delimiter = _delimiter
+    this
+  }
+
+  def withSeparator(_separator:Char):CsvBasic={
+    this.separator = _separator
+    this
+  }
+
+  def withQuoteMode(_quoteMode:QuoteMode):CsvBasic={
+    this.quoteMode = _quoteMode
+    this
+  }
 
   def withEncoding(_encoding:String):CsvBasic={
     this.encoding = _encoding
@@ -26,9 +51,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] {
   }
 
   def getColumnSize(iStream: FileInputStream):Int={
-    val parser = CSVFormat.DEFAULT
-      .withRecordSeparator(separator)
-      .withQuote(quoteChar)
+    val parser = getFormatter
 
     val inputStreamReader = new InputStreamReader(iStream, encoding)
     val readers = parser.parse(inputStreamReader)
@@ -50,9 +73,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] {
   }
 
   def getRowSize(iStream: FileInputStream):Int={
-    val parser = CSVFormat.DEFAULT
-      .withRecordSeparator(separator)
-      .withQuote(quoteChar)
+    val parser = getFormatter
 
     val inputStreamReader = new InputStreamReader(iStream, encoding)
     val reader = parser.parse(inputStreamReader)
@@ -72,9 +93,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] {
 
 
   override def _getData(iStream: FileInputStream): IndexedSeq[(String, Map[String, Any])] = {
-    val parser = CSVFormat.DEFAULT
-      .withRecordSeparator(separator)
-      .withQuote(quoteChar)
+    val parser = getFormatter
 
     val inputStreamReader = new InputStreamReader(iStream, encoding)
     val reader = parser.parse(inputStreamReader)
@@ -112,9 +131,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] {
 
 
   override def _getDataDown(iStream: FileInputStream): IndexedSeq[(String, IndexedSeq[Map[String, Any]])] = {
-    val parser = CSVFormat.DEFAULT
-      .withRecordSeparator(separator)
-      .withQuote(quoteChar)
+    val parser = getFormatter
 
     val inputStreamReader = new InputStreamReader(iStream, encoding)
     val reader = parser.parse(inputStreamReader)
@@ -151,10 +168,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] {
   }
 
   override def _setData(bindData: (String, Map[String, Any])*): Unit = {
-
-    val parser = CSVFormat.DEFAULT
-      .withRecordSeparator(separator)
-      .withQuote(quoteChar)
+    val parser = getFormatter
 
     val outputStreamWriter = new OutputStreamWriter(outputStream, encoding)
     val writer = parser.print(outputStreamWriter)
@@ -195,10 +209,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] {
   }
 
   override def _setDataDown(bindData: (String, IndexedSeq[Map[String, Any]])*): Unit = {
-
-    val parser = CSVFormat.DEFAULT
-      .withRecordSeparator(separator)
-      .withQuote(quoteChar)
+    val parser = getFormatter
 
     val outputStreamWriter = new OutputStreamWriter(outputStream, encoding)
     val writer = parser.print(outputStreamWriter)

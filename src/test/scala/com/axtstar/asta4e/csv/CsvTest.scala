@@ -18,6 +18,15 @@ import org.specs2.runner.JUnitRunner
 class CsvTest extends Specification {
   val currentDir:String = new File(".").getAbsoluteFile.getParent
 
+  def cat(ff:File) = {
+    val s = scala.io.Source.fromFile(ff)
+    for (line <- s.getLines) {
+      println(line)
+    }
+    s.close()
+
+  }
+
   "CSV" should {
     "Not Found" in {
       def a = {
@@ -94,13 +103,14 @@ class CsvTest extends Specification {
       )
 
       val ff = java.io.File.createTempFile(s"${currentDir}/target/","data_w_r_1.csv")
-      println(ff.getAbsolutePath)
 
       CsvMapper.by[VariousCell]
         .withLocation(VariousCell.getLocation())
         .withOutStream(ff.getAbsolutePath)
         .setCC(IndexedSeq("Sheet1" -> Option(map)))
 
+      println(ff.getAbsolutePath)
+      cat(ff)
 
       val target = CsvMapper.by[VariousCell]
         .withLocation(VariousCell.getLocation())
@@ -138,6 +148,8 @@ class CsvTest extends Specification {
             Option(result)
         }
 
+      println(ff.getAbsolutePath)
+      cat(ff)
 
       val target = CsvMapper.by[VariousCell]
         .withLocation(VariousCell.getLocation())
@@ -169,18 +181,15 @@ class CsvTest extends Specification {
         "userDate" -> new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse("2018/11/23 18:52:56")
       )
 
-      val ff = java.io.File.createTempFile(s"${currentDir}/target/","data_w_r_down.csv").getAbsolutePath
+      val ff = java.io.File.createTempFile(s"${currentDir}/target/","data_w_r_down.csv")
 
       CsvMapper.by[VariousCell]
         .withLocation(VariousCell.getLocation())
         .withOutStream(new FileOutputStream(ff))
         .setCCDown(IndexedSeq("Sheet1" -> IndexedSeq(Option(map))))
 
-      val s = scala.io.Source.fromFile(ff)
-      for (line <- s.getLines) {
-        println(line)
-      }
-      s.close()
+      println(ff.getAbsolutePath)
+      cat(ff)
 
       val target = CsvMapper.by[VariousCell]
         .withLocation(VariousCell.getLocation())
@@ -241,11 +250,46 @@ class CsvTest extends Specification {
               )):_*
         )
 
+      println(ff.getAbsolutePath)
+      cat(ff)
+
       "" must be_==("")
 
 
 
     }
+
+    "SetDown 2 row" in {
+      import com.axtstar.asta4e.converter.E._
+
+      val ff = java.io.File.createTempFile(s"${currentDir}/target/","set_data_down.csv")
+
+      val target = CsvMapper.by[CSV_Data]
+        .withLocation(Location_4_CSV.ao_a1_a2_startRow_as_0)
+        .withOutStream(new FileOutputStream(ff.getAbsolutePath))
+        ._setDataDown(
+          ("Sheet1" -> IndexedSeq(
+            ("a0" -> 1001 &
+              "a1" -> "1000" &
+              "a2" -> new SimpleDateFormat("yyyy/MM/dd").parse("2018/7/7")
+            ).toMap,
+             (
+              "a0" -> 1002 &
+                "a1" -> "1001" &
+                "a2" -> new SimpleDateFormat("yyyy/MM/dd").parse("2018/7/8")
+              ).toMap)
+        ))
+
+      println(ff.getAbsolutePath)
+      cat(ff)
+
+
+      "" must be_==("")
+
+
+
+    }
+
 
     "column size" in {
       val target = CsvMapper

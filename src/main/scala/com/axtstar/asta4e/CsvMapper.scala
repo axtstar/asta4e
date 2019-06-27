@@ -6,6 +6,7 @@ import com.axtstar.asta4e.basic.CsvBasic
 import com.axtstar.asta4e.converter.CC
 import com.axtstar.asta4e.converter.CC._
 import com.axtstar.asta4e.core._
+import org.apache.commons.csv.QuoteMode
 import shapeless.LabelledGeneric.Aux
 import shapeless._
 import shapeless.ops.hlist
@@ -31,6 +32,21 @@ object CsvMapper extends CsvBasic {
   * @tparam A1
   */
 class CsvMapper[A1] extends CsvBasic with TypeCore[A1] with FTypeCore[A1] {
+
+  override def withDelimiter(_delimiter:Char):CsvBasic={
+    this.delimiter = _delimiter
+    this
+  }
+
+  override def withSeparator(_separator:Char):CsvBasic={
+    this.separator = _separator
+    this
+  }
+
+  override def withQuoteMode(_quoteMode:QuoteMode):CsvBasic={
+    this.quoteMode = _quoteMode
+    this
+  }
 
   def withLocation(_locationMap: List[com.axtstar.asta4e.etc.Location]) = {
     super.withLocation(_locationMap)
