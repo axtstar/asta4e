@@ -1,8 +1,7 @@
 package com.axtstar.asta4e.basic
 
-import java.io.{FileInputStream, InputStreamReader, OutputStreamWriter}
+import java.io.{File, FileInputStream, InputStreamReader, OutputStreamWriter}
 import java.time.{LocalDateTime, ZoneId}
-import java.util.Arrays
 import java.util.Date
 
 import com.axtstar.asta4e.converter.Config
@@ -14,34 +13,40 @@ object CsvBasic {
 
 }
 
-trait CsvBasic extends DataCore with InitialCore [CsvBasic] {
+trait CsvBasic extends DataCore with InitialCore[CsvBasic] {
   protected var delimiter = ','
-  protected var separator = '\n'
+  protected var separator = "\n"
   protected var quoteChar = '"'
   protected var encoding = "UTF-8"
+  protected var escape = '\\'
   protected var quoteMode:QuoteMode = QuoteMode.ALL
+  protected var inputFilePath = ""
 
-  private def getFormatter:CSVFormat= {
-    CSVFormat.DEFAULT
-      .withDelimiter(delimiter)
-      .withRecordSeparator(separator)
-      .withEscape('\\')
-      .withQuote(quoteChar)
-      .withQuoteMode(quoteMode)
+  //default settings
+  protected var csvFormat:CSVFormat = CSVFormat.DEFAULT
+    .withDelimiter(delimiter)
+    .withRecordSeparator(separator)
+    .withEscape('\\')
+    .withQuote(quoteChar)
+    .withQuoteMode(quoteMode)
+
+  private def getFormatter:CSVFormat={
+    csvFormat
   }
 
-  def withDelimiter(_delimiter:Char):CsvBasic={
-    this.delimiter = _delimiter
+  def withFilePath(_filePath:String)={
+    this.inputFilePath = _filePath
     this
   }
 
-  def withSeparator(_separator:Char):CsvBasic={
-    this.separator = _separator
-    this
-  }
+  def withCSVFormat(_csvFormat:CSVFormat):CsvBasic={
+    this.csvFormat = _csvFormat
+    this.delimiter = this.csvFormat.getDelimiter
+    this.separator = this.csvFormat.getRecordSeparator
+    this.quoteChar = this.csvFormat.getQuoteCharacter
+    this.escape = this.csvFormat.getEscapeCharacter
+    this.quoteMode = this.csvFormat.getQuoteMode
 
-  def withQuoteMode(_quoteMode:QuoteMode):CsvBasic={
-    this.quoteMode = _quoteMode
     this
   }
 
@@ -91,6 +96,11 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] {
 
   }
 
+  def _getData(inputPath:String): IndexedSeq[(String, Map[String, Any])] = {
+    this.inputFilePath = inputPath
+    val f = new FileInputStream(inputPath)
+    _getData(f)
+  }
 
   override def _getData(iStream: FileInputStream): IndexedSeq[(String, Map[String, Any])] = {
     val parser = getFormatter
@@ -99,8 +109,6 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] {
     val reader = parser.parse(inputStreamReader)
 
     val minRow = locationMap.map(_.positionY).min
-
-    //val offSet = locationMap.groupBy(x=>x.positionY)
 
     try {
       val oneLine = reader.getRecords.get(minRow)
@@ -115,8 +123,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] {
           }
           x.name -> target
       }.toMap
-      //TODO : "" as FileName
-      IndexedSeq("" ->
+      IndexedSeq(inputFilePath ->
         map
       )
     } catch {
@@ -129,6 +136,12 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] {
     }
   }
 
+
+  def _getDataDown(inputPath:String): IndexedSeq[(String, IndexedSeq[Map[String, Any]])] = {
+    this.inputFilePath = inputPath
+    val f = new FileInputStream(inputPath)
+    _getDataDown(f)
+  }
 
   override def _getDataDown(iStream: FileInputStream): IndexedSeq[(String, IndexedSeq[Map[String, Any]])] = {
     val parser = getFormatter
@@ -143,8 +156,7 @@ trait CsvBasic extends DataCore with InitialCore [CsvBasic] {
     //val offSet = locationMap.groupBy(x=>x.positionY)
 
     try {
-      //TODO : "" as FileName
-      IndexedSeq("" -> (for(index <- minRow to maxRow) yield {
+      IndexedSeq(inputFilePath -> (for(index <- minRow to maxRow) yield {
         val oneLine = oneLines.get(index)
         locationMap.map {
           x =>

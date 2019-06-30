@@ -6,7 +6,7 @@ import com.axtstar.asta4e.basic.CsvBasic
 import com.axtstar.asta4e.converter.CC
 import com.axtstar.asta4e.converter.CC._
 import com.axtstar.asta4e.core._
-import org.apache.commons.csv.QuoteMode
+import org.apache.commons.csv.{CSVFormat, QuoteMode}
 import shapeless.LabelledGeneric.Aux
 import shapeless._
 import shapeless.ops.hlist
@@ -33,18 +33,13 @@ object CsvMapper extends CsvBasic {
   */
 class CsvMapper[A1] extends CsvBasic with TypeCore[A1] with FTypeCore[A1] {
 
-  override def withDelimiter(_delimiter:Char):CsvBasic={
-    this.delimiter = _delimiter
+  override def withCSVFormat(_csvFormat:CSVFormat):CsvBasic={
+    super.withCSVFormat(_csvFormat)
     this
   }
 
-  override def withSeparator(_separator:Char):CsvBasic={
-    this.separator = _separator
-    this
-  }
-
-  override def withQuoteMode(_quoteMode:QuoteMode):CsvBasic={
-    this.quoteMode = _quoteMode
+  override def withEncoding(_encoding:String):CsvBasic={
+    this.encoding = _encoding
     this
   }
 
@@ -73,12 +68,6 @@ class CsvMapper[A1] extends CsvBasic with TypeCore[A1] with FTypeCore[A1] {
     super.withOutStream(new FileOutputStream(_outputXlsPath))
     this
   }
-
-  override def withEncoding(_encoding:String)={
-    this.encoding = _encoding
-    this
-  }
-
 
   override def getCC[RA1 <: HList, K <: HList, V <: HList, V1 <: HList](iStream:FileInputStream)
                                                                      (implicit gen: LabelledGeneric.Aux[A1, RA1],
