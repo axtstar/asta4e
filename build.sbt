@@ -13,8 +13,8 @@ publishMavenStyle := true
 name := "asta4e"
 version := "0.0.23-SNAPSHOT"
 
-scalaVersion := "2.12.10"
-crossScalaVersions := Seq("2.11.12", "2.12.10" /*, "2.13.0"*/)
+scalaVersion := "2.13.3"
+crossScalaVersions := Seq("2.11.12", "2.12.10", "2.13.3")
 
 scalacOptions ++= Seq(
   "-encoding", "utf8", // Option and arguments on same line
