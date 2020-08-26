@@ -11,7 +11,7 @@ licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 publishMavenStyle := true
 
 name := "asta4e"
-version := "0.0.23-SNAPSHOT"
+version := "0.0.23"
 
 scalaVersion := "2.12.10"
 crossScalaVersions := Seq("2.11.12", "2.12.10", "2.13.3")
