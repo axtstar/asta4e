@@ -35,11 +35,11 @@ libraryDependencies ++= Seq(
   "org.junit.jupiter" % "junit-jupiter-api" % "5.2.0" % Test
 
 ) ++ (if(scalaVersion.toString().startsWith("2.13.")) {Seq(
-  "org.specs2" %% "specs2-core" % "4.3.0" % Test,
-  "org.specs2" %% "specs2-junit" % "4.3.0" % Test
+  "org.specs2" %% "specs2-core" % "4.10.3" % Test,
+  "org.specs2" %% "specs2-junit" % "4.10.3" % Test
 )} else {Seq(
-  "org.specs2" %% "specs2-core" % "4.3.0" % Test,
-  "org.specs2" %% "specs2-junit" % "4.3.0" % Test
+  "org.specs2" %% "specs2-core" % "4.10.3" % Test,
+  "org.specs2" %% "specs2-junit" % "4.10.3" % Test
 )})
 
 publishTo := {

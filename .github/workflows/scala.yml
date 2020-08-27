@@ -17,5 +17,9 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - name: Run tests
+    - name: Run tests default 2.12.13
       run: sbt test
+    - name: Run tests 2.11.12
+      run: sbt ++2.11.12 test
+    - name: Run tests 2.13.3
+      run: sbt ++2.13.3 test
